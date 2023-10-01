@@ -1,0 +1,6 @@
+Mad-Assembler v1.6.?beta by TeBe/Madteam
+Source: F:\!Atari\getris2\msx_new\mpt.asm
+     1
+     2 				 .get 'rama.sap',$5e
+     3
+     4 				 .sav 'rama.mpt',$94f+6

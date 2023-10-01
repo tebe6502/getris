@@ -1,0 +1,1011 @@
+Mad-Assembler v1.6.6beta by TeBe/Madteam
+Source: D:\!Atari\getris2\msx\forever.asm
+     1 				*---------------*
+     2 				*  TMC  Player  *
+     3 				*Jaskier/Taquart*
+     4 				*---------------*
+     5
+     6 				 org $1000
+     7
+     8 = 00,00FA		byte equ $fa
+     9 = 00,00FB		bajt equ $fb
+    10 = 00,00FC		addr equ $fc
+    11 = 00,00FE		adrsng equ $fe
+    12
+    13
+    14 				main
+    15 FFFF> 00,1000-1B8C> A9 +	        lda #0
+    16 00,1002 8D 00 D4		        sta $d400
+    17 00,1005 8D 2F 02		        sta 559
+    18
+    19 00,1008 A9 70		        lda #$70
+    20 00,100A A2 80		        ldx >muza
+    21 00,100C A0 00		        ldy <muza
+    22 00,100E 20 24 11		        jsr player
+    23
+    24 00,1011 A2 00		        ldx #0          ;TMC
+    25 00,1013 8A		        txa
+    26 00,1014 20 24 11		        jsr player
+    27
+    28 00,1017 A9 10		        lda #$10
+    29 00,1019 A2 00		        ldx #0
+    30 00,101B 20 24 11		        jsr player
+    31
+    32 00,101E			loop
+    33 00,101E A5 14		        lda 20
+    34 00,1020 C5 14		        cmp 20
+    35 00,1022 F0 FC		        beq *-2
+    36
+    37 00,1024 8D 0A D4 8D 0A +	        :80 sta $d40a
+    38
+    39 00,1114 A9 0E		        lda #$e
+    40 00,1116 8D 1A D0		        sta $d01a
+    41
+    42 00,1119 20 27 11		        jsr player+3
+    43
+    44 00,111C A9 00		        lda #0
+    45 00,111E 8D 1A D0		        sta $d01a
+    46
+    47 00,1121 4C 1E 10		        jmp loop
+    48
+    49
+    50 = 00,1124		player equ *
+    51 00,1124 4C F2 19		 jmp init
+    52 00,1127 4C F4 14		 jmp play
+    53 00,112A 4C 13 16		 jmp sound
+    54
+    55 00,112D 0F		maxvol dta b(15)
+    56 00,112E 00 00 00 00 00 +	volume dta d'        '
+    57 00,1136 00 00 00 00 00 +	freqen dta d'        '
+    58 00,113E 00 00 00 00 00 +	kanal  dta d'        '
+    59 00,1146 00 00 00 00 00 +	aktwys dta d'        '
+    60 00,114E 00 00 00 00 00 +	numdzw dta d'        '
+    61 00,1156 00 00 00 00 00 +	audctl dta d'        '
+    62 00,115E 00		aud1   dta b(0)
+    63 00,115F 00		aud2   dta b(0)
+    64
+    65 00,1160 00 00 00 00 00 +	voltab dta d'                '
+    66 00,1170 00 00 00 00 00 +	 dta d'        !!!!!!!!'
+    67 00,1180 00 00 00 00 01 +	 dta d'    !!!!!!!!""""'
+    68 00,1190 00 00 00 01 01 +	 dta d'   !!!!!"""""###'
+    69 00,11A0 00 00 01 01 01 +	 dta d'  !!!!""""####$$'
+    70 00,11B0 00 00 01 01 01 +	 dta d'  !!!"""###$$$%%'
+    71 00,11C0 00 00 01 01 02 +	 dta d'  !!"""##$$$%%&&'
+    72 00,11D0 00 00 01 01 02 +	 dta d'  !!""##$$%%&&'''''
+    73 00,11E0 00 01 01 02 02 +	 dta d' !!""##$$%%&&''''('
+    74 00,11F0 00 01 01 02 02 +	 dta d' !!""#$$%%&''''(()'
+    75 00,1200 00 01 01 02 03 +	 dta d' !!"##$%%&''''())*'
+    76 00,1210 00 01 01 02 03 +	 dta d' !!"#$$%&''''()**+'
+    77 00,1220 00 01 02 02 03 +	 dta d' !""#$%&&''()**+,'
+    78 00,1230 00 01 02 03 03 +	 dta d' !"##$%&''()**+,-'
+    79 00,1240 00 01 02 03 04 +	 dta d' !"#$%&''''()*+,-.'
+    80 00,1250 00 01 02 03 04 +	 dta d' !"#$%&''()*+,-./'
+    81
+    82 00,1260 00 F1 E4 D7	frqtab dta b(0),b($f1),b($e4),b($d7)
+    83 00,1264 CB C0 B5 AA	 dta b($cb),b($c0),b($b5),b($aa)
+    84 00,1268 A1 98 8F 87	 dta b($a1),b($98),b($8f),b($87)
+    85 00,126C 7F 78 72 6B	 dta b($7f),b($78),b($72),b($6b)
+    86 00,1270 65 5F 5A 55	 dta b($65),b($5f),b($5a),b($55)
+    87 00,1274 50 4B 47 43	 dta b($50),b($4b),b($47),b($43)
+    88 00,1278 3F 3C 38 35	 dta b($3f),b($3c),b($38),b($35)
+    89 00,127C 32 2F 2C 2A	 dta b($32),b($2f),b($2c),b($2a)
+    90 00,1280 27 25 23 21	 dta b($27),b($25),b($23),b($21)
+    91 00,1284 1F 1D 1C 1A	 dta b($1f),b($1d),b($1c),b($1a)
+    92 00,1288 18 17 16 14	 dta b($18),b($17),b($16),b($14)
+    93 00,128C 13 12 11 10	 dta b($13),b($12),b($11),b($10)
+    94 00,1290 0F 0E 0D 0C	 dta b(15),b(14),b(13),b(12)
+    95 00,1294 0B 0A 09 08	 dta b(11),b(10),b(9),b(8)
+    96 00,1298 07 06 05 04	 dta b(7),b(6),b(5),b(4)
+    97 00,129C 03 02 01 00	 dta b(3),b(2),b(1),b(0)
+    98
+    99 00,12A0 00 F2 E6 DA	 dta b(0),b($f2),b($e6),b($da)
+   100 00,12A4 CE BF B6 AA	 dta b($ce),b($bf),b($b6),b($aa)
+   101 00,12A8 A1 98 8F 89	 dta b($a1),b($98),b($8f),b($89)
+   102 00,12AC 80 7A 71 6B	 dta b($80),b($7a),b($71),b($6b)
+   103 00,12B0 65 5F 5C 56	 dta b($65),b($5f),b($5c),b($56)
+   104 00,12B4 50 4D 47 44	 dta b($50),b($4d),b($47),b($44)
+   105 00,12B8 3E 3C 38 35	 dta b($3e),b($3c),b($38),b($35)
+   106 00,12BC 32 2F 2D 2A	 dta b($32),b($2f),b($2d),b($2a)
+   107 00,12C0 28 25 23 21	 dta b($28),b($25),b($23),b($21)
+   108 00,12C4 1F 1D 1C 1A	 dta b($1f),b($1d),b($1c),b($1a)
+   109 00,12C8 18 17 16 14	 dta b($18),b($17),b($16),b($14)
+   110 00,12CC 13 12 11 10	 dta b($13),b($12),b($11),b($10)
+   111 00,12D0 0F 0E 0D 0C	 dta b(15),b(14),b(13),b(12)
+   112 00,12D4 0B 0A 09 08	 dta b(11),b(10),b(9),b(8)
+   113 00,12D8 07 06 05 04	 dta b(7),b(6),b(5),b(4)
+   114 00,12DC 03 02 01 00	 dta b(3),b(2),b(1),b(0)
+   115
+   116 00,12E0 00 FF F1 E4	 dta b(0),b($ff),b($f1),b($e4)
+   117 00,12E4 D8 CA C0 B5	 dta b($d8),b($ca),b($c0),b($b5)
+   118 00,12E8 AB A2 99 8E	 dta b($ab),b($a2),b($99),b($8e)
+   119 00,12EC 87 7F 79 73	 dta b($87),b($7f),b($79),b($73)
+   120 00,12F0 70 66 61 5A	 dta b($70),b($66),b($61),b($5a)
+   121 00,12F4 55 52 4B 48	 dta b($55),b($52),b($4b),b($48)
+   122 00,12F8 43 3F 3C 39	 dta b($43),b($3f),b($3c),b($39)
+   123 00,12FC 37 33 30 2D	 dta b($37),b($33),b($30),b($2d)
+   124 00,1300 2A 28 25 24	 dta b($2a),b($28),b($25),b($24)
+   125 00,1304 21 1F 1E 1C	 dta b($21),b($1f),b($1e),b($1c)
+   126 00,1308 1B 19 17 16	 dta b($1b),b($19),b($17),b($16)
+   127 00,130C 15 13 12 11	 dta b($15),b($13),b($12),b($11)
+   128 00,1310 10 0F 0E 0D	 dta b($10),b(15),b(14),b(13)
+   129 00,1314 0C 0B 0A 09	 dta b(12),b(11),b(10),b(9)
+   130 00,1318 08 07 06 05	 dta b(8),b(7),b(6),b(5)
+   131 00,131C 04 03 02 01	 dta b(4),b(3),b(2),b(1)
+   132
+   133 00,1320 00 F3 E6 D9	 dta b(0),b($f3),b($e6),b($d9)
+   134 00,1324 CC C1 B5 AD	 dta b($cc),b($c1),b($b5),b($ad)
+   135 00,1328 A2 99 90 88	 dta b($a2),b($99),b($90),b($88)
+   136 00,132C 80 79 72 6C	 dta b($80),b($79),b($72),b($6c)
+   137 00,1330 66 60 5B 55	 dta b($66),b($60),b($5b),b($55)
+   138 00,1334 51 4C 48 44	 dta b($51),b($4c),b($48),b($44)
+   139 00,1338 40 3C 39 35	 dta b($40),b($3c),b($39),b($35)
+   140 00,133C 32 2F 2D 2A	 dta b($32),b($2f),b($2d),b($2a)
+   141 00,1340 28 25 23 21	 dta b($28),b($25),b($23),b($21)
+   142 00,1344 1F 1D 1C 1A	 dta b($1f),b($1d),b($1c),b($1a)
+   143 00,1348 18 17 16 14	 dta b($18),b($17),b($16),b($14)
+   144 00,134C 13 12 11 10	 dta b($13),b($12),b($11),b($10)
+   145 00,1350 0F 0E 0D 0C	 dta b(15),b(14),b(13),b(12)
+   146 00,1354 0B 0A 09 08	 dta b(11),b(10),b(9),b(8)
+   147 00,1358 07 06 05 04	 dta b(7),b(6),b(5),b(4)
+   148 00,135C 03 02 01 00	 dta b(3),b(2),b(1),b(0)
+   149
+   150 00,1360 00 F2 33 96	basslo dta b(0),b($f2),b($33),b($96)
+   151 00,1364 E2 38 8C 00	 dta b($e2),b($38),b($8c),b($00)
+   152 00,1368 6A E8 6A EF	 dta b($6a),b($e8),b($6a),b($ef)
+   153 00,136C 80 08 AE 46	 dta b($80),b($08),b($ae),b($46)
+   154 00,1370 E6 95 41 F6	 dta b($e6),b($95),b($41),b($f6)
+   155 00,1374 B0 6E 30 F6	 dta b($b0),b($6e),b($30),b($f6)
+   156 00,1378 BB 84 52 22	 dta b($bb),b($84),b($52),b($22)
+   157 00,137C F4 C8 A0 7A	 dta b($f4),b($c8),b($a0),b($7a)
+   158 00,1380 55 34 14 F5	 dta b($55),b($34),b($14),b($f5)
+   159 00,1384 D8 BD A4 8D	 dta b($d8),b($bd),b($a4),b($8d)
+   160 00,1388 77 60 4E 38	 dta b($77),b($60),b($4e),b($38)
+   161 00,138C 27 15 06 F7	 dta b($27),b($15),b($06),b($f7)
+   162 00,1390 E8 DB CF C3	 dta b($e8),b($db),b($cf),b($c3)
+   163 00,1394 B8 AC A2 9A	 dta b($b8),b($ac),b($a2),b($9a)
+   164 00,1398 90 88 7F 78	 dta b($90),b($88),b($7f),b($78)
+   165 00,139C 70 6A 64 5E	 dta b($70),b($6a),b($64),b($5e)
+   166
+   167 00,13A0 00 0D 0D 0C	basshi dta b(0),b(13),b(13),b(12)
+   168 00,13A4 0B 0B 0A 0A	 dta b(11),b(11),b(10),b(10)
+   169 00,13A8 09 08 08 07	 dta b(9),b(8),b(8),b(7)
+   170 00,13AC 07 07 06 06	 dta b(7),b(7),b(6),b(6)
+   171 00,13B0 05 05 05 04	 dta b(5),b(5),b(5),b(4)
+   172 00,13B4 04 04 04 03	 dta b(4),b(4),b(4),b(3)
+   173 00,13B8 03 03 03 03	 dta b(3),b(3),b(3),b(3)
+   174 00,13BC 02 02 02 02	 dta b(2),b(2),b(2),b(2)
+   175 00,13C0 02 02 02 01	 dta b(2),b(2),b(2),b(1)
+   176 00,13C4 01 01 01 01	 dta b(1),b(1),b(1),b(1)
+   177 00,13C8 01 01 01 01	 dta b(1),b(1),b(1),b(1)
+   178 00,13CC 01 01 01 00	 dta b(1),b(1),b(1),b(0)
+   179 00,13D0 00 00 00 00	 dta b(0),b(0),b(0),b(0)
+   180 00,13D4 00 00 00 00	 dta b(0),b(0),b(0),b(0)
+   181 00,13D8 00 00 00 00	 dta b(0),b(0),b(0),b(0)
+   182 00,13DC 00 00 00 00	 dta b(0),b(0),b(0),b(0)
+   183
+   184 00,13E0 00 00 00 00 00 +	czygrx dta d'        '
+   185 00,13E8 00 00 00 00 00 +	pozwpt dta d'        '
+   186 00,13F0 00 00 00 00 00 +	delay  dta d'        '
+   187 00,13F8 00 00 00 00 00 +	numptr dta d'        '
+   188 00,1400 00 00 00 00 00 +	poddzw dta d'        '
+   189 00,1408 00 00 00 00 00 +	wysdzw dta d'        '
+   190 00,1410 00 00 00 00 00 +	znksz  dta d'        '
+   191 00,1418 00 00 00 00 00 +	frq    dta d'        '
+   192 00,1420 00 00 00 00 00 +	vol1ch dta d'        '
+   193 00,1428 00 00 00 00 00 +	vol2ch dta d'        '
+   194 00,1430 00 00 00 00 00 +	adcvl1 dta d'        '
+   195 00,1438 00 00 00 00 00 +	adcvl2 dta d'        '
+   196 00,1440 00 00 00 00 00 +	adrsnl dta d'        '
+   197 00,1448 00 00 00 00 00 +	adrsnh dta d'        '
+   198 00,1450 00 00 00 00 00 +	slupy  dta d'        '
+   199 00,1458 00 00 00 00 00 +	opad1  dta d'        '
+   200 00,1460 00 00 00 00 00 +	opad2  dta d'        '
+   201 00,1468 00 00 00 00 00 +	lopad1 dta d'        '
+   202 00,1470 00 00 00 00 00 +	lopad2 dta d'        '
+   203 00,1478 00 00 00 00 00 +	typ    dta d'        '
+   204 00,1480 00 00 00 00 00 +	param  dta d'        '
+   205 00,1488 00 00 00 00 00 +	pomoc1 dta d'        '
+   206 00,1490 00 00 00 00 00 +	pomoc2 dta d'        '
+   207 00,1498 00 00 00 00 00 +	czekaj dta d'        '
+   208 00,14A0 00 00 00 00 00 +	dtyp   dta d'        '
+   209 00,14A8 00 00 00 00 00 +	ltyp   dta d'        '
+   210 00,14B0 00 00 00 00 00 +	ilperm dta d'        '
+   211 00,14B8 00 00 00 00 00 +	aperm  dta d'        '
+   212 00,14C0 00 00 00 00 00 +	dperm  dta d'        '
+   213 00,14C8 00 00 00 00 00 +	lperm  dta d'        '
+   214 00,14D0 00 00 00 00 00 +	kolejn dta d'        '
+   215 00,14D8 00		tempo  dta b(0)
+   216 00,14D9 00		ltempo dta b(0)
+   217 00,14DA 00		pozptr dta b(0)
+   218 00,14DB 00		czygrc dta b(0)
+   219
+   220 00,14DC 04 05 06 07	przeci dta b(4),b(5),b(6),b(7)
+   221 00,14E0 00 01 02 03	 dta b(0),b(1),b(2),b(3)
+   222 00,14E4 04 02 00 00	audtb1 dta b(4),b(2),b(0),b(0)
+   223 00,14E8 04 02 00 00	 dta b(4),b(2),b(0),b(0)
+   224 00,14EC 00 10 00 08	audtb2 dta b(0),b(16),b(0),b(8)
+   225 00,14F0 00 10 00 08	 dta b(0),b(16),b(0),b(8)
+   226
+   227 00,14F4 AD DB 14		play lda czygrc
+   228 00,14F7 F0 5E		 beq r1-3
+   229 00,14F9 AD DA 14		 lda pozptr
+   230 00,14FC C9 40		 cmp #64
+   231 00,14FE 90 5A		 bcc r1
+   232 00,1500 CE D9 14		 dec ltempo
+   233 00,1503 F0 03		 beq *+5
+   234 00,1505 4C 13 16		 jmp sound
+   235
+   236 00,1508 A2 07		 ldx #7
+   237 00,150A A9 00		 lda #0
+   238 00,150C 9D E8 13		p1 sta pozwpt,x
+   239 00,150F 9D F0 13		 sta delay,x
+   240 00,1512 CA		 dex
+   241 00,1513 10 F7		 bpl p1
+   242 00,1515 8D DA 14		 sta pozptr
+   243 00,1518 AA		 tax
+   244 00,1519 A0 0F		 ldy #15
+   245 00,151B B1 FE		p2 lda (adrsng),y
+   246 00,151D 10 20		 bpl p3
+   247 00,151F 88		 dey
+   248 00,1520 B1 FE		 lda (adrsng),y
+   249 00,1522 10 03		 bpl *+5
+   250 00,1524 4C 83 1A		 jmp stop
+   251 00,1527 86 FC		 stx addr
+   252 00,1529 0A		 asl @
+   253 00,152A 0A		 asl @
+   254 00,152B 26 FC		 rol addr
+   255 00,152D 0A		 asl @
+   256 00,152E 26 FC		 rol addr
+   257 00,1530 0A		 asl @
+   258 00,1531 26 FC		 rol addr
+   259 00,1533 69 00		zm0 adc #0
+   260 00,1535 85 FE		 sta adrsng
+   261 00,1537 A5 FC		 lda addr
+   262 00,1539 69 00		zm1 adc #0
+   263 00,153B 85 FF		 sta adrsng+1
+   264 00,153D 90 DA		 bcc p2-2
+   265 00,153F 9D F8 13		p3 sta numptr,x
+   266 00,1542 88		 dey
+   267 00,1543 B1 FE		 lda (adrsng),y
+   268 00,1545 9D 00 14		 sta poddzw,x
+   269 00,1548 E8		 inx
+   270 00,1549 88		 dey
+   271 00,154A 10 CF		 bpl p2
+   272 00,154C 18		 clc
+   273 00,154D A5 FE		 lda adrsng
+   274 00,154F 69 10		 adc #16
+   275 00,1551 85 FE		 sta adrsng
+   276 00,1553 90 02		 bcc *+4
+   277 00,1555 E6 FF		 inc adrsng+1
+   278 00,1557 4C 13 16		 jmp sound
+   279
+   280 00,155A CE D9 14		r1 dec ltempo
+   281 00,155D 10 F8		 bpl r1-3
+   282 00,155F EE DA 14		 inc pozptr
+   283 00,1562 AD D8 14		 lda tempo
+   284 00,1565 8D D9 14		 sta ltempo
+   285 00,1568 A2 07		 ldx #7
+   286 00,156A DE F0 13		r2 dec delay,x
+   287 00,156D 30 03		 bmi *+5
+   288 00,156F 4C 0D 16		 jmp r14
+   289 00,1572 BC F8 13		 ldy numptr,x
+   290 00,1575 B9 FF FF		zm2 lda $ffff,y
+   291 00,1578 85 FC		 sta addr
+   292 00,157A B9 FF FF		zm3 lda $ffff,y
+   293 00,157D 85 FD		 sta addr+1
+   294 00,157F BC E8 13		 ldy pozwpt,x
+   295 00,1582 B1 FC		r3 lda (addr),y
+   296 00,1584 D0 06		 bne r4
+   297 00,1586 20 91 19		 jsr nparam
+   298 00,1589 4C 0A 16		 jmp r13
+   299 00,158C C9 40		r4 cmp #$40
+   300 00,158E B0 12		 bcs r5
+   301 00,1590 7D 00 14		 adc poddzw,x
+   302 00,1593 9D 08 14		 sta wysdzw,x
+   303 00,1596 20 91 19		 jsr nparam
+   304 00,1599 BC 4E 11		 ldy numdzw,x
+   305 00,159C 20 E0 1A		 jsr dzwiek
+   306 00,159F 4C 0A 16		 jmp r13
+   307 00,15A2 D0 22		r5 bne r8
+   308 00,15A4 C8		 iny
+   309 00,15A5 FE E8 13		 inc pozwpt,x
+   310 00,15A8 B1 FC		 lda (addr),y
+   311 00,15AA 10 07		 bpl r6
+   312 00,15AC 85 FB		 sta bajt
+   313 00,15AE 20 91 19		 jsr nparam
+   314 00,15B1 A5 FB		 lda bajt
+   315 00,15B3 29 7F		r6 and #$7f
+   316 00,15B5 D0 07		 bne r7
+   317 00,15B7 A9 40		 lda #64
+   318 00,15B9 8D DA 14		 sta pozptr
+   319 00,15BC D0 4C		 bne r13
+   320 00,15BE 8D D8 14		r7 sta tempo
+   321 00,15C1 8D D9 14		 sta ltempo
+   322 00,15C4 D0 44		 bne r13
+   323 00,15C6 C9 80		r8 cmp #$80
+   324 00,15C8 B0 2B		 bcs r11
+   325 00,15CA 29 3F		 and #$3f
+   326 00,15CC 7D 00 14		 adc poddzw,x
+   327 00,15CF 9D 08 14		 sta wysdzw,x
+   328 00,15D2 C8		 iny
+   329 00,15D3 FE E8 13		 inc pozwpt,x
+   330 00,15D6 B1 FC		 lda (addr),y
+   331 00,15D8 29 7F		 and #127
+   332 00,15DA D0 07		 bne r9
+   333 00,15DC A9 40		 lda #64
+   334 00,15DE 8D DA 14		 sta pozptr
+   335 00,15E1 D0 06		 bne r10
+   336 00,15E3 8D D8 14		r9 sta tempo
+   337 00,15E6 8D D9 14		 sta ltempo
+   338 00,15E9 20 91 19		r10 jsr nparam
+   339 00,15EC BC 4E 11		 ldy numdzw,x
+   340 00,15EF 20 E0 1A		 jsr dzwiek
+   341 00,15F2 4C 0A 16		 jmp r13
+   342 00,15F5 C9 C0		r11 cmp #$c0
+   343 00,15F7 B0 0C		 bcs r12
+   344 00,15F9 29 3F		 and #$3f
+   345 00,15FB 9D 4E 11		 sta numdzw,x
+   346 00,15FE C8		 iny
+   347 00,15FF FE E8 13		 inc pozwpt,x
+   348 00,1602 4C 82 15		 jmp r3
+   349 00,1605 29 3F		r12 and #$3f
+   350 00,1607 9D F0 13		 sta delay,x
+   351 00,160A FE E8 13		r13 inc pozwpt,x
+   352 00,160D CA		r14 dex
+   353 00,160E 30 03		 bmi sound
+   354 00,1610 4C 6A 15		 jmp r2
+   355
+   356 00,1613 A2 07		sound ldx #7
+   357 00,1615 BD E0 13		p5 lda czygrx,x
+   358 00,1618 F0 21		 beq p6
+   359 00,161A 20 52 17		 jsr graj
+   360 00,161D BD 56 11		 lda audctl,x
+   361 00,1620 3D E4 14		 and audtb1,x
+   362 00,1623 F0 16		 beq p6
+   363 00,1625 A0 47		 ldy #71
+   364 00,1627 B1 FC		 lda (addr),y
+   365 00,1629 18		 clc
+   366 00,162A 7D 46 11		 adc aktwys,x
+   367 00,162D 9D 48 11		 sta aktwys+2,x
+   368 00,1630 A8		 tay
+   369 00,1631 B9 60 12		 lda frqtab,y
+   370 00,1634 38		 sec
+   371 00,1635 7D 88 14		 adc pomoc1,x
+   372 00,1638 9D 1A 14		 sta frq+2,x
+   373 00,163B CA		p6 dex
+   374 00,163C 10 D7		 bpl p5
+   375
+   376 00,163E 0E 2D 11		 asl maxvol
+   377 00,1641 0E 2D 11		 asl maxvol
+   378 00,1644 0E 2D 11		 asl maxvol
+   379 00,1647 0E 2D 11		 asl maxvol
+   380 00,164A E8		 inx
+   381 00,164B 86 FC		 stx addr
+   382 00,164D 86 FD		 stx addr+1
+   383 00,164F A2 07		 ldx #7
+   384 00,1651 8A		p9 txa
+   385 00,1652 A8		 tay
+   386 00,1653 B9 20 14		 lda vol1ch,y
+   387 00,1656 D0 0C		 bne p10
+   388 00,1658 BC DC 14		 ldy przeci,x
+   389 00,165B B9 28 14		 lda vol2ch,y
+   390 00,165E D0 04		 bne p10
+   391 00,1660 8A		 txa
+   392 00,1661 A8		 tay
+   393 00,1662 A9 00		 lda #0
+   394 00,1664 85 FA		p10 sta byte
+   395 00,1666 98		 tya
+   396 00,1667 9D 3E 11		 sta kanal,x
+   397 00,166A B9 18 14		 lda frq,y
+   398 00,166D 9D 36 11		 sta freqen,x
+   399 00,1670 B9 56 11		 lda audctl,y
+   400 00,1673 85 FB		 sta bajt
+   401 00,1675 05 FD		 ora addr+1
+   402 00,1677 85 FD		 sta addr+1
+   403 00,1679 A5 FB		 lda bajt
+   404 00,167B 3D E4 14		 and audtb1,x
+   405 00,167E F0 06		 beq p11
+   406 00,1680 B9 1A 14		 lda frq+2,y
+   407 00,1683 9D 38 11		 sta freqen+2,x
+   408 00,1686 A5 FB		p11 lda bajt
+   409 00,1688 3D EC 14		 and audtb2,x
+   410 00,168B F0 12		 beq p12
+   411 00,168D B9 46 11		 lda aktwys,y
+   412 00,1690 29 3F		 and #$3f
+   413 00,1692 A8		 tay
+   414 00,1693 C8		 iny
+   415 00,1694 84 FC		 sty addr
+   416 00,1696 B9 9F 13		 lda basshi-1,y
+   417 00,1699 9D 36 11		 sta freqen,x
+   418 00,169C 4C AD 16		 jmp p13
+   419 00,169F A4 FC		p12 ldy addr
+   420 00,16A1 F0 0A		 beq p13
+   421 00,16A3 B9 5F 13		 lda basslo-1,y
+   422 00,16A6 9D 36 11		 sta freqen,x
+   423 00,16A9 A9 00		 lda #0
+   424 00,16AB 85 FC		 sta addr
+   425 00,16AD A5 FA		p13 lda byte
+   426 00,16AF 0D 2D 11		 ora maxvol
+   427 00,16B2 A8		 tay
+   428 00,16B3 B9 60 11		 lda voltab,y
+   429 00,16B6 BC 3E 11		 ldy kanal,x
+   430 00,16B9 19 10 14		 ora znksz,y
+   431 00,16BC 9D 2E 11		 sta volume,x
+   432 00,16BF E0 04		 cpx #4
+   433 00,16C1 D0 09		 bne p14
+   434 00,16C3 A5 FD		 lda addr+1
+   435 00,16C5 8D 5F 11		 sta aud2
+   436 00,16C8 A9 00		 lda #0
+   437 00,16CA 85 FD		 sta addr+1
+   438 00,16CC CA		p14 dex
+   439 00,16CD 10 82		 bpl p9
+   440 00,16CF 4E 2D 11		 lsr maxvol
+   441 00,16D2 4E 2D 11		 lsr maxvol
+   442 00,16D5 4E 2D 11		 lsr maxvol
+   443 00,16D8 4E 2D 11		 lsr maxvol
+   444 00,16DB A5 FD		 lda addr+1
+   445 00,16DD A2 03		quit ldx #3
+   446 00,16DF 8E 1F D2		 stx $d21f
+   447 00,16E2 8E 0F D2		 stx $d20f
+   448 00,16E5 AE 3A 11		 ldx freqen+4
+   449 00,16E8 AC 36 11		 ldy freqen
+   450 00,16EB 8E 10 D2		 stx $d210
+   451 00,16EE 8C 00 D2		 sty $d200
+   452 00,16F1 AE 32 11		 ldx volume+4
+   453 00,16F4 AC 2E 11		 ldy volume
+   454 00,16F7 8E 11 D2		 stx $d211
+   455 00,16FA 8C 01 D2		 sty $d201
+   456 00,16FD AE 3B 11		 ldx freqen+5
+   457 00,1700 AC 37 11		 ldy freqen+1
+   458 00,1703 8E 12 D2		 stx $d212
+   459 00,1706 8C 02 D2		 sty $d202
+   460 00,1709 AE 33 11		 ldx volume+5
+   461 00,170C AC 2F 11		 ldy volume+1
+   462 00,170F 8E 13 D2		 stx $d213
+   463 00,1712 8C 03 D2		 sty $d203
+   464 00,1715 AE 3C 11		 ldx freqen+6
+   465 00,1718 AC 38 11		 ldy freqen+2
+   466 00,171B 8E 14 D2		 stx $d214
+   467 00,171E 8C 04 D2		 sty $d204
+   468 00,1721 AE 34 11		 ldx volume+6
+   469 00,1724 AC 30 11		 ldy volume+2
+   470 00,1727 8E 15 D2		 stx $d215
+   471 00,172A 8C 05 D2		 sty $d205
+   472 00,172D AE 3D 11		 ldx freqen+7
+   473 00,1730 AC 39 11		 ldy freqen+3
+   474 00,1733 8E 16 D2		 stx $d216
+   475 00,1736 8C 06 D2		 sty $d206
+   476 00,1739 AE 35 11		 ldx volume+7
+   477 00,173C AC 31 11		 ldy volume+3
+   478 00,173F 8E 17 D2		 stx $d217
+   479 00,1742 8C 07 D2		 sty $d207
+   480 00,1745 8D 5E 11		 sta aud1
+   481 00,1748 AE 5F 11		 ldx aud2
+   482 00,174B 8E 18 D2		 stx $d218
+   483 00,174E 8D 08 D2		 sta $d208
+   484 00,1751 60		 rts
+   485
+   486 00,1752 BD 40 14		graj lda adrsnl,x
+   487 00,1755 85 FC		 sta addr
+   488 00,1757 BD 48 14		 lda adrsnh,x
+   489 00,175A 85 FD		 sta addr+1
+   490 00,175C BC 50 14		 ldy slupy,x
+   491 00,175F C0 3F		 cpy #63
+   492 00,1761 F0 7B		 beq n6
+   493 00,1763 FE 50 14		 inc slupy,x
+   494 00,1766 FE 50 14		 inc slupy,x
+   495 00,1769 FE 50 14		 inc slupy,x
+   496 00,176C B1 FC		 lda (addr),y
+   497 00,176E 29 F0		 and #$f0
+   498 00,1770 9D 10 14		 sta znksz,x
+   499 00,1773 B1 FC		 lda (addr),y
+   500 00,1775 29 0F		 and #15
+   501 00,1777 38		 sec
+   502 00,1778 FD 30 14		 sbc adcvl1,x
+   503 00,177B 10 02		 bpl n1
+   504 00,177D A9 00		 lda #0
+   505 00,177F 9D 20 14		n1 sta vol1ch,x
+   506 00,1782 C8		 iny
+   507 00,1783 B1 FC		 lda (addr),y
+   508 00,1785 29 0F		 and #15
+   509 00,1787 38		 sec
+   510 00,1788 FD 38 14		 sbc adcvl2,x
+   511 00,178B 10 02		 bpl n2
+   512 00,178D A9 00		 lda #0
+   513 00,178F 9D 28 14		n2 sta vol2ch,x
+   514 00,1792 B1 FC		 lda (addr),y
+   515 00,1794 29 F0		 and #$f0
+   516 00,1796 F0 74		 beq n8
+   517 00,1798 10 0B		 bpl n3
+   518 00,179A A0 49		 ldy #73
+   519 00,179C B1 FC		 lda (addr),y
+   520 00,179E BC 50 14		 ldy slupy,x
+   521 00,17A1 88		 dey
+   522 00,17A2 88		 dey
+   523 00,17A3 10 02		 bpl n4
+   524 00,17A5 A9 00		n3 lda #0
+   525 00,17A7 9D 56 11		n4 sta audctl,x
+   526 00,17AA B1 FC		 lda (addr),y
+   527 00,17AC 29 70		 and #$70
+   528 00,17AE F0 63		 beq n9
+   529 00,17B0 4A		 lsr @
+   530 00,17B1 4A		 lsr @
+   531 00,17B2 8D BE 17		 sta n5+1
+   532 00,17B5 A9 00		 lda #0
+   533 00,17B7 9D 88 14		 sta pomoc1,x
+   534 00,17BA C8		 iny
+   535 00,17BB B1 FC		 lda (addr),y
+   536 00,17BD 90 FE		n5 bcc *
+   537 00,17BF EA		 nop
+   538 00,17C0 EA		 nop
+   539 00,17C1 EA		 nop
+   540 00,17C2 EA		 nop
+   541 00,17C3 4C 5C 19		 jmp a1
+   542 00,17C6 EA		 nop
+   543 00,17C7 4C 59 19		 jmp a2
+   544 00,17CA EA		 nop
+   545 00,17CB 4C 60 19		 jmp a3
+   546 00,17CE EA		 nop
+   547 00,17CF 4C 6E 19		 jmp a4
+   548 00,17D2 EA		 nop
+   549 00,17D3 4C 78 19		 jmp a5
+   550 00,17D6 EA		 nop
+   551 00,17D7 4C 83 19		 jmp a6
+   552 00,17DA EA		 nop
+   553 00,17DB 4C 75 19		 jmp a7
+   554 00,17DE BD 58 14		n6 lda opad1,x
+   555 00,17E1 F0 12		 beq n7
+   556 00,17E3 DE 68 14		 dec lopad1,x
+   557 00,17E6 D0 0D		 bne n7
+   558 00,17E8 9D 68 14		 sta lopad1,x
+   559 00,17EB BD 20 14		 lda vol1ch,x
+   560 00,17EE 29 0F		 and #15
+   561 00,17F0 F0 03		 beq n7
+   562 00,17F2 DE 20 14		 dec vol1ch,x
+   563 00,17F5 BD 60 14		n7 lda opad2,x
+   564 00,17F8 F0 12		 beq n8
+   565 00,17FA DE 70 14		 dec lopad2,x
+   566 00,17FD D0 0D		 bne n8
+   567 00,17FF 9D 70 14		 sta lopad2,x
+   568 00,1802 BD 28 14		 lda vol2ch,x
+   569 00,1805 29 0F		 and #15
+   570 00,1807 F0 03		 beq n8
+   571 00,1809 DE 28 14		 dec vol2ch,x
+   572 00,180C A0 48		n8 ldy #72
+   573 00,180E B1 FC		 lda (addr),y
+   574 00,1810 9D 56 11		 sta audctl,x
+   575 00,1813 BD B8 14		n9 lda aperm,x
+   576 00,1816 18		 clc
+   577 00,1817 69 3F		 adc #63
+   578 00,1819 A8		 tay
+   579 00,181A B1 FC		 lda (addr),y
+   580 00,181C 7D 08 14		 adc wysdzw,x
+   581 00,181F 9D 46 11		 sta aktwys,x
+   582 00,1822 A8		 tay
+   583 00,1823 B9 60 12		 lda frqtab,y
+   584 00,1826 9D 18 14		 sta frq,x
+   585 00,1829 DE C8 14		 dec lperm,x
+   586 00,182C 10 33		 bpl m1
+   587 00,182E BD C0 14		 lda dperm,x
+   588 00,1831 9D C8 14		 sta lperm,x
+   589 00,1834 BD D0 14		 lda kolejn,x
+   590 00,1837 F0 18		 beq m6
+   591 00,1839 18		 clc
+   592 00,183A 7D B8 14		 adc aperm,x
+   593 00,183D 9D B8 14		 sta aperm,x
+   594 00,1840 F0 07		 beq m7
+   595 00,1842 DD B0 14		 cmp ilperm,x
+   596 00,1845 D0 1A		 bne m1
+   597 00,1847 A9 FE		 lda #$fe
+   598 00,1849 18		m7 clc
+   599 00,184A 69 01		 adc #1
+   600 00,184C 9D D0 14		 sta kolejn,x
+   601 00,184F D0 10		 bne m1
+   602 00,1851 FE B8 14		m6 inc aperm,x
+   603 00,1854 BD B0 14		 lda ilperm,x
+   604 00,1857 DD B8 14		 cmp aperm,x
+   605 00,185A B0 05		 bcs m1
+   606 00,185C A9 00		 lda #0
+   607 00,185E 9D B8 14		 sta aperm,x
+   608 00,1861 BD 98 14		m1 lda czekaj,x
+   609 00,1864 F0 04		 beq m2
+   610 00,1866 DE 98 14		 dec czekaj,x
+   611 00,1869 60		 rts
+   612 00,186A BD 90 14		m2 lda pomoc2,x
+   613 00,186D 85 FA		 sta byte
+   614 00,186F BD 80 14		 lda param,x
+   615 00,1872 85 FB		 sta bajt
+   616 00,1874 20 8D 18		 jsr m4
+   617 00,1877 DE A8 14		 dec ltyp,x
+   618 00,187A 10 10		 bpl m4-1
+   619 00,187C A5 FA		 lda byte
+   620 00,187E 9D 90 14		 sta pomoc2,x
+   621 00,1881 A5 FB		 lda bajt
+   622 00,1883 9D 80 14		 sta param,x
+   623 00,1886 BD A0 14		 lda dtyp,x
+   624 00,1889 9D A8 14		 sta ltyp,x
+   625 00,188C 60		 rts
+   626 00,188D BD 78 14		m4 lda typ,x
+   627 00,1890 8D 94 18		 sta m5+1
+   628 00,1893 10 FE		m5 bpl *
+   629 00,1895 4C CB 18		 jmp typ0
+   630 00,1898 EA		 nop
+   631 00,1899 4C B4 18		 jmp typ1
+   632 00,189C EA		 nop
+   633 00,189D 4C D2 18		 jmp typ2
+   634 00,18A0 EA		 nop
+   635 00,18A1 4C D8 18		 jmp typ3
+   636 00,18A4 EA		 nop
+   637 00,18A5 4C E2 18		 jmp typ4
+   638 00,18A8 EA		 nop
+   639 00,18A9 4C F6 18		 jmp typ5
+   640 00,18AC EA		 nop
+   641 00,18AD 4C 06 19		 jmp typ6
+   642 00,18B0 EA		 nop
+   643 00,18B1 4C 18 19		 jmp typ7
+   644
+   645 00,18B4 A5 FA		typ1 lda byte
+   646 00,18B6 E6 FA		 inc byte
+   647 00,18B8 29 03		 and #3
+   648 00,18BA 4A		 lsr @
+   649 00,18BB 90 0F		 bcc t2
+   650 00,18BD D0 47		 bne typ6
+   651 00,18BF A5 FB		 lda bajt
+   652 00,18C1 9D 88 14		t1 sta pomoc1,x
+   653 00,18C4 18		 clc
+   654 00,18C5 7D 18 14		 adc frq,x
+   655 00,18C8 9D 18 14		 sta frq,x
+   656 00,18CB 60		typ0 rts
+   657 00,18CC A9 00		t2 lda #0
+   658 00,18CE 9D 88 14		 sta pomoc1,x
+   659 00,18D1 60		 rts
+   660 00,18D2 20 41 19		typ2 jsr t5
+   661 00,18D5 4C C1 18		 jmp t1
+   662 00,18D8 20 41 19		typ3 jsr t5
+   663 00,18DB 18		 clc
+   664 00,18DC 7D 46 11		 adc aktwys,x
+   665 00,18DF 4C 78 19		 jmp a5
+   666 00,18E2 A5 FA		typ4 lda byte
+   667 00,18E4 9D 88 14		 sta pomoc1,x
+   668 00,18E7 18		 clc
+   669 00,18E8 7D 18 14		 adc frq,x
+   670 00,18EB 9D 18 14		t3 sta frq,x
+   671 00,18EE A5 FA		 lda byte
+   672 00,18F0 18		 clc
+   673 00,18F1 65 FB		 adc bajt
+   674 00,18F3 85 FA		 sta byte
+   675 00,18F5 60		 rts
+   676 00,18F6 BD 46 11		typ5 lda aktwys,x
+   677 00,18F9 38		 sec
+   678 00,18FA E5 FA		 sbc byte
+   679 00,18FC 9D 46 11		 sta aktwys,x
+   680 00,18FF A8		 tay
+   681 00,1900 B9 60 12		 lda frqtab,y
+   682 00,1903 4C EB 18		 jmp t3
+   683 00,1906 BD 18 14		typ6 lda frq,x
+   684 00,1909 38		 sec
+   685 00,190A E5 FB		 sbc bajt
+   686 00,190C 9D 18 14		 sta frq,x
+   687 00,190F 38		 sec
+   688 00,1910 A9 00		 lda #0
+   689 00,1912 E5 FB		 sbc bajt
+   690 00,1914 9D 88 14		 sta pomoc1,x
+   691 00,1917 60		 rts
+   692 00,1918 BD A8 14		typ7 lda ltyp,x
+   693 00,191B D0 AE		 bne typ0
+   694 00,191D A5 FB		 lda bajt
+   695 00,191F 10 10		 bpl t4
+   696 00,1921 BD 28 14		 lda vol2ch,x
+   697 00,1924 F0 A5		 beq typ0
+   698 00,1926 BD 20 14		 lda vol1ch,x
+   699 00,1929 C9 0F		 cmp #15
+   700 00,192B F0 9E		 beq typ0
+   701 00,192D FE 20 14		 inc vol1ch,x
+   702 00,1930 60		 rts
+   703 00,1931 BD 20 14		t4 lda vol1ch,x
+   704 00,1934 F0 95		 beq typ0
+   705 00,1936 BD 28 14		 lda vol2ch,x
+   706 00,1939 C9 0F		 cmp #15
+   707 00,193B F0 8E		 beq typ0
+   708 00,193D FE 28 14		 inc vol2ch,x
+   709 00,1940 60		 rts
+   710 00,1941 A4 FA		t5 ldy byte
+   711 00,1943 A5 FB		 lda bajt
+   712 00,1945 30 02		 bmi t6
+   713 00,1947 C8		 iny
+   714 00,1948 C8		 iny
+   715 00,1949 88		t6 dey
+   716 00,194A 98		 tya
+   717 00,194B 85 FA		 sta byte
+   718 00,194D C5 FB		 cmp bajt
+   719 00,194F D0 06		 bne t7
+   720 00,1951 A5 FB		 lda bajt
+   721 00,1953 49 FF		 eor #$ff
+   722 00,1955 85 FB		 sta bajt
+   723 00,1957 98		t7 tya
+   724 00,1958 60		 rts
+   725
+   726 00,1959 7D 18 14		a2 adc frq,x
+   727 00,195C 9D 18 14		a1 sta frq,x
+   728 00,195F 60		 rts
+   729 00,1960 BC 08 14		a3 ldy wysdzw,x
+   730 00,1963 79 60 12		 adc frqtab,y
+   731 00,1966 9D 18 14		 sta frq,x
+   732 00,1969 98		 tya
+   733 00,196A 9D 46 11		 sta aktwys,x
+   734 00,196D 60		 rts
+   735 00,196E 2D 0A D2		a4 and $d20a
+   736 00,1971 9D 18 14		 sta frq,x
+   737 00,1974 60		 rts
+   738 00,1975 7D 08 14		a7 adc wysdzw,x
+   739 00,1978 9D 46 11		a5 sta aktwys,x
+   740 00,197B A8		 tay
+   741 00,197C B9 60 12		 lda frqtab,y
+   742 00,197F 9D 18 14		 sta frq,x
+   743 00,1982 60		 rts
+   744 00,1983 9D 46 11		a6 sta aktwys,x
+   745 00,1986 A8		 tay
+   746 00,1987 BD 18 14		 lda frq,x
+   747 00,198A 79 60 12		 adc frqtab,y
+   748 00,198D 9D 18 14		 sta frq,x
+   749 00,1990 60		 rts
+   750
+   751 00,1991 C8		nparam iny
+   752 00,1992 FE E8 13		 inc pozwpt,x
+   753 00,1995 B1 FC		 lda (addr),y
+   754 00,1997 4A		 lsr @
+   755 00,1998 4A		 lsr @
+   756 00,1999 4A		 lsr @
+   757 00,199A 4A		 lsr @
+   758 00,199B 9D 30 14		 sta adcvl1,x
+   759 00,199E B1 FC		 lda (addr),y
+   760 00,19A0 29 0F		 and #15
+   761 00,19A2 9D 38 14		 sta adcvl2,x
+   762 00,19A5 60		 rts
+   763
+   764 00,19A6 20 83 1A		songx jsr stop
+   765 00,19A9 A0 0F		 ldy #15
+   766 00,19AB A9 00		zm4 lda #0
+   767 00,19AD 85 FE		 sta adrsng
+   768 00,19AF A9 00		zm5 lda #0
+   769 00,19B1 85 FF		 sta adrsng+1
+   770 00,19B3 8A		d5 txa
+   771 00,19B4 F0 2E		 beq inic
+   772 00,19B6 B1 FE		d3 lda (adrsng),y
+   773 00,19B8 10 01		 bpl d4
+   774 00,19BA CA		 dex
+   775 00,19BB 18		d4 clc
+   776 00,19BC A5 FE		 lda adrsng
+   777 00,19BE 69 10		 adc #16
+   778 00,19C0 85 FE		 sta adrsng
+   779 00,19C2 90 EF		 bcc d5
+   780 00,19C4 E6 FF		 inc adrsng+1
+   781 00,19C6 B0 EB		 bcs d5
+   782
+   783 00,19C8 20 83 1A		playx jsr stop
+   784 00,19CB A9 00		 lda #0
+   785 00,19CD 85 FC		 sta addr
+   786 00,19CF 8A		 txa
+   787 00,19D0 0A		 asl @
+   788 00,19D1 0A		 asl @
+   789 00,19D2 26 FC		 rol addr
+   790 00,19D4 0A		 asl @
+   791 00,19D5 26 FC		 rol addr
+   792 00,19D7 0A		 asl @
+   793 00,19D8 26 FC		 rol addr
+   794 00,19DA 69 00		zm6 adc #0
+   795 00,19DC 85 FE		 sta adrsng
+   796 00,19DE A5 FC		 lda addr
+   797 00,19E0 69 00		zm7 adc #0
+   798 00,19E2 85 FF		 sta adrsng+1
+   799 00,19E4 A9 40		inic lda #64
+   800 00,19E6 8D DA 14		 sta pozptr
+   801 00,19E9 A9 01		 lda #1
+   802 00,19EB 8D D9 14		 sta ltempo
+   803 00,19EE 8D DB 14		 sta czygrc
+   804 00,19F1 60		 rts
+   805
+   806 00,19F2 C9 10		init cmp #$10
+   807 00,19F4 90 B0		 bcc songx
+   808 00,19F6 C9 20		 cmp #$20
+   809 00,19F8 90 CE		 bcc playx
+   810 00,19FA C9 30		 cmp #$30
+   811 00,19FC B0 03		 bcs *+5
+   812 00,19FE 4C D2 1A		 jmp d2
+   813 00,1A01 C9 40		 cmp #$40
+   814 00,1A03 B0 09		 bcs i1
+   815 00,1A05 8A		 txa
+   816 00,1A06 29 0F		 and #15
+   817 00,1A08 F0 03		 beq i1-1
+   818 00,1A0A 8D D8 14		 sta tempo
+   819 00,1A0D 60		 rts
+   820 00,1A0E C9 50		i1 cmp #$50
+   821 00,1A10 90 71		 bcc stop
+   822 00,1A12 C9 60		 cmp #$60
+   823 00,1A14 B0 06		 bcs i2
+   824 00,1A16 A9 00		 lda #0
+   825 00,1A18 8D DB 14		i3 sta czygrc
+   826 00,1A1B 60		 rts
+   827 00,1A1C C9 70		i2 cmp #$70
+   828 00,1A1E 90 F8		 bcc i3
+   829
+   830 00,1A20 A9 01		 lda #1
+   831 00,1A22 8D D9 14		 sta ltempo
+   832 00,1A25 A9 40		 lda #64
+   833 00,1A27 8D DA 14		 sta pozptr
+   834 00,1A2A 84 FC		 sty addr
+   835 00,1A2C 86 FD		 stx addr+1
+   836 00,1A2E A0 1E		 ldy #30
+   837 00,1A30 B1 FC		 lda (addr),y
+   838 00,1A32 8D D8 14		 sta tempo
+   839 00,1A35 A5 FC		 lda addr
+   840 00,1A37 18		 clc
+   841 00,1A38 69 20		 adc #32
+   842 00,1A3A 8D E6 1A		 sta zm8+1
+   843 00,1A3D 90 01		 bcc *+3
+   844 00,1A3F E8		 inx
+   845 00,1A40 8E E7 1A		 stx zm8+2
+   846 00,1A43 18		 clc
+   847 00,1A44 69 40		 adc #$40
+   848 00,1A46 8D EE 1A		 sta zm9+1
+   849 00,1A49 90 01		 bcc *+3
+   850 00,1A4B E8		 inx
+   851 00,1A4C 8E EF 1A		 stx zm9+2
+   852 00,1A4F 18		 clc
+   853 00,1A50 69 40		 adc #$40
+   854 00,1A52 8D 76 15		 sta zm2+1
+   855 00,1A55 90 01		 bcc *+3
+   856 00,1A57 E8		 inx
+   857 00,1A58 8E 77 15		 stx zm2+2
+   858 00,1A5B 18		 clc
+   859 00,1A5C 69 80		 adc #$80
+   860 00,1A5E 8D 7B 15		 sta zm3+1
+   861 00,1A61 90 01		 bcc *+3
+   862 00,1A63 E8		 inx
+   863 00,1A64 8E 7C 15		 stx zm3+2
+   864 00,1A67 18		 clc
+   865 00,1A68 69 80		 adc #$80
+   866 00,1A6A 85 FE		 sta adrsng
+   867 00,1A6C 8D 34 15		 sta zm0+1
+   868 00,1A6F 8D AC 19		 sta zm4+1
+   869 00,1A72 8D DB 19		 sta zm6+1
+   870 00,1A75 90 01		 bcc *+3
+   871 00,1A77 E8		 inx
+   872 00,1A78 86 FF		 stx adrsng+1
+   873 00,1A7A 8E 3A 15		 stx zm1+1
+   874 00,1A7D 8E B0 19		 stx zm5+1
+   875 00,1A80 8E E1 19		 stx zm7+1
+   876
+   877 00,1A83 A0 07		stop ldy #7
+   878 00,1A85 A9 00		 lda #0
+   879 00,1A87 8D DB 14		 sta czygrc
+   880 00,1A8A 99 00 D2		d9 sta $d200,y
+   881 00,1A8D 99 10 D2		 sta $d210,y
+   882 00,1A90 99 2E 11		 sta volume,y
+   883 00,1A93 99 20 14		 sta vol1ch,y
+   884 00,1A96 99 28 14		 sta vol2ch,y
+   885 00,1A99 99 56 11		 sta audctl,y
+   886 00,1A9C 99 E0 13		 sta czygrx,y
+   887 00,1A9F 88		 dey
+   888 00,1AA0 10 E8		 bpl d9
+   889 00,1AA2 8D 08 D2		 sta $d208
+   890 00,1AA5 8D 18 D2		 sta $d218
+   891 00,1AA8 8D 5E 11		 sta aud1
+   892 00,1AAB 8D 5F 11		 sta aud2
+   893 00,1AAE 60		 rts
+   894
+   895 00,1AAF 9D 20 14		d1 sta vol1ch,x
+   896 00,1AB2 9D 28 14		 sta vol2ch,x
+   897 00,1AB5 9D 56 11		 sta audctl,x
+   898 00,1AB8 BD 08 14		 lda wysdzw,x
+   899 00,1ABB 9D 46 11		 sta aktwys,x
+   900 00,1ABE 60		 rts
+   901 00,1ABF 98		d0 tya
+   902 00,1AC0 49 F0		 eor #$f0
+   903 00,1AC2 4A		 lsr @
+   904 00,1AC3 4A		 lsr @
+   905 00,1AC4 4A		 lsr @
+   906 00,1AC5 4A		 lsr @
+   907 00,1AC6 9D 30 14		 sta adcvl1,x
+   908 00,1AC9 98		 tya
+   909 00,1ACA 29 0F		 and #15
+   910 00,1ACC 49 0F		 eor #15
+   911 00,1ACE 9D 38 14		 sta adcvl2,x
+   912 00,1AD1 60		 rts
+   913 00,1AD2 29 07		d2 and #7
+   914 00,1AD4 85 FC		 sta addr
+   915 00,1AD6 8A		 txa
+   916 00,1AD7 A6 FC		 ldx addr
+   917 00,1AD9 29 3F		 and #$3f
+   918 00,1ADB F0 E2		 beq d0
+   919 00,1ADD 9D 08 14		 sta wysdzw,x
+   920 00,1AE0 A9 00		dzwiek lda #0
+   921 00,1AE2 9D E0 13		 sta czygrx,x
+   922 00,1AE5 B9 FF FF		zm8 lda $ffff,y
+   923 00,1AE8 9D 40 14		 sta adrsnl,x
+   924 00,1AEB 85 FC		 sta addr
+   925 00,1AED B9 FF FF		zm9 lda $ffff,y
+   926 00,1AF0 9D 48 14		 sta adrsnh,x
+   927 00,1AF3 85 FD		 sta addr+1
+   928 00,1AF5 05 FC		 ora addr
+   929 00,1AF7 F0 B6		 beq d1
+   930 00,1AF9 A0 4A		 ldy #74
+   931 00,1AFB B1 FC		 lda (addr),y
+   932 00,1AFD 9D 58 14		 sta opad1,x
+   933 00,1B00 9D 68 14		 sta lopad1,x
+   934 00,1B03 C8		 iny
+   935 00,1B04 B1 FC		 lda (addr),y
+   936 00,1B06 9D 60 14		 sta opad2,x
+   937 00,1B09 9D 70 14		 sta lopad2,x
+   938 00,1B0C C8		 iny
+   939 00,1B0D B1 FC		 lda (addr),y
+   940 00,1B0F 29 70		 and #$70
+   941 00,1B11 4A		 lsr @
+   942 00,1B12 4A		 lsr @
+   943 00,1B13 9D 78 14		 sta typ,x
+   944 00,1B16 B1 FC		 lda (addr),y
+   945 00,1B18 29 0F		 and #15
+   946 00,1B1A 9D 80 14		 sta param,x
+   947 00,1B1D B1 FC		 lda (addr),y
+   948 00,1B1F 10 0B		 bpl d7
+   949 00,1B21 BD 80 14		 lda param,x
+   950 00,1B24 49 FF		 eor #$ff
+   951 00,1B26 18		 clc
+   952 00,1B27 69 01		 adc #1
+   953 00,1B29 9D 80 14		 sta param,x
+   954 00,1B2C C8		d7 iny
+   955 00,1B2D B1 FC		 lda (addr),y
+   956 00,1B2F 9D 98 14		 sta czekaj,x
+   957 00,1B32 C8		 iny
+   958 00,1B33 B1 FC		 lda (addr),y
+   959 00,1B35 29 3F		 and #$3f
+   960 00,1B37 9D A0 14		 sta dtyp,x
+   961 00,1B3A 9D A8 14		 sta ltyp,x
+   962 00,1B3D C8		 iny
+   963 00,1B3E B1 FC		 lda (addr),y
+   964 00,1B40 29 80		 and #$80
+   965 00,1B42 F0 02		 beq d8
+   966 00,1B44 A9 01		 lda #1
+   967 00,1B46 9D D0 14		d8 sta kolejn,x
+   968 00,1B49 B1 FC		 lda (addr),y
+   969 00,1B4B 29 70		 and #$70
+   970 00,1B4D 4A		 lsr @
+   971 00,1B4E 4A		 lsr @
+   972 00,1B4F 4A		 lsr @
+   973 00,1B50 4A		 lsr @
+   974 00,1B51 9D B0 14		 sta ilperm,x
+   975 00,1B54 D0 03		 bne d6
+   976 00,1B56 9D D0 14		 sta kolejn,x
+   977 00,1B59 B1 FC		d6 lda (addr),y
+   978 00,1B5B 29 0F		 and #15
+   979 00,1B5D 9D C0 14		 sta dperm,x
+   980 00,1B60 9D C8 14		 sta lperm,x
+   981 00,1B63 88		 dey
+   982 00,1B64 B1 FC		 lda (addr),y
+   983 00,1B66 29 C0		 and #$c0
+   984 00,1B68 18		 clc
+   985 00,1B69 7D 08 14		 adc wysdzw,x
+   986 00,1B6C 9D 08 14		 sta wysdzw,x
+   987 00,1B6F 9D 46 11		 sta aktwys,x
+   988 00,1B72 A8		 tay
+   989 00,1B73 B9 60 12		 lda frqtab,y
+   990 00,1B76 9D 18 14		 sta frq,x
+   991 00,1B79 A9 00		 lda #0
+   992 00,1B7B 9D 50 14		 sta slupy,x
+   993 00,1B7E 9D 88 14		 sta pomoc1,x
+   994 00,1B81 9D 90 14		 sta pomoc2,x
+   995 00,1B84 9D B8 14		 sta aperm,x
+   996 00,1B87 A9 01		 lda #1
+   997 00,1B89 9D E0 13		 sta czygrx,x
+   998 00,1B8C 60		 rts
+   999
+  1000 00,1B8D			endplr
+  1001
+  1002
+  1003 				 opt h-
+  1004 00,1B8D			 org $8000
+  1005
+  1006 00,8000			muza
+  1007 00,8000 FF FF 00 80 EF +	 ins 'forever.tm8'
+  1008
+  1009 00,02E0 00 10		 run main
