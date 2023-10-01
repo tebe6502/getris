@@ -1,0 +1,1776 @@
+Mad-Assembler v1.6.?beta by TeBe/Madteam
+Source: F:\!Atari\getris2\high_score\msx\toolate.asm
+     1
+     2 				/*
+     3 				  TMC Player Demo
+     4
+     5 				  Przyklad wykorzystania relocatora dla modulow TMC i playera TMC
+     6 				  (player jest wywolywany 1x, 2x, 3x, 4x na ramke w zaleznosci od muzyczki)
+     7
+     8 				  W definicji etykiety MSX podajemy adres pod ktory ma zostac zaladowany plik TMC,
+     9 				  relokacji adresow instrumentow i patternow dokonuje makro TMC_RELOCATOR
+    10
+    11 				  09.11.2005
+    12 				*/
+    13
+    14 = 00,6FEF		msx	equ $6fef			// nowy adres modulu TMC
+    15
+    16 					tmc_relocator 'toolate.tm8' , msx
+Macro: TMC_RELOCATOR [Source: F:\!Atari\getris2\high_score\msx\tmc_relocator.mac]
+     6 = 00,6FEF			new_add	equ MSX					
+     8 = 00,2800			old_add	equ .get[2] + .get[3]<<8		
+     9 = 00,3B96			length	equ .get[4] + .get[5]<<8 - old_add + 1	
+    11  [0002] EF			.put[2] = .lo(new_add)				
+    12  [0003] 6F			.put[3] = .hi(new_add)				
+    14  [0004] 84			.put[4] = .lo(new_add + length - 1)		
+    15  [0005] AB			.put[5] = .hi(new_add + length - 1)
+    17 = 00,0006		ofs	equ 6
+    19 = 00,0004			fps	equ .get[ofs+$1f]			
+    21 = 00,2CC0			?tmp = .get[ofs+$20] + .get[ofs+$60]<<8		
+    30 = 00,2CC0			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,74AF			?hlp = ?tmp - old_add + new_add
+    33  #00 [0026] AF			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #00 [0066] 74			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,2D10			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,74FF			?hlp = ?tmp - old_add + new_add
+    33  #01 [0027] FF			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #01 [0067] 74			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,2D60			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,754F			?hlp = ?tmp - old_add + new_add
+    33  #02 [0028] 4F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #02 [0068] 75			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,2DB0			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,759F			?hlp = ?tmp - old_add + new_add
+    33  #03 [0029] 9F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #03 [0069] 75			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,2E00			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,75EF			?hlp = ?tmp - old_add + new_add
+    33  #04 [002A] EF			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #04 [006A] 75			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,2E50			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,763F			?hlp = ?tmp - old_add + new_add
+    33  #05 [002B] 3F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #05 [006B] 76			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,2EA0			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,768F			?hlp = ?tmp - old_add + new_add
+    33  #06 [002C] 8F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #06 [006C] 76			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,2EF0			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,76DF			?hlp = ?tmp - old_add + new_add
+    33  #07 [002D] DF			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #07 [006D] 76			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,2F40			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,772F			?hlp = ?tmp - old_add + new_add
+    33  #08 [002E] 2F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #08 [006E] 77			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,2F90			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,777F			?hlp = ?tmp - old_add + new_add
+    33  #09 [002F] 7F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #09 [006F] 77			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,2FE0			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,77CF			?hlp = ?tmp - old_add + new_add
+    33  #0A [0030] CF			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #0A [0070] 77			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3030			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,781F			?hlp = ?tmp - old_add + new_add
+    33  #0B [0031] 1F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #0B [0071] 78			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3080			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,786F			?hlp = ?tmp - old_add + new_add
+    33  #0C [0032] 6F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #0C [0072] 78			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,30D0			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,78BF			?hlp = ?tmp - old_add + new_add
+    33  #0D [0033] BF			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #0D [0073] 78			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3120			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,790F			?hlp = ?tmp - old_add + new_add
+    33  #0E [0034] 0F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #0E [0074] 79			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3170			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,795F			?hlp = ?tmp - old_add + new_add
+    33  #0F [0035] 5F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #0F [0075] 79			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,31C0			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,79AF			?hlp = ?tmp - old_add + new_add
+    33  #10 [0036] AF			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #10 [0076] 79			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3210			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,79FF			?hlp = ?tmp - old_add + new_add
+    33  #11 [0037] FF			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #11 [0077] 79			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3260			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,7A4F			?hlp = ?tmp - old_add + new_add
+    33  #12 [0038] 4F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #12 [0078] 7A			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,32B0			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,7A9F			?hlp = ?tmp - old_add + new_add
+    33  #13 [0039] 9F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #13 [0079] 7A			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3300			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,7AEF			?hlp = ?tmp - old_add + new_add
+    33  #14 [003A] EF			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #14 [007A] 7A			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3350			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,7B3F			?hlp = ?tmp - old_add + new_add
+    33  #15 [003B] 3F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #15 [007B] 7B			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,33A0			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,7B8F			?hlp = ?tmp - old_add + new_add
+    33  #16 [003C] 8F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #16 [007C] 7B			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,33F0			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,7BDF			?hlp = ?tmp - old_add + new_add
+    33  #17 [003D] DF			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #17 [007D] 7B			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3440			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,7C2F			?hlp = ?tmp - old_add + new_add
+    33  #18 [003E] 2F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #18 [007E] 7C			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3490			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,7C7F			?hlp = ?tmp - old_add + new_add
+    33  #19 [003F] 7F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #19 [007F] 7C			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,34E0			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,7CCF			?hlp = ?tmp - old_add + new_add
+    33  #1A [0040] CF			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #1A [0080] 7C			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3530			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,7D1F			?hlp = ?tmp - old_add + new_add
+    33  #1B [0041] 1F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #1B [0081] 7D			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3580			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,7D6F			?hlp = ?tmp - old_add + new_add
+    33  #1C [0042] 6F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #1C [0082] 7D			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,35D0			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,7DBF			?hlp = ?tmp - old_add + new_add
+    33  #1D [0043] BF			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #1D [0083] 7D			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3620			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,7E0F			?hlp = ?tmp - old_add + new_add
+    33  #1E [0044] 0F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #1E [0084] 7E			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3670			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,7E5F			?hlp = ?tmp - old_add + new_add
+    33  #1F [0045] 5F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #1F [0085] 7E			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,36C0			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,7EAF			?hlp = ?tmp - old_add + new_add
+    33  #20 [0046] AF			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #20 [0086] 7E			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3710			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,7EFF			?hlp = ?tmp - old_add + new_add
+    33  #21 [0047] FF			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #21 [0087] 7E			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3760			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,7F4F			?hlp = ?tmp - old_add + new_add
+    33  #22 [0048] 4F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #22 [0088] 7F			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,37B0			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,7F9F			?hlp = ?tmp - old_add + new_add
+    33  #23 [0049] 9F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #23 [0089] 7F			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3800			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,7FEF			?hlp = ?tmp - old_add + new_add
+    33  #24 [004A] EF			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #24 [008A] 7F			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3850			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,803F			?hlp = ?tmp - old_add + new_add
+    33  #25 [004B] 3F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #25 [008B] 80			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,38A0			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,808F			?hlp = ?tmp - old_add + new_add
+    33  #26 [004C] 8F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #26 [008C] 80			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,38F0			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,80DF			?hlp = ?tmp - old_add + new_add
+    33  #27 [004D] DF			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #27 [008D] 80			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3940			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,812F			?hlp = ?tmp - old_add + new_add
+    33  #28 [004E] 2F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #28 [008E] 81			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3990			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,817F			?hlp = ?tmp - old_add + new_add
+    33  #29 [004F] 7F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #29 [008F] 81			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,39E0			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,81CF			?hlp = ?tmp - old_add + new_add
+    33  #2A [0050] CF			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #2A [0090] 81			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3A30			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,821F			?hlp = ?tmp - old_add + new_add
+    33  #2B [0051] 1F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #2B [0091] 82			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3A80			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,826F			?hlp = ?tmp - old_add + new_add
+    33  #2C [0052] 6F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #2C [0092] 82			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3AD0			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,82BF			?hlp = ?tmp - old_add + new_add
+    33  #2D [0053] BF			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #2D [0093] 82			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3B20			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,830F			?hlp = ?tmp - old_add + new_add
+    33  #2E [0054] 0F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #2E [0094] 83			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3B70			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,835F			?hlp = ?tmp - old_add + new_add
+    33  #2F [0055] 5F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #2F [0095] 83			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3BC0			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,83AF			?hlp = ?tmp - old_add + new_add
+    33  #30 [0056] AF			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #30 [0096] 83			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3C10			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,83FF			?hlp = ?tmp - old_add + new_add
+    33  #31 [0057] FF			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #31 [0097] 83			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3C60			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,844F			?hlp = ?tmp - old_add + new_add
+    33  #32 [0058] 4F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #32 [0098] 84			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3CB0			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,849F			?hlp = ?tmp - old_add + new_add
+    33  #33 [0059] 9F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #33 [0099] 84			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3D00			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,84EF			?hlp = ?tmp - old_add + new_add
+    33  #34 [005A] EF			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #34 [009A] 84			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3D50			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,853F			?hlp = ?tmp - old_add + new_add
+    33  #35 [005B] 3F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #35 [009B] 85			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3DA0			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,858F			?hlp = ?tmp - old_add + new_add
+    33  #36 [005C] 8F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #36 [009C] 85			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3DF0			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,85DF			?hlp = ?tmp - old_add + new_add
+    33  #37 [005D] DF			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #37 [009D] 85			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3E40			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,862F			?hlp = ?tmp - old_add + new_add
+    33  #38 [005E] 2F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #38 [009E] 86			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3E90			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,867F			?hlp = ?tmp - old_add + new_add
+    33  #39 [005F] 7F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #39 [009F] 86			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3EE0			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,86CF			?hlp = ?tmp - old_add + new_add
+    33  #3A [0060] CF			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #3A [00A0] 86			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3F30			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,871F			?hlp = ?tmp - old_add + new_add
+    33  #3B [0061] 1F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #3B [00A1] 87			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3F80			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,876F			?hlp = ?tmp - old_add + new_add
+    33  #3C [0062] 6F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #3C [00A2] 87			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,3FD0			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,87BF			?hlp = ?tmp - old_add + new_add
+    33  #3D [0063] BF			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #3D [00A3] 87			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,4020			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,880F			?hlp = ?tmp - old_add + new_add
+    33  #3E [0064] 0F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #3E [00A4] 88			.put[ofs+$60+.r] = .hi(?hlp)
+    30 = 00,4070			?tmp = .get[ofs+$20+.r] + .get[ofs+$60+.r]<<8
+    32 = 00,885F			?hlp = ?tmp - old_add + new_add
+    33  #3F [0065] 5F			.put[ofs+$20+.r] = .lo(?hlp)
+    34  #3F [00A5] 88			.put[ofs+$60+.r] = .hi(?hlp)
+    45 = 00,40C0			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,88AF			?hlp = ?tmp - old_add + new_add
+    47  #00 [00A6] AF			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #00 [0126] 88			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,40C1			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,88B0			?hlp = ?tmp - old_add + new_add
+    47  #01 [00A7] B0			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #01 [0127] 88			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,411D			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,890C			?hlp = ?tmp - old_add + new_add
+    47  #02 [00A8] 0C			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #02 [0128] 89			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4179			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,8968			?hlp = ?tmp - old_add + new_add
+    47  #03 [00A9] 68			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #03 [0129] 89			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,41E0			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,89CF			?hlp = ?tmp - old_add + new_add
+    47  #04 [00AA] CF			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #04 [012A] 89			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,425A			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,8A49			?hlp = ?tmp - old_add + new_add
+    47  #05 [00AB] 49			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #05 [012B] 8A			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,429F			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,8A8E			?hlp = ?tmp - old_add + new_add
+    47  #06 [00AC] 8E			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #06 [012C] 8A			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,42E4			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,8AD3			?hlp = ?tmp - old_add + new_add
+    47  #07 [00AD] D3			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #07 [012D] 8A			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4334			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,8B23			?hlp = ?tmp - old_add + new_add
+    47  #08 [00AE] 23			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #08 [012E] 8B			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4383			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,8B72			?hlp = ?tmp - old_add + new_add
+    47  #09 [00AF] 72			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #09 [012F] 8B			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,43AD			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,8B9C			?hlp = ?tmp - old_add + new_add
+    47  #0A [00B0] 9C			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #0A [0130] 8B			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,43D7			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,8BC6			?hlp = ?tmp - old_add + new_add
+    47  #0B [00B1] C6			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #0B [0131] 8B			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4434			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,8C23			?hlp = ?tmp - old_add + new_add
+    47  #0C [00B2] 23			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #0C [0132] 8C			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,449A			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,8C89			?hlp = ?tmp - old_add + new_add
+    47  #0D [00B3] 89			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #0D [0133] 8C			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,44E2			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,8CD1			?hlp = ?tmp - old_add + new_add
+    47  #0E [00B4] D1			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #0E [0134] 8C			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4542			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,8D31			?hlp = ?tmp - old_add + new_add
+    47  #0F [00B5] 31			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #0F [0135] 8D			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4546			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,8D35			?hlp = ?tmp - old_add + new_add
+    47  #10 [00B6] 35			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #10 [0136] 8D			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,45C1			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,8DB0			?hlp = ?tmp - old_add + new_add
+    47  #11 [00B7] B0			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #11 [0137] 8D			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4641			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,8E30			?hlp = ?tmp - old_add + new_add
+    47  #12 [00B8] 30			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #12 [0138] 8E			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,46B5			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,8EA4			?hlp = ?tmp - old_add + new_add
+    47  #13 [00B9] A4			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #13 [0139] 8E			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,472F			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,8F1E			?hlp = ?tmp - old_add + new_add
+    47  #14 [00BA] 1E			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #14 [013A] 8F			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4776			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,8F65			?hlp = ?tmp - old_add + new_add
+    47  #15 [00BB] 65			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #15 [013B] 8F			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,47EA			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,8FD9			?hlp = ?tmp - old_add + new_add
+    47  #16 [00BC] D9			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #16 [013C] 8F			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,482E			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,901D			?hlp = ?tmp - old_add + new_add
+    47  #17 [00BD] 1D			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #17 [013D] 90			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,487E			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,906D			?hlp = ?tmp - old_add + new_add
+    47  #18 [00BE] 6D			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #18 [013E] 90			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4882			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9071			?hlp = ?tmp - old_add + new_add
+    47  #19 [00BF] 71			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #19 [013F] 90			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,48A4			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9093			?hlp = ?tmp - old_add + new_add
+    47  #1A [00C0] 93			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #1A [0140] 90			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4927			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9116			?hlp = ?tmp - old_add + new_add
+    47  #1B [00C1] 16			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #1B [0141] 91			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,49B0			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,919F			?hlp = ?tmp - old_add + new_add
+    47  #1C [00C2] 9F			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #1C [0142] 91			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4A02			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,91F1			?hlp = ?tmp - old_add + new_add
+    47  #1D [00C3] F1			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #1D [0143] 91			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4A54			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9243			?hlp = ?tmp - old_add + new_add
+    47  #1E [00C4] 43			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #1E [0144] 92			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4A98			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9287			?hlp = ?tmp - old_add + new_add
+    47  #1F [00C5] 87			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #1F [0145] 92			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4AD4			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,92C3			?hlp = ?tmp - old_add + new_add
+    47  #20 [00C6] C3			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #20 [0146] 92			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4B11			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9300			?hlp = ?tmp - old_add + new_add
+    47  #21 [00C7] 00			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #21 [0147] 93			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4B4B			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,933A			?hlp = ?tmp - old_add + new_add
+    47  #22 [00C8] 3A			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #22 [0148] 93			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4B4F			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,933E			?hlp = ?tmp - old_add + new_add
+    47  #23 [00C9] 3E			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #23 [0149] 93			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4BAA			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9399			?hlp = ?tmp - old_add + new_add
+    47  #24 [00CA] 99			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #24 [014A] 93			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4BF2			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,93E1			?hlp = ?tmp - old_add + new_add
+    47  #25 [00CB] E1			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #25 [014B] 93			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4C71			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9460			?hlp = ?tmp - old_add + new_add
+    47  #26 [00CC] 60			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #26 [014C] 94			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4CF9			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,94E8			?hlp = ?tmp - old_add + new_add
+    47  #27 [00CD] E8			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #27 [014D] 94			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4D4E			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,953D			?hlp = ?tmp - old_add + new_add
+    47  #28 [00CE] 3D			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #28 [014E] 95			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4DA3			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9592			?hlp = ?tmp - old_add + new_add
+    47  #29 [00CF] 92			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #29 [014F] 95			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4DC5			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,95B4			?hlp = ?tmp - old_add + new_add
+    47  #2A [00D0] B4			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #2A [0150] 95			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4DE7			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,95D6			?hlp = ?tmp - old_add + new_add
+    47  #2B [00D1] D6			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #2B [0151] 95			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4E07			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,95F6			?hlp = ?tmp - old_add + new_add
+    47  #2C [00D2] F6			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #2C [0152] 95			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4E27			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9616			?hlp = ?tmp - old_add + new_add
+    47  #2D [00D3] 16			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #2D [0153] 96			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4E34			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9623			?hlp = ?tmp - old_add + new_add
+    47  #2E [00D4] 23			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #2E [0154] 96			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4E6D			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,965C			?hlp = ?tmp - old_add + new_add
+    47  #2F [00D5] 5C			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #2F [0155] 96			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4E7D			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,966C			?hlp = ?tmp - old_add + new_add
+    47  #30 [00D6] 6C			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #30 [0156] 96			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4E84			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9673			?hlp = ?tmp - old_add + new_add
+    47  #31 [00D7] 73			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #31 [0157] 96			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4E9A			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9689			?hlp = ?tmp - old_add + new_add
+    47  #32 [00D8] 89			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #32 [0158] 96			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4EB0			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,969F			?hlp = ?tmp - old_add + new_add
+    47  #33 [00D9] 9F			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #33 [0159] 96			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4EB1			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,96A0			?hlp = ?tmp - old_add + new_add
+    47  #34 [00DA] A0			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #34 [015A] 96			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4F15			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9704			?hlp = ?tmp - old_add + new_add
+    47  #35 [00DB] 04			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #35 [015B] 97			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4F85			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9774			?hlp = ?tmp - old_add + new_add
+    47  #36 [00DC] 74			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #36 [015C] 97			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,4FA6			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9795			?hlp = ?tmp - old_add + new_add
+    47  #37 [00DD] 95			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #37 [015D] 97			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5003			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,97F2			?hlp = ?tmp - old_add + new_add
+    47  #38 [00DE] F2			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #38 [015E] 97			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5060			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,984F			?hlp = ?tmp - old_add + new_add
+    47  #39 [00DF] 4F			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #39 [015F] 98			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5096			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9885			?hlp = ?tmp - old_add + new_add
+    47  #3A [00E0] 85			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #3A [0160] 98			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,50CD			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,98BC			?hlp = ?tmp - old_add + new_add
+    47  #3B [00E1] BC			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #3B [0161] 98			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5104			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,98F3			?hlp = ?tmp - old_add + new_add
+    47  #3C [00E2] F3			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #3C [0162] 98			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5168			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9957			?hlp = ?tmp - old_add + new_add
+    47  #3D [00E3] 57			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #3D [0163] 99			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,51D8			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,99C7			?hlp = ?tmp - old_add + new_add
+    47  #3E [00E4] C7			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #3E [0164] 99			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5211			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9A00			?hlp = ?tmp - old_add + new_add
+    47  #3F [00E5] 00			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #3F [0165] 9A			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5231			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9A20			?hlp = ?tmp - old_add + new_add
+    47  #40 [00E6] 20			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #40 [0166] 9A			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5276			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9A65			?hlp = ?tmp - old_add + new_add
+    47  #41 [00E7] 65			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #41 [0167] 9A			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,52BB			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9AAA			?hlp = ?tmp - old_add + new_add
+    47  #42 [00E8] AA			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #42 [0168] 9A			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,52F2			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9AE1			?hlp = ?tmp - old_add + new_add
+    47  #43 [00E9] E1			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #43 [0169] 9A			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5348			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9B37			?hlp = ?tmp - old_add + new_add
+    47  #44 [00EA] 37			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #44 [016A] 9B			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,539E			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9B8D			?hlp = ?tmp - old_add + new_add
+    47  #45 [00EB] 8D			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #45 [016B] 9B			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,53F4			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9BE3			?hlp = ?tmp - old_add + new_add
+    47  #46 [00EC] E3			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #46 [016C] 9B			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,544A			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9C39			?hlp = ?tmp - old_add + new_add
+    47  #47 [00ED] 39			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #47 [016D] 9C			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,54A3			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9C92			?hlp = ?tmp - old_add + new_add
+    47  #48 [00EE] 92			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #48 [016E] 9C			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,54FC			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9CEB			?hlp = ?tmp - old_add + new_add
+    47  #49 [00EF] EB			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #49 [016F] 9C			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5533			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9D22			?hlp = ?tmp - old_add + new_add
+    47  #4A [00F0] 22			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #4A [0170] 9D			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5537			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9D26			?hlp = ?tmp - old_add + new_add
+    47  #4B [00F1] 26			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #4B [0171] 9D			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,553E			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9D2D			?hlp = ?tmp - old_add + new_add
+    47  #4C [00F2] 2D			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #4C [0172] 9D			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5587			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9D76			?hlp = ?tmp - old_add + new_add
+    47  #4D [00F3] 76			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #4D [0173] 9D			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,55D3			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9DC2			?hlp = ?tmp - old_add + new_add
+    47  #4E [00F4] C2			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #4E [0174] 9D			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,55D7			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9DC6			?hlp = ?tmp - old_add + new_add
+    47  #4F [00F5] C6			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #4F [0175] 9D			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,55DB			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9DCA			?hlp = ?tmp - old_add + new_add
+    47  #50 [00F6] CA			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #50 [0176] 9D			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,55DF			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9DCE			?hlp = ?tmp - old_add + new_add
+    47  #51 [00F7] CE			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #51 [0177] 9D			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,55E3			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9DD2			?hlp = ?tmp - old_add + new_add
+    47  #52 [00F8] D2			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #52 [0178] 9D			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5641			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9E30			?hlp = ?tmp - old_add + new_add
+    47  #53 [00F9] 30			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #53 [0179] 9E			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,569F			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9E8E			?hlp = ?tmp - old_add + new_add
+    47  #54 [00FA] 8E			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #54 [017A] 9E			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,56B0			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9E9F			?hlp = ?tmp - old_add + new_add
+    47  #55 [00FB] 9F			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #55 [017B] 9E			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,56C1			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9EB0			?hlp = ?tmp - old_add + new_add
+    47  #56 [00FC] B0			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #56 [017C] 9E			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,56C5			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9EB4			?hlp = ?tmp - old_add + new_add
+    47  #57 [00FD] B4			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #57 [017D] 9E			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,56E5			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9ED4			?hlp = ?tmp - old_add + new_add
+    47  #58 [00FE] D4			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #58 [017E] 9E			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,570C			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9EFB			?hlp = ?tmp - old_add + new_add
+    47  #59 [00FF] FB			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #59 [017F] 9E			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5752			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9F41			?hlp = ?tmp - old_add + new_add
+    47  #5A [0100] 41			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #5A [0180] 9F			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5788			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9F77			?hlp = ?tmp - old_add + new_add
+    47  #5B [0101] 77			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #5B [0181] 9F			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,57C1			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9FB0			?hlp = ?tmp - old_add + new_add
+    47  #5C [0102] B0			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #5C [0182] 9F			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,57C5			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9FB4			?hlp = ?tmp - old_add + new_add
+    47  #5D [0103] B4			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #5D [0183] 9F			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,57C9			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,9FB8			?hlp = ?tmp - old_add + new_add
+    47  #5E [0104] B8			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #5E [0184] 9F			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5844			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,A033			?hlp = ?tmp - old_add + new_add
+    47  #5F [0105] 33			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #5F [0185] A0			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,58BD			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,A0AC			?hlp = ?tmp - old_add + new_add
+    47  #60 [0106] AC			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #60 [0186] A0			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,58C1			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,A0B0			?hlp = ?tmp - old_add + new_add
+    47  #61 [0107] B0			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #61 [0187] A0			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5918			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,A107			?hlp = ?tmp - old_add + new_add
+    47  #62 [0108] 07			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #62 [0188] A1			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,596F			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,A15E			?hlp = ?tmp - old_add + new_add
+    47  #63 [0109] 5E			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #63 [0189] A1			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,59EE			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,A1DD			?hlp = ?tmp - old_add + new_add
+    47  #64 [010A] DD			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #64 [018A] A1			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5A72			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,A261			?hlp = ?tmp - old_add + new_add
+    47  #65 [010B] 61			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #65 [018B] A2			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5AB1			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,A2A0			?hlp = ?tmp - old_add + new_add
+    47  #66 [010C] A0			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #66 [018C] A2			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5ACF			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,A2BE			?hlp = ?tmp - old_add + new_add
+    47  #67 [010D] BE			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #67 [018D] A2			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5AF0			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,A2DF			?hlp = ?tmp - old_add + new_add
+    47  #68 [010E] DF			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #68 [018E] A2			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5B64			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,A353			?hlp = ?tmp - old_add + new_add
+    47  #69 [010F] 53			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #69 [018F] A3			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5BDE			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,A3CD			?hlp = ?tmp - old_add + new_add
+    47  #6A [0110] CD			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #6A [0190] A3			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5BDF			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,A3CE			?hlp = ?tmp - old_add + new_add
+    47  #6B [0111] CE			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #6B [0191] A3			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5BE0			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,A3CF			?hlp = ?tmp - old_add + new_add
+    47  #6C [0112] CF			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #6C [0192] A3			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5BE1			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,A3D0			?hlp = ?tmp - old_add + new_add
+    47  #6D [0113] D0			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #6D [0193] A3			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5BE2			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,A3D1			?hlp = ?tmp - old_add + new_add
+    47  #6E [0114] D1			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #6E [0194] A3			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5C66			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,A455			?hlp = ?tmp - old_add + new_add
+    47  #6F [0115] 55			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #6F [0195] A4			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5C81			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,A470			?hlp = ?tmp - old_add + new_add
+    47  #70 [0116] 70			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #70 [0196] A4			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5CE8			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,A4D7			?hlp = ?tmp - old_add + new_add
+    47  #71 [0117] D7			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #71 [0197] A4			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5D62			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,A551			?hlp = ?tmp - old_add + new_add
+    47  #72 [0118] 51			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #72 [0198] A5			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5DE4			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,A5D3			?hlp = ?tmp - old_add + new_add
+    47  #73 [0119] D3			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #73 [0199] A5			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5E67			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,A656			?hlp = ?tmp - old_add + new_add
+    47  #74 [011A] 56			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #74 [019A] A6			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5EE7			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,A6D6			?hlp = ?tmp - old_add + new_add
+    47  #75 [011B] D6			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #75 [019B] A6			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5F68			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,A757			?hlp = ?tmp - old_add + new_add
+    47  #76 [011C] 57			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #76 [019C] A7			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,5FAB			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,A79A			?hlp = ?tmp - old_add + new_add
+    47  #77 [011D] 9A			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #77 [019D] A7			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,602D			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,A81C			?hlp = ?tmp - old_add + new_add
+    47  #78 [011E] 1C			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #78 [019E] A8			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,60AE			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,A89D			?hlp = ?tmp - old_add + new_add
+    47  #79 [011F] 9D			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #79 [019F] A8			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,6107			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,A8F6			?hlp = ?tmp - old_add + new_add
+    47  #7A [0120] F6			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #7A [01A0] A8			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,6160			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,A94F			?hlp = ?tmp - old_add + new_add
+    47  #7B [0121] 4F			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #7B [01A1] A9			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,61DF			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,A9CE			?hlp = ?tmp - old_add + new_add
+    47  #7C [0122] CE			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #7C [01A2] A9			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,6263			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,AA52			?hlp = ?tmp - old_add + new_add
+    47  #7D [0123] 52			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #7D [01A3] AA			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,62BD			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,AAAC			?hlp = ?tmp - old_add + new_add
+    47  #7E [0124] AC			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #7E [01A4] AA			.put[ofs+$0120+.r] = .hi(?hlp)
+    45 = 00,6317			?tmp = .get[ofs+$00a0+.r] + .get[ofs+$0120+.r]<<8
+    46 = 00,AB06			?hlp = ?tmp - old_add + new_add
+    47  #7F [0125] 06			.put[ofs+$00a0+.r] = .lo(?hlp)
+    48  #7F [01A5] AB			.put[ofs+$0120+.r] = .hi(?hlp)
+Source: F:\!Atari\getris2\high_score\msx\toolate.asm
+Source: F:\!Atari\getris2\high_score\msx\toolate.asm
+    17
+    18 					org msx
+    19
+    20 				// dlugosc pliku mozna odczytac z etykiety LENGTH (globalna zdefiniowana w makrze) lub wyjatkowo
+    21 				// w tym przypadku z TMC_RELOCATOR0.LENGTH (lokalna zdefiniowana w makrze przy "zerowym" wywolaniu makra)
+    22
+    23 				// jest dla dyrektywy .SAV nie podano nazwy pliku do zapisania, wowczas dane zostana dolaczone do asemblowanego pliku
+    24
+    25 FFFF> 00,6FEF-B60B> 54 +		.sav [6] length			// pomijamy 6 bajtow z naglowka pliku, reszte dolaczamy
+    26
+    27 00,AB85			main
+    28 00,AB85 A9 00			lda #0
+    29 00,AB87 8D 2F 02			sta 559		; SCREEN OFF
+    30
+    31 00,AB8A A9 70			lda #$70
+    32 00,AB8C A2 6F			ldx >msx
+    33 00,AB8E A0 EF			ldy <msx
+    34 00,AB90 20 71 B4			jsr player.init
+    35
+    36 00,AB93 A2 00			ldx #0		;TMC
+    37 00,AB95 8A			txa
+    38 00,AB96 20 71 B4			jsr player.init
+    39
+    40 00,AB99 A9 10			lda #$10
+    41 00,AB9B A2 00			ldx #0
+    42 00,AB9D 20 71 B4			jsr player.init
+    43
+    44 00,ABA0 A5 14		loop    lda 20
+    45 00,ABA2 C5 14		        cmp 20
+    46 00,ABA4 F0 FC		        beq *-2
+    47
+    48 00,ABA6 20 73 AF		        jsr player.play		// pierwsze glowne wywolanie playera (1x na ramke)
+    49
+    50 				/*
+    51 					ift fps = 2		// player wywolywany 2x na ramke
+    52
+    53 					play 48
+    54
+    55 					eli fps = 3		// player wywolywany 3x na ramke
+    56
+    57 					play 20
+    58 					play 76
+    59
+    60 					eli fps = 4		// player wywolywany 4x na ramke
+    61
+    62 					play 8
+    63 					play 48
+    64 					play 88
+    65
+    66 					eif
+    67 				*/
+    68 00,ABA9 4C A0 AB		        jmp loop
+    69
+    70
+    71 00,ABAC			        icl 'tmc_player.asm'
+Source: F:\!Atari\getris2\high_score\msx\tmc_player.asm
+     1 				/**********************
+     2 				      TMC  Player
+     3 				    Jaskier/Taquart
+     4 				**********************/
+     5
+     6 00,ABAC			.proc player
+     7
+     8 = 00,00FA		byte	equ $fa     ;(1)
+     9 = 00,00FB		bajt	equ byte+1  ;(1)
+    10 = 00,00FC		addr	equ bajt+1  ;(2)
+    11 = 00,00FE		adrsng	equ addr+2  ;(1)
+    12
+    13 00,ABAC 0F		maxvol dta 15
+    14 00,ABAD 00 00 00 00 00 +	volume dta d'        '
+    15 00,ABB5 00 00 00 00 00 +	freqen dta d'        '
+    16 00,ABBD 00 00 00 00 00 +	kanal  dta d'        '
+    17 00,ABC5 00 00 00 00 00 +	aktwys dta d'        '
+    18 00,ABCD 00 00 00 00 00 +	numdzw dta d'        '
+    19 00,ABD5 00 00 00 00 00 +	audctl dta d'        '
+    20 00,ABDD 00		aud1   dta 0
+    21 00,ABDE 00		aud2   dta 0
+    22
+    23 00,ABDF			voltab
+    24 00,ABDF 00 00 00 00 00 +	 dta d'                '
+    25 00,ABEF 00 00 00 00 00 +	 dta d'        !!!!!!!!'
+    26 00,ABFF 00 00 00 00 01 +	 dta d'    !!!!!!!!""""'
+    27 00,AC0F 00 00 00 01 01 +	 dta d'   !!!!!"""""###'
+    28 00,AC1F 00 00 01 01 01 +	 dta d'  !!!!""""####$$'
+    29 00,AC2F 00 00 01 01 01 +	 dta d'  !!!"""###$$$%%'
+    30 00,AC3F 00 00 01 01 02 +	 dta d'  !!"""##$$$%%&&'
+    31 00,AC4F 00 00 01 01 02 +	 dta d'  !!""##$$%%&&'''''
+    32 00,AC5F 00 01 01 02 02 +	 dta d' !!""##$$%%&&''''('
+    33 00,AC6F 00 01 01 02 02 +	 dta d' !!""#$$%%&''''(()'
+    34 00,AC7F 00 01 01 02 03 +	 dta d' !!"##$%%&''''())*'
+    35 00,AC8F 00 01 01 02 03 +	 dta d' !!"#$$%&''''()**+'
+    36 00,AC9F 00 01 02 02 03 +	 dta d' !""#$%&&''()**+,'
+    37 00,ACAF 00 01 02 03 03 +	 dta d' !"##$%&''()**+,-'
+    38 00,ACBF 00 01 02 03 04 +	 dta d' !"#$%&''''()*+,-.'
+    39 00,ACCF 00 01 02 03 04 +	 dta d' !"#$%&''()*+,-./'
+    40
+    41 00,ACDF			frqtab
+    42 00,ACDF 00 F1 E4 D7 CB +	 dta 0,$f1,$e4,$d7,$cb,$c0,$b5,$aa
+    43 00,ACE7 A1 98 8F 87 7F +	 dta $a1,$98,$8f,$87,$7f,$78,$72,$6b
+    44 00,ACEF 65 5F 5A 55 50 +	 dta $65,$5f,$5a,$55,$50,$4b,$47,$43
+    45 00,ACF7 3F 3C 38 35 32 +	 dta $3f,$3c,$38,$35,$32,$2f,$2c,$2a
+    46 00,ACFF 27 25 23 21 1F +	 dta $27,$25,$23,$21,$1f,$1d,$1c,$1a
+    47 00,AD07 18 17 16 14 13 +	 dta $18,$17,$16,$14,$13,$12,$11,$10
+    48 00,AD0F 0F 0E 0D 0C 0B +	 dta 15,14,13,12,11,10,9,8
+    49 00,AD17 07 06 05 04 03 +	 dta 7,6,5,4,3,2,1,0
+    50
+    51 00,AD1F 00 F2 E6 DA CE +	 dta 0,$f2,$e6,$da,$ce,$bf,$b6,$aa
+    52 00,AD27 A1 98 8F 89 80 +	 dta $a1,$98,$8f,$89,$80,$7a,$71,$6b
+    53 00,AD2F 65 5F 5C 56 50 +	 dta $65,$5f,$5c,$56,$50,$4d,$47,$44
+    54 00,AD37 3E 3C 38 35 32 +	 dta $3e,$3c,$38,$35,$32,$2f,$2d,$2a
+    55 00,AD3F 28 25 23 21 1F +	 dta $28,$25,$23,$21,$1f,$1d,$1c,$1a
+    56 00,AD47 18 17 16 14 13 +	 dta $18,$17,$16,$14,$13,$12,$11,$10
+    57 00,AD4F 0F 0E 0D 0C 0B +	 dta 15,14,13,12,11,10,9,8
+    58 00,AD57 07 06 05 04 03 +	 dta 7,6,5,4,3,2,1,0
+    59
+    60 00,AD5F 00 FF F1 E4 D8 +	 dta 0,$ff,$f1,$e4,$d8,$ca,$c0,$b5
+    61 00,AD67 AB A2 99 8E 87 +	 dta $ab,$a2,$99,$8e,$87,$7f,$79,$73
+    62 00,AD6F 70 66 61 5A 55 +	 dta $70,$66,$61,$5a,$55,$52,$4b,$48
+    63 00,AD77 43 3F 3C 39 37 +	 dta $43,$3f,$3c,$39,$37,$33,$30,$2d
+    64 00,AD7F 2A 28 25 24 21 +	 dta $2a,$28,$25,$24,$21,$1f,$1e,$1c
+    65 00,AD87 1B 19 17 16 15 +	 dta $1b,$19,$17,$16,$15,$13,$12,$11
+    66 00,AD8F 10 0F 0E 0D 0C +	 dta $10,15,14,13,12,11,10,9
+    67 00,AD97 08 07 06 05 04 +	 dta 8,7,6,5,4,3,2,1
+    68
+    69 00,AD9F 00 F3 E6 D9 CC +	 dta 0,$f3,$e6,$d9,$cc,$c1,$b5,$ad
+    70 00,ADA7 A2 99 90 88 80 +	 dta $a2,$99,$90,$88,$80,$79,$72,$6c
+    71 00,ADAF 66 60 5B 55 51 +	 dta $66,$60,$5b,$55,$51,$4c,$48,$44
+    72 00,ADB7 40 3C 39 35 32 +	 dta $40,$3c,$39,$35,$32,$2f,$2d,$2a
+    73 00,ADBF 28 25 23 21 1F +	 dta $28,$25,$23,$21,$1f,$1d,$1c,$1a
+    74 00,ADC7 18 17 16 14 13 +	 dta $18,$17,$16,$14,$13,$12,$11,$10
+    75 00,ADCF 0F 0E 0D 0C 0B +	 dta 15,14,13,12,11,10,9,8
+    76 00,ADD7 07 06 05 04 03 +	 dta 7,6,5,4,3,2,1,0
+    77
+    78 00,ADDF			basslo
+    79 00,ADDF 00 F2 33 96 E2 +	 dta 0,$f2,$33,$96,$e2,$38,$8c,$00
+    80 00,ADE7 6A E8 6A EF 80 +	 dta $6a,$e8,$6a,$ef,$80,$08,$ae,$46
+    81 00,ADEF E6 95 41 F6 B0 +	 dta $e6,$95,$41,$f6,$b0,$6e,$30,$f6
+    82 00,ADF7 BB 84 52 22 F4 +	 dta $bb,$84,$52,$22,$f4,$c8,$a0,$7a
+    83 00,ADFF 55 34 14 F5 D8 +	 dta $55,$34,$14,$f5,$d8,$bd,$a4,$8d
+    84 00,AE07 77 60 4E 38 27 +	 dta $77,$60,$4e,$38,$27,$15,$06,$f7
+    85 00,AE0F E8 DB CF C3 B8 +	 dta $e8,$db,$cf,$c3,$b8,$ac,$a2,$9a
+    86 00,AE17 90 88 7F 78 70 +	 dta $90,$88,$7f,$78,$70,$6a,$64,$5e
+    87
+    88 00,AE1F			basshi
+    89 00,AE1F 00 0D 0D 0C 0B +	 dta 0,13,13,12,11,11,10,10
+    90 00,AE27 09 08 08 07 07 +	 dta 9,8,8,7,7,7,6,6
+    91 00,AE2F 05 05 05 04 04 +	 dta 5,5,5,4,4,4,4,3
+    92 00,AE37 03 03 03 03 02 +	 dta 3,3,3,3,2,2,2,2
+    93 00,AE3F 02 02 02 01 01 +	 dta 2,2,2,1,1,1,1,1
+    94 00,AE47 01 01 01 01 01 +	 dta 1,1,1,1,1,1,1,0
+    95 00,AE4F 00 00 00 00 00 +	 dta 0,0,0,0,0,0,0,0
+    96 00,AE57 00 00 00 00 00 +	 dta 0,0,0,0,0,0,0,0
+    97
+    98 00,AE5F 00 00 00 00 00 +	czygrx dta d'        '
+    99 00,AE67 00 00 00 00 00 +	pozwpt dta d'        '
+   100 00,AE6F 00 00 00 00 00 +	delay  dta d'        '
+   101 00,AE77 00 00 00 00 00 +	numptr dta d'        '
+   102 00,AE7F 00 00 00 00 00 +	poddzw dta d'        '
+   103 00,AE87 00 00 00 00 00 +	wysdzw dta d'        '
+   104 00,AE8F 00 00 00 00 00 +	znksz  dta d'        '
+   105 00,AE97 00 00 00 00 00 +	frq    dta d'        '
+   106 00,AE9F 00 00 00 00 00 +	vol1ch dta d'        '
+   107 00,AEA7 00 00 00 00 00 +	vol2ch dta d'        '
+   108 00,AEAF 00 00 00 00 00 +	adcvl1 dta d'        '
+   109 00,AEB7 00 00 00 00 00 +	adcvl2 dta d'        '
+   110 00,AEBF 00 00 00 00 00 +	adrsnl dta d'        '
+   111 00,AEC7 00 00 00 00 00 +	adrsnh dta d'        '
+   112 00,AECF 00 00 00 00 00 +	slupy  dta d'        '
+   113 00,AED7 00 00 00 00 00 +	opad1  dta d'        '
+   114 00,AEDF 00 00 00 00 00 +	opad2  dta d'        '
+   115 00,AEE7 00 00 00 00 00 +	lopad1 dta d'        '
+   116 00,AEEF 00 00 00 00 00 +	lopad2 dta d'        '
+   117 00,AEF7 00 00 00 00 00 +	typ    dta d'        '
+   118 00,AEFF 00 00 00 00 00 +	param  dta d'        '
+   119 00,AF07 00 00 00 00 00 +	pomoc1 dta d'        '
+   120 00,AF0F 00 00 00 00 00 +	pomoc2 dta d'        '
+   121 00,AF17 00 00 00 00 00 +	czekaj dta d'        '
+   122 00,AF1F 00 00 00 00 00 +	dtyp   dta d'        '
+   123 00,AF27 00 00 00 00 00 +	ltyp   dta d'        '
+   124 00,AF2F 00 00 00 00 00 +	ilperm dta d'        '
+   125 00,AF37 00 00 00 00 00 +	aperm  dta d'        '
+   126 00,AF3F 00 00 00 00 00 +	dperm  dta d'        '
+   127 00,AF47 00 00 00 00 00 +	lperm  dta d'        '
+   128 00,AF4F 00 00 00 00 00 +	kolejn dta d'        '
+   129 00,AF57 00		tempo  dta 0
+   130 00,AF58 00		ltempo dta 0
+   131 00,AF59 00		pozptr dta 0
+   132 00,AF5A 00		czygrc dta 0
+   133
+   134 00,AF5B			przeci
+   135 00,AF5B 04 05 06 07 00 +	 dta 4,5,6,7,0,1,2,3
+   136
+   137 00,AF63			audtb1
+   138 00,AF63 04 02 00 00 04 +	 dta 4,2,0,0,4,2,0,0
+   139
+   140 00,AF6B			audtb2
+   141 00,AF6B 00 10 00 08 00 +	 dta 0,16,0,8,0,16,0,8
+   142
+   143 00,AF73 AD 5A AF		play lda czygrc
+   144 00,AF76 F0 5E		 beq r1-3
+   145 00,AF78 AD 59 AF		 lda pozptr
+   146 00,AF7B C9 40		 cmp #64
+   147 00,AF7D 90 5A		 bcc r1
+   148 00,AF7F CE 58 AF		 dec ltempo
+   149 00,AF82 F0 03		 beq *+5
+   150 00,AF84 4C 92 B0		 jmp sound
+   151
+   152 00,AF87 A2 07		 ldx #7
+   153 00,AF89 A9 00		 lda #0
+   154 00,AF8B 9D 67 AE		p1 sta pozwpt,x
+   155 00,AF8E 9D 6F AE		 sta delay,x
+   156 00,AF91 CA		 dex
+   157 00,AF92 10 F7		 bpl p1
+   158 00,AF94 8D 59 AF		 sta pozptr
+   159 00,AF97 AA		 tax
+   160 00,AF98 A0 0F		 ldy #15
+   161 00,AF9A B1 FE		p2 lda (adrsng),y
+   162 00,AF9C 10 20		 bpl p3
+   163 00,AF9E 88		 dey
+   164 00,AF9F B1 FE		 lda (adrsng),y
+   165 00,AFA1 10 03		 bpl *+5
+   166 00,AFA3 4C 02 B5		 jmp stop
+   167 00,AFA6 86 FC		 stx addr
+   168 00,AFA8 0A		 asl @
+   169 00,AFA9 0A		 asl @
+   170 00,AFAA 26 FC		 rol addr
+   171 00,AFAC 0A		 asl @
+   172 00,AFAD 26 FC		 rol addr
+   173 00,AFAF 0A		 asl @
+   174 00,AFB0 26 FC		 rol addr
+   175 00,AFB2 69 00		zm0 adc #0
+   176 00,AFB4 85 FE		 sta adrsng
+   177 00,AFB6 A5 FC		 lda addr
+   178 00,AFB8 69 00		zm1 adc #0
+   179 00,AFBA 85 FF		 sta adrsng+1
+   180 00,AFBC 90 DA		 bcc p2-2
+   181 00,AFBE 9D 77 AE		p3 sta numptr,x
+   182 00,AFC1 88		 dey
+   183 00,AFC2 B1 FE		 lda (adrsng),y
+   184 00,AFC4 9D 7F AE		 sta poddzw,x
+   185 00,AFC7 E8		 inx
+   186 00,AFC8 88		 dey
+   187 00,AFC9 10 CF		 bpl p2
+   188 00,AFCB 18		 clc
+   189 00,AFCC A5 FE		 lda adrsng
+   190 00,AFCE 69 10		 adc #16
+   191 00,AFD0 85 FE		 sta adrsng
+   192 00,AFD2 90 02		 bcc *+4
+   193 00,AFD4 E6 FF		 inc adrsng+1
+   194 00,AFD6 4C 92 B0		 jmp sound
+   195
+   196 00,AFD9 CE 58 AF		r1 dec ltempo
+   197 00,AFDC 10 F8		 bpl r1-3
+   198 00,AFDE EE 59 AF		 inc pozptr
+   199 00,AFE1 AD 57 AF		 lda tempo
+   200 00,AFE4 8D 58 AF		 sta ltempo
+   201 00,AFE7 A2 07		 ldx #7
+   202 00,AFE9 DE 6F AE		r2 dec delay,x
+   203 00,AFEC 30 03		 bmi *+5
+   204 00,AFEE 4C 8C B0		 jmp r14
+   205 00,AFF1 BC 77 AE		 ldy numptr,x
+   206 00,AFF4 B9 FF FF		zm2 lda $ffff,y
+   207 00,AFF7 85 FC		 sta addr
+   208 00,AFF9 B9 FF FF		zm3 lda $ffff,y
+   209 00,AFFC 85 FD		 sta addr+1
+   210 00,AFFE BC 67 AE		 ldy pozwpt,x
+   211 00,B001 B1 FC		r3 lda (addr),y
+   212 00,B003 D0 06		 bne r4
+   213 00,B005 20 10 B4		 jsr nparam
+   214 00,B008 4C 89 B0		 jmp r13
+   215 00,B00B C9 40		r4 cmp #$40
+   216 00,B00D B0 12		 bcs r5
+   217 00,B00F 7D 7F AE		 adc poddzw,x
+   218 00,B012 9D 87 AE		 sta wysdzw,x
+   219 00,B015 20 10 B4		 jsr nparam
+   220 00,B018 BC CD AB		 ldy numdzw,x
+   221 00,B01B 20 5F B5		 jsr dzwiek
+   222 00,B01E 4C 89 B0		 jmp r13
+   223 00,B021 D0 22		r5 bne r8
+   224 00,B023 C8		 iny
+   225 00,B024 FE 67 AE		 inc pozwpt,x
+   226 00,B027 B1 FC		 lda (addr),y
+   227 00,B029 10 07		 bpl r6
+   228 00,B02B 85 FB		 sta bajt
+   229 00,B02D 20 10 B4		 jsr nparam
+   230 00,B030 A5 FB		 lda bajt
+   231 00,B032 29 7F		r6 and #$7f
+   232 00,B034 D0 07		 bne r7
+   233 00,B036 A9 40		 lda #64
+   234 00,B038 8D 59 AF		 sta pozptr
+   235 00,B03B D0 4C		 bne r13
+   236 00,B03D 8D 57 AF		r7 sta tempo
+   237 00,B040 8D 58 AF		 sta ltempo
+   238 00,B043 D0 44		 bne r13
+   239 00,B045 C9 80		r8 cmp #$80
+   240 00,B047 B0 2B		 bcs r11
+   241 00,B049 29 3F		 and #$3f
+   242 00,B04B 7D 7F AE		 adc poddzw,x
+   243 00,B04E 9D 87 AE		 sta wysdzw,x
+   244 00,B051 C8		 iny
+   245 00,B052 FE 67 AE		 inc pozwpt,x
+   246 00,B055 B1 FC		 lda (addr),y
+   247 00,B057 29 7F		 and #127
+   248 00,B059 D0 07		 bne r9
+   249 00,B05B A9 40		 lda #64
+   250 00,B05D 8D 59 AF		 sta pozptr
+   251 00,B060 D0 06		 bne r10
+   252 00,B062 8D 57 AF		r9 sta tempo
+   253 00,B065 8D 58 AF		 sta ltempo
+   254 00,B068 20 10 B4		r10 jsr nparam
+   255 00,B06B BC CD AB		 ldy numdzw,x
+   256 00,B06E 20 5F B5		 jsr dzwiek
+   257 00,B071 4C 89 B0		 jmp r13
+   258 00,B074 C9 C0		r11 cmp #$c0
+   259 00,B076 B0 0C		 bcs r12
+   260 00,B078 29 3F		 and #$3f
+   261 00,B07A 9D CD AB		 sta numdzw,x
+   262 00,B07D C8		 iny
+   263 00,B07E FE 67 AE		 inc pozwpt,x
+   264 00,B081 4C 01 B0		 jmp r3
+   265 00,B084 29 3F		r12 and #$3f
+   266 00,B086 9D 6F AE		 sta delay,x
+   267 00,B089 FE 67 AE		r13 inc pozwpt,x
+   268 00,B08C CA		r14 dex
+   269 00,B08D 30 03		 bmi sound
+   270 00,B08F 4C E9 AF		 jmp r2
+   271
+   272 00,B092 A2 07		sound ldx #7
+   273 00,B094 BD 5F AE		p5 lda czygrx,x
+   274 00,B097 F0 21		 beq p6
+   275 00,B099 20 D1 B1		 jsr graj
+   276 00,B09C BD D5 AB		 lda audctl,x
+   277 00,B09F 3D 63 AF		 and audtb1,x
+   278 00,B0A2 F0 16		 beq p6
+   279 00,B0A4 A0 47		 ldy #71
+   280 00,B0A6 B1 FC		 lda (addr),y
+   281 00,B0A8 18		 clc
+   282 00,B0A9 7D C5 AB		 adc aktwys,x
+   283 00,B0AC 9D C7 AB		 sta aktwys+2,x
+   284 00,B0AF A8		 tay
+   285 00,B0B0 B9 DF AC		 lda frqtab,y
+   286 00,B0B3 38		 sec
+   287 00,B0B4 7D 07 AF		 adc pomoc1,x
+   288 00,B0B7 9D 99 AE		 sta frq+2,x
+   289 00,B0BA CA		p6 dex
+   290 00,B0BB 10 D7		 bpl p5
+   291
+   292 00,B0BD 0E AC AB		 asl maxvol
+   293 00,B0C0 0E AC AB		 asl maxvol
+   294 00,B0C3 0E AC AB		 asl maxvol
+   295 00,B0C6 0E AC AB		 asl maxvol
+   296 00,B0C9 E8		 inx
+   297 00,B0CA 86 FC		 stx addr
+   298 00,B0CC 86 FD		 stx addr+1
+   299 00,B0CE A2 07		 ldx #7
+   300 00,B0D0 8A		p9 txa
+   301 00,B0D1 A8		 tay
+   302 00,B0D2 B9 9F AE		 lda vol1ch,y
+   303 00,B0D5 D0 0C		 bne p10
+   304 00,B0D7 BC 5B AF		 ldy przeci,x
+   305 00,B0DA B9 A7 AE		 lda vol2ch,y
+   306 00,B0DD D0 04		 bne p10
+   307 00,B0DF 8A		 txa
+   308 00,B0E0 A8		 tay
+   309 00,B0E1 A9 00		 lda #0
+   310 00,B0E3 85 FA		p10 sta byte
+   311 00,B0E5 98		 tya
+   312 00,B0E6 9D BD AB		 sta kanal,x
+   313 00,B0E9 B9 97 AE		 lda frq,y
+   314 00,B0EC 9D B5 AB		 sta freqen,x
+   315 00,B0EF B9 D5 AB		 lda audctl,y
+   316 00,B0F2 85 FB		 sta bajt
+   317 00,B0F4 05 FD		 ora addr+1
+   318 00,B0F6 85 FD		 sta addr+1
+   319 00,B0F8 A5 FB		 lda bajt
+   320 00,B0FA 3D 63 AF		 and audtb1,x
+   321 00,B0FD F0 06		 beq p11
+   322 00,B0FF B9 99 AE		 lda frq+2,y
+   323 00,B102 9D B7 AB		 sta freqen+2,x
+   324 00,B105 A5 FB		p11 lda bajt
+   325 00,B107 3D 6B AF		 and audtb2,x
+   326 00,B10A F0 12		 beq p12
+   327 00,B10C B9 C5 AB		 lda aktwys,y
+   328 00,B10F 29 3F		 and #$3f
+   329 00,B111 A8		 tay
+   330 00,B112 C8		 iny
+   331 00,B113 84 FC		 sty addr
+   332 00,B115 B9 1E AE		 lda basshi-1,y
+   333 00,B118 9D B5 AB		 sta freqen,x
+   334 00,B11B 4C 2C B1		 jmp p13
+   335 00,B11E A4 FC		p12 ldy addr
+   336 00,B120 F0 0A		 beq p13
+   337 00,B122 B9 DE AD		 lda basslo-1,y
+   338 00,B125 9D B5 AB		 sta freqen,x
+   339 00,B128 A9 00		 lda #0
+   340 00,B12A 85 FC		 sta addr
+   341 00,B12C A5 FA		p13 lda byte
+   342 00,B12E 0D AC AB		 ora maxvol
+   343 00,B131 A8		 tay
+   344 00,B132 B9 DF AB		 lda voltab,y
+   345 00,B135 BC BD AB		 ldy kanal,x
+   346 00,B138 19 8F AE		 ora znksz,y
+   347 00,B13B 9D AD AB		 sta volume,x
+   348 00,B13E E0 04		 cpx #4
+   349 00,B140 D0 09		 bne p14
+   350 00,B142 A5 FD		 lda addr+1
+   351 00,B144 8D DE AB		 sta aud2
+   352 00,B147 A9 00		 lda #0
+   353 00,B149 85 FD		 sta addr+1
+   354 00,B14B CA		p14 dex
+   355 00,B14C 10 82		 bpl p9
+   356 00,B14E 4E AC AB		 lsr maxvol
+   357 00,B151 4E AC AB		 lsr maxvol
+   358 00,B154 4E AC AB		 lsr maxvol
+   359 00,B157 4E AC AB		 lsr maxvol
+   360 00,B15A A5 FD		 lda addr+1
+   361 00,B15C A2 03		quit ldx #3
+   362 00,B15E 8E 1F D2		 stx $d21f
+   363 00,B161 8E 0F D2		 stx $d20f
+   364 00,B164 AE B9 AB		 ldx freqen+4
+   365 00,B167 AC B5 AB		 ldy freqen
+   366 00,B16A 8E 10 D2		 stx $d210
+   367 00,B16D 8C 00 D2		 sty $d200
+   368 00,B170 AE B1 AB		 ldx volume+4
+   369 00,B173 AC AD AB		 ldy volume
+   370 00,B176 8E 11 D2		 stx $d211
+   371 00,B179 8C 01 D2		 sty $d201
+   372 00,B17C AE BA AB		 ldx freqen+5
+   373 00,B17F AC B6 AB		 ldy freqen+1
+   374 00,B182 8E 12 D2		 stx $d212
+   375 00,B185 8C 02 D2		 sty $d202
+   376 00,B188 AE B2 AB		 ldx volume+5
+   377 00,B18B AC AE AB		 ldy volume+1
+   378 00,B18E 8E 13 D2		 stx $d213
+   379 00,B191 8C 03 D2		 sty $d203
+   380 00,B194 AE BB AB		 ldx freqen+6
+   381 00,B197 AC B7 AB		 ldy freqen+2
+   382 00,B19A 8E 14 D2		 stx $d214
+   383 00,B19D 8C 04 D2		 sty $d204
+   384 00,B1A0 AE B3 AB		 ldx volume+6
+   385 00,B1A3 AC AF AB		 ldy volume+2
+   386 00,B1A6 8E 15 D2		 stx $d215
+   387 00,B1A9 8C 05 D2		 sty $d205
+   388 00,B1AC AE BC AB		 ldx freqen+7
+   389 00,B1AF AC B8 AB		 ldy freqen+3
+   390 00,B1B2 8E 16 D2		 stx $d216
+   391 00,B1B5 8C 06 D2		 sty $d206
+   392 00,B1B8 AE B4 AB		 ldx volume+7
+   393 00,B1BB AC B0 AB		 ldy volume+3
+   394 00,B1BE 8E 17 D2		 stx $d217
+   395 00,B1C1 8C 07 D2		 sty $d207
+   396 00,B1C4 8D DD AB		 sta aud1
+   397 00,B1C7 AE DE AB		 ldx aud2
+   398 00,B1CA 8E 18 D2		 stx $d218
+   399 00,B1CD 8D 08 D2		 sta $d208
+   400 00,B1D0 60		 rts
+   401
+   402 00,B1D1 BD BF AE		graj lda adrsnl,x
+   403 00,B1D4 85 FC		 sta addr
+   404 00,B1D6 BD C7 AE		 lda adrsnh,x
+   405 00,B1D9 85 FD		 sta addr+1
+   406 00,B1DB BC CF AE		 ldy slupy,x
+   407 00,B1DE C0 3F		 cpy #63
+   408 00,B1E0 F0 7B		 beq n6
+   409 00,B1E2 FE CF AE		 inc slupy,x
+   410 00,B1E5 FE CF AE		 inc slupy,x
+   411 00,B1E8 FE CF AE		 inc slupy,x
+   412 00,B1EB B1 FC		 lda (addr),y
+   413 00,B1ED 29 F0		 and #$f0
+   414 00,B1EF 9D 8F AE		 sta znksz,x
+   415 00,B1F2 B1 FC		 lda (addr),y
+   416 00,B1F4 29 0F		 and #15
+   417 00,B1F6 38		 sec
+   418 00,B1F7 FD AF AE		 sbc adcvl1,x
+   419 00,B1FA 10 02		 bpl n1
+   420 00,B1FC A9 00		 lda #0
+   421 00,B1FE 9D 9F AE		n1 sta vol1ch,x
+   422 00,B201 C8		 iny
+   423 00,B202 B1 FC		 lda (addr),y
+   424 00,B204 29 0F		 and #15
+   425 00,B206 38		 sec
+   426 00,B207 FD B7 AE		 sbc adcvl2,x
+   427 00,B20A 10 02		 bpl n2
+   428 00,B20C A9 00		 lda #0
+   429 00,B20E 9D A7 AE		n2 sta vol2ch,x
+   430 00,B211 B1 FC		 lda (addr),y
+   431 00,B213 29 F0		 and #$f0
+   432 00,B215 F0 74		 beq n8
+   433 00,B217 10 0B		 bpl n3
+   434 00,B219 A0 49		 ldy #73
+   435 00,B21B B1 FC		 lda (addr),y
+   436 00,B21D BC CF AE		 ldy slupy,x
+   437 00,B220 88		 dey
+   438 00,B221 88		 dey
+   439 00,B222 10 02		 bpl n4
+   440 00,B224 A9 00		n3 lda #0
+   441 00,B226 9D D5 AB		n4 sta audctl,x
+   442 00,B229 B1 FC		 lda (addr),y
+   443 00,B22B 29 70		 and #$70
+   444 00,B22D F0 63		 beq n9
+   445 00,B22F 4A		 lsr @
+   446 00,B230 4A		 lsr @
+   447 00,B231 8D 3D B2		 sta n5+1
+   448 00,B234 A9 00		 lda #0
+   449 00,B236 9D 07 AF		 sta pomoc1,x
+   450 00,B239 C8		 iny
+   451 00,B23A B1 FC		 lda (addr),y
+   452 00,B23C 90 FE		n5 bcc *
+   453 00,B23E EA		 nop
+   454 00,B23F EA		 nop
+   455 00,B240 EA		 nop
+   456 00,B241 EA		 nop
+   457 00,B242 4C DB B3		 jmp a1
+   458 00,B245 EA		 nop
+   459 00,B246 4C D8 B3		 jmp a2
+   460 00,B249 EA		 nop
+   461 00,B24A 4C DF B3		 jmp a3
+   462 00,B24D EA		 nop
+   463 00,B24E 4C ED B3		 jmp a4
+   464 00,B251 EA		 nop
+   465 00,B252 4C F7 B3		 jmp a5
+   466 00,B255 EA		 nop
+   467 00,B256 4C 02 B4		 jmp a6
+   468 00,B259 EA		 nop
+   469 00,B25A 4C F4 B3		 jmp a7
+   470 00,B25D BD D7 AE		n6 lda opad1,x
+   471 00,B260 F0 12		 beq n7
+   472 00,B262 DE E7 AE		 dec lopad1,x
+   473 00,B265 D0 0D		 bne n7
+   474 00,B267 9D E7 AE		 sta lopad1,x
+   475 00,B26A BD 9F AE		 lda vol1ch,x
+   476 00,B26D 29 0F		 and #15
+   477 00,B26F F0 03		 beq n7
+   478 00,B271 DE 9F AE		 dec vol1ch,x
+   479 00,B274 BD DF AE		n7 lda opad2,x
+   480 00,B277 F0 12		 beq n8
+   481 00,B279 DE EF AE		 dec lopad2,x
+   482 00,B27C D0 0D		 bne n8
+   483 00,B27E 9D EF AE		 sta lopad2,x
+   484 00,B281 BD A7 AE		 lda vol2ch,x
+   485 00,B284 29 0F		 and #15
+   486 00,B286 F0 03		 beq n8
+   487 00,B288 DE A7 AE		 dec vol2ch,x
+   488 00,B28B A0 48		n8 ldy #72
+   489 00,B28D B1 FC		 lda (addr),y
+   490 00,B28F 9D D5 AB		 sta audctl,x
+   491 00,B292 BD 37 AF		n9 lda aperm,x
+   492 00,B295 18		 clc
+   493 00,B296 69 3F		 adc #63
+   494 00,B298 A8		 tay
+   495 00,B299 B1 FC		 lda (addr),y
+   496 00,B29B 7D 87 AE		 adc wysdzw,x
+   497 00,B29E 9D C5 AB		 sta aktwys,x
+   498 00,B2A1 A8		 tay
+   499 00,B2A2 B9 DF AC		 lda frqtab,y
+   500 00,B2A5 9D 97 AE		 sta frq,x
+   501 00,B2A8 DE 47 AF		 dec lperm,x
+   502 00,B2AB 10 33		 bpl m1
+   503 00,B2AD BD 3F AF		 lda dperm,x
+   504 00,B2B0 9D 47 AF		 sta lperm,x
+   505 00,B2B3 BD 4F AF		 lda kolejn,x
+   506 00,B2B6 F0 18		 beq m6
+   507 00,B2B8 18		 clc
+   508 00,B2B9 7D 37 AF		 adc aperm,x
+   509 00,B2BC 9D 37 AF		 sta aperm,x
+   510 00,B2BF F0 07		 beq m7
+   511 00,B2C1 DD 2F AF		 cmp ilperm,x
+   512 00,B2C4 D0 1A		 bne m1
+   513 00,B2C6 A9 FE		 lda #$fe
+   514 00,B2C8 18		m7 clc
+   515 00,B2C9 69 01		 adc #1
+   516 00,B2CB 9D 4F AF		 sta kolejn,x
+   517 00,B2CE D0 10		 bne m1
+   518 00,B2D0 FE 37 AF		m6 inc aperm,x
+   519 00,B2D3 BD 2F AF		 lda ilperm,x
+   520 00,B2D6 DD 37 AF		 cmp aperm,x
+   521 00,B2D9 B0 05		 bcs m1
+   522 00,B2DB A9 00		 lda #0
+   523 00,B2DD 9D 37 AF		 sta aperm,x
+   524 00,B2E0 BD 17 AF		m1 lda czekaj,x
+   525 00,B2E3 F0 04		 beq m2
+   526 00,B2E5 DE 17 AF		 dec czekaj,x
+   527 00,B2E8 60		 rts
+   528 00,B2E9 BD 0F AF		m2 lda pomoc2,x
+   529 00,B2EC 85 FA		 sta byte
+   530 00,B2EE BD FF AE		 lda param,x
+   531 00,B2F1 85 FB		 sta bajt
+   532 00,B2F3 20 0C B3		 jsr m4
+   533 00,B2F6 DE 27 AF		 dec ltyp,x
+   534 00,B2F9 10 10		 bpl m4-1
+   535 00,B2FB A5 FA		 lda byte
+   536 00,B2FD 9D 0F AF		 sta pomoc2,x
+   537 00,B300 A5 FB		 lda bajt
+   538 00,B302 9D FF AE		 sta param,x
+   539 00,B305 BD 1F AF		 lda dtyp,x
+   540 00,B308 9D 27 AF		 sta ltyp,x
+   541 00,B30B 60		 rts
+   542 00,B30C BD F7 AE		m4 lda typ,x
+   543 00,B30F 8D 13 B3		 sta m5+1
+   544 00,B312 10 FE		m5 bpl *
+   545 00,B314 4C 4A B3		 jmp typ0
+   546 00,B317 EA		 nop
+   547 00,B318 4C 33 B3		 jmp typ1
+   548 00,B31B EA		 nop
+   549 00,B31C 4C 51 B3		 jmp typ2
+   550 00,B31F EA		 nop
+   551 00,B320 4C 57 B3		 jmp typ3
+   552 00,B323 EA		 nop
+   553 00,B324 4C 61 B3		 jmp typ4
+   554 00,B327 EA		 nop
+   555 00,B328 4C 75 B3		 jmp typ5
+   556 00,B32B EA		 nop
+   557 00,B32C 4C 85 B3		 jmp typ6
+   558 00,B32F EA		 nop
+   559 00,B330 4C 97 B3		 jmp typ7
+   560
+   561 00,B333 A5 FA		typ1 lda byte
+   562 00,B335 E6 FA		 inc byte
+   563 00,B337 29 03		 and #3
+   564 00,B339 4A		 lsr @
+   565 00,B33A 90 0F		 bcc t2
+   566 00,B33C D0 47		 bne typ6
+   567 00,B33E A5 FB		 lda bajt
+   568 00,B340 9D 07 AF		t1 sta pomoc1,x
+   569 00,B343 18		 clc
+   570 00,B344 7D 97 AE		 adc frq,x
+   571 00,B347 9D 97 AE		 sta frq,x
+   572 00,B34A 60		typ0 rts
+   573 00,B34B A9 00		t2 lda #0
+   574 00,B34D 9D 07 AF		 sta pomoc1,x
+   575 00,B350 60		 rts
+   576 00,B351 20 C0 B3		typ2 jsr t5
+   577 00,B354 4C 40 B3		 jmp t1
+   578 00,B357 20 C0 B3		typ3 jsr t5
+   579 00,B35A 18		 clc
+   580 00,B35B 7D C5 AB		 adc aktwys,x
+   581 00,B35E 4C F7 B3		 jmp a5
+   582 00,B361 A5 FA		typ4 lda byte
+   583 00,B363 9D 07 AF		 sta pomoc1,x
+   584 00,B366 18		 clc
+   585 00,B367 7D 97 AE		 adc frq,x
+   586 00,B36A 9D 97 AE		t3 sta frq,x
+   587 00,B36D A5 FA		 lda byte
+   588 00,B36F 18		 clc
+   589 00,B370 65 FB		 adc bajt
+   590 00,B372 85 FA		 sta byte
+   591 00,B374 60		 rts
+   592 00,B375 BD C5 AB		typ5 lda aktwys,x
+   593 00,B378 38		 sec
+   594 00,B379 E5 FA		 sbc byte
+   595 00,B37B 9D C5 AB		 sta aktwys,x
+   596 00,B37E A8		 tay
+   597 00,B37F B9 DF AC		 lda frqtab,y
+   598 00,B382 4C 6A B3		 jmp t3
+   599 00,B385 BD 97 AE		typ6 lda frq,x
+   600 00,B388 38		 sec
+   601 00,B389 E5 FB		 sbc bajt
+   602 00,B38B 9D 97 AE		 sta frq,x
+   603 00,B38E 38		 sec
+   604 00,B38F A9 00		 lda #0
+   605 00,B391 E5 FB		 sbc bajt
+   606 00,B393 9D 07 AF		 sta pomoc1,x
+   607 00,B396 60		 rts
+   608 00,B397 BD 27 AF		typ7 lda ltyp,x
+   609 00,B39A D0 AE		 bne typ0
+   610 00,B39C A5 FB		 lda bajt
+   611 00,B39E 10 10		 bpl t4
+   612 00,B3A0 BD A7 AE		 lda vol2ch,x
+   613 00,B3A3 F0 A5		 beq typ0
+   614 00,B3A5 BD 9F AE		 lda vol1ch,x
+   615 00,B3A8 C9 0F		 cmp #15
+   616 00,B3AA F0 9E		 beq typ0
+   617 00,B3AC FE 9F AE		 inc vol1ch,x
+   618 00,B3AF 60		 rts
+   619 00,B3B0 BD 9F AE		t4 lda vol1ch,x
+   620 00,B3B3 F0 95		 beq typ0
+   621 00,B3B5 BD A7 AE		 lda vol2ch,x
+   622 00,B3B8 C9 0F		 cmp #15
+   623 00,B3BA F0 8E		 beq typ0
+   624 00,B3BC FE A7 AE		 inc vol2ch,x
+   625 00,B3BF 60		 rts
+   626 00,B3C0 A4 FA		t5 ldy byte
+   627 00,B3C2 A5 FB		 lda bajt
+   628 00,B3C4 30 02		 bmi t6
+   629 00,B3C6 C8		 iny
+   630 00,B3C7 C8		 iny
+   631 00,B3C8 88		t6 dey
+   632 00,B3C9 98		 tya
+   633 00,B3CA 85 FA		 sta byte
+   634 00,B3CC C5 FB		 cmp bajt
+   635 00,B3CE D0 06		 bne t7
+   636 00,B3D0 A5 FB		 lda bajt
+   637 00,B3D2 49 FF		 eor #$ff
+   638 00,B3D4 85 FB		 sta bajt
+   639 00,B3D6 98		t7 tya
+   640 00,B3D7 60		 rts
+   641
+   642 00,B3D8 7D 97 AE		a2 adc frq,x
+   643 00,B3DB 9D 97 AE		a1 sta frq,x
+   644 00,B3DE 60		 rts
+   645 00,B3DF BC 87 AE		a3 ldy wysdzw,x
+   646 00,B3E2 79 DF AC		 adc frqtab,y
+   647 00,B3E5 9D 97 AE		 sta frq,x
+   648 00,B3E8 98		 tya
+   649 00,B3E9 9D C5 AB		 sta aktwys,x
+   650 00,B3EC 60		 rts
+   651 00,B3ED 2D 0A D2		a4 and $d20a
+   652 00,B3F0 9D 97 AE		 sta frq,x
+   653 00,B3F3 60		 rts
+   654 00,B3F4 7D 87 AE		a7 adc wysdzw,x
+   655 00,B3F7 9D C5 AB		a5 sta aktwys,x
+   656 00,B3FA A8		 tay
+   657 00,B3FB B9 DF AC		 lda frqtab,y
+   658 00,B3FE 9D 97 AE		 sta frq,x
+   659 00,B401 60		 rts
+   660 00,B402 9D C5 AB		a6 sta aktwys,x
+   661 00,B405 A8		 tay
+   662 00,B406 BD 97 AE		 lda frq,x
+   663 00,B409 79 DF AC		 adc frqtab,y
+   664 00,B40C 9D 97 AE		 sta frq,x
+   665 00,B40F 60		 rts
+   666
+   667 00,B410 C8		nparam iny
+   668 00,B411 FE 67 AE		 inc pozwpt,x
+   669 00,B414 B1 FC		 lda (addr),y
+   670 00,B416 4A		 lsr @
+   671 00,B417 4A		 lsr @
+   672 00,B418 4A		 lsr @
+   673 00,B419 4A		 lsr @
+   674 00,B41A 9D AF AE		 sta adcvl1,x
+   675 00,B41D B1 FC		 lda (addr),y
+   676 00,B41F 29 0F		 and #15
+   677 00,B421 9D B7 AE		 sta adcvl2,x
+   678 00,B424 60		 rts
+   679
+   680 00,B425 20 02 B5		songx jsr stop
+   681 00,B428 A0 0F		 ldy #15
+   682 00,B42A A9 00		zm4 lda #0
+   683 00,B42C 85 FE		 sta adrsng
+   684 00,B42E A9 00		zm5 lda #0
+   685 00,B430 85 FF		 sta adrsng+1
+   686 00,B432 8A		d5 txa
+   687 00,B433 F0 2E		 beq inic
+   688 00,B435 B1 FE		d3 lda (adrsng),y
+   689 00,B437 10 01		 bpl d4
+   690 00,B439 CA		 dex
+   691 00,B43A 18		d4 clc
+   692 00,B43B A5 FE		 lda adrsng
+   693 00,B43D 69 10		 adc #16
+   694 00,B43F 85 FE		 sta adrsng
+   695 00,B441 90 EF		 bcc d5
+   696 00,B443 E6 FF		 inc adrsng+1
+   697 00,B445 B0 EB		 bcs d5
+   698
+   699 00,B447 20 02 B5		playx jsr stop
+   700 00,B44A A9 00		 lda #0
+   701 00,B44C 85 FC		 sta addr
+   702 00,B44E 8A		 txa
+   703 00,B44F 0A		 asl @
+   704 00,B450 0A		 asl @
+   705 00,B451 26 FC		 rol addr
+   706 00,B453 0A		 asl @
+   707 00,B454 26 FC		 rol addr
+   708 00,B456 0A		 asl @
+   709 00,B457 26 FC		 rol addr
+   710 00,B459 69 00		zm6 adc #0
+   711 00,B45B 85 FE		 sta adrsng
+   712 00,B45D A5 FC		 lda addr
+   713 00,B45F 69 00		zm7 adc #0
+   714 00,B461 85 FF		 sta adrsng+1
+   715 00,B463 A9 40		inic lda #64
+   716 00,B465 8D 59 AF		 sta pozptr
+   717 00,B468 A9 01		 lda #1
+   718 00,B46A 8D 58 AF		 sta ltempo
+   719 00,B46D 8D 5A AF		 sta czygrc
+   720 00,B470 60		 rts
+   721
+   722 00,B471 C9 10		init cmp #$10
+   723 00,B473 90 B0		 bcc songx
+   724 00,B475 C9 20		 cmp #$20
+   725 00,B477 90 CE		 bcc playx
+   726 00,B479 C9 30		 cmp #$30
+   727 00,B47B B0 03		 bcs *+5
+   728 00,B47D 4C 51 B5		 jmp d2
+   729 00,B480 C9 40		 cmp #$40
+   730 00,B482 B0 09		 bcs i1
+   731 00,B484 8A		 txa
+   732 00,B485 29 0F		 and #15
+   733 00,B487 F0 03		 beq i1-1
+   734 00,B489 8D 57 AF		 sta tempo
+   735 00,B48C 60		 rts
+   736 00,B48D C9 50		i1 cmp #$50
+   737 00,B48F 90 71		 bcc stop
+   738 00,B491 C9 60		 cmp #$60
+   739 00,B493 B0 06		 bcs i2
+   740 00,B495 A9 00		 lda #0
+   741 00,B497 8D 5A AF		i3 sta czygrc
+   742 00,B49A 60		 rts
+   743 00,B49B C9 70		i2 cmp #$70
+   744 00,B49D 90 F8		 bcc i3
+   745
+   746 00,B49F A9 01		 lda #1
+   747 00,B4A1 8D 58 AF		 sta ltempo
+   748 00,B4A4 A9 40		 lda #64
+   749 00,B4A6 8D 59 AF		 sta pozptr
+   750 00,B4A9 84 FC		 sty addr
+   751 00,B4AB 86 FD		 stx addr+1
+   752 00,B4AD A0 1E		 ldy #30
+   753 00,B4AF B1 FC		 lda (addr),y
+   754 00,B4B1 8D 57 AF		 sta tempo
+   755 00,B4B4 A5 FC		 lda addr
+   756 00,B4B6 18		 clc
+   757 00,B4B7 69 20		 adc #32
+   758 00,B4B9 8D 65 B5		 sta zm8+1
+   759 00,B4BC 90 01		 bcc *+3
+   760 00,B4BE E8		 inx
+   761 00,B4BF 8E 66 B5		 stx zm8+2
+   762 00,B4C2 18		 clc
+   763 00,B4C3 69 40		 adc #$40
+   764 00,B4C5 8D 6D B5		 sta zm9+1
+   765 00,B4C8 90 01		 bcc *+3
+   766 00,B4CA E8		 inx
+   767 00,B4CB 8E 6E B5		 stx zm9+2
+   768 00,B4CE 18		 clc
+   769 00,B4CF 69 40		 adc #$40
+   770 00,B4D1 8D F5 AF		 sta zm2+1
+   771 00,B4D4 90 01		 bcc *+3
+   772 00,B4D6 E8		 inx
+   773 00,B4D7 8E F6 AF		 stx zm2+2
+   774 00,B4DA 18		 clc
+   775 00,B4DB 69 80		 adc #$80
+   776 00,B4DD 8D FA AF		 sta zm3+1
+   777 00,B4E0 90 01		 bcc *+3
+   778 00,B4E2 E8		 inx
+   779 00,B4E3 8E FB AF		 stx zm3+2
+   780 00,B4E6 18		 clc
+   781 00,B4E7 69 80		 adc #$80
+   782 00,B4E9 85 FE		 sta adrsng
+   783 00,B4EB 8D B3 AF		 sta zm0+1
+   784 00,B4EE 8D 2B B4		 sta zm4+1
+   785 00,B4F1 8D 5A B4		 sta zm6+1
+   786 00,B4F4 90 01		 bcc *+3
+   787 00,B4F6 E8		 inx
+   788 00,B4F7 86 FF		 stx adrsng+1
+   789 00,B4F9 8E B9 AF		 stx zm1+1
+   790 00,B4FC 8E 2F B4		 stx zm5+1
+   791 00,B4FF 8E 60 B4		 stx zm7+1
+   792
+   793 00,B502 A0 07		stop ldy #7
+   794 00,B504 A9 00		 lda #0
+   795 00,B506 8D 5A AF		 sta czygrc
+   796 00,B509 99 00 D2		d9 sta $d200,y
+   797 00,B50C 99 10 D2		 sta $d210,y
+   798 00,B50F 99 AD AB		 sta volume,y
+   799 00,B512 99 9F AE		 sta vol1ch,y
+   800 00,B515 99 A7 AE		 sta vol2ch,y
+   801 00,B518 99 D5 AB		 sta audctl,y
+   802 00,B51B 99 5F AE		 sta czygrx,y
+   803 00,B51E 88		 dey
+   804 00,B51F 10 E8		 bpl d9
+   805 00,B521 8D 08 D2		 sta $d208
+   806 00,B524 8D 18 D2		 sta $d218
+   807 00,B527 8D DD AB		 sta aud1
+   808 00,B52A 8D DE AB		 sta aud2
+   809 00,B52D 60		 rts
+   810
+   811 00,B52E 9D 9F AE		d1 sta vol1ch,x
+   812 00,B531 9D A7 AE		 sta vol2ch,x
+   813 00,B534 9D D5 AB		 sta audctl,x
+   814 00,B537 BD 87 AE		 lda wysdzw,x
+   815 00,B53A 9D C5 AB		 sta aktwys,x
+   816 00,B53D 60		 rts
+   817 00,B53E 98		d0 tya
+   818 00,B53F 49 F0		 eor #$f0
+   819 00,B541 4A		 lsr @
+   820 00,B542 4A		 lsr @
+   821 00,B543 4A		 lsr @
+   822 00,B544 4A		 lsr @
+   823 00,B545 9D AF AE		 sta adcvl1,x
+   824 00,B548 98		 tya
+   825 00,B549 29 0F		 and #15
+   826 00,B54B 49 0F		 eor #15
+   827 00,B54D 9D B7 AE		 sta adcvl2,x
+   828 00,B550 60		 rts
+   829 00,B551 29 07		d2 and #7
+   830 00,B553 85 FC		 sta addr
+   831 00,B555 8A		 txa
+   832 00,B556 A6 FC		 ldx addr
+   833 00,B558 29 3F		 and #$3f
+   834 00,B55A F0 E2		 beq d0
+   835 00,B55C 9D 87 AE		 sta wysdzw,x
+   836 00,B55F A9 00		dzwiek lda #0
+   837 00,B561 9D 5F AE		 sta czygrx,x
+   838 00,B564 B9 FF FF		zm8 lda $ffff,y
+   839 00,B567 9D BF AE		 sta adrsnl,x
+   840 00,B56A 85 FC		 sta addr
+   841 00,B56C B9 FF FF		zm9 lda $ffff,y
+   842 00,B56F 9D C7 AE		 sta adrsnh,x
+   843 00,B572 85 FD		 sta addr+1
+   844 00,B574 05 FC		 ora addr
+   845 00,B576 F0 B6		 beq d1
+   846 00,B578 A0 4A		 ldy #74
+   847 00,B57A B1 FC		 lda (addr),y
+   848 00,B57C 9D D7 AE		 sta opad1,x
+   849 00,B57F 9D E7 AE		 sta lopad1,x
+   850 00,B582 C8		 iny
+   851 00,B583 B1 FC		 lda (addr),y
+   852 00,B585 9D DF AE		 sta opad2,x
+   853 00,B588 9D EF AE		 sta lopad2,x
+   854 00,B58B C8		 iny
+   855 00,B58C B1 FC		 lda (addr),y
+   856 00,B58E 29 70		 and #$70
+   857 00,B590 4A		 lsr @
+   858 00,B591 4A		 lsr @
+   859 00,B592 9D F7 AE		 sta typ,x
+   860 00,B595 B1 FC		 lda (addr),y
+   861 00,B597 29 0F		 and #15
+   862 00,B599 9D FF AE		 sta param,x
+   863 00,B59C B1 FC		 lda (addr),y
+   864 00,B59E 10 0B		 bpl d7
+   865 00,B5A0 BD FF AE		 lda param,x
+   866 00,B5A3 49 FF		 eor #$ff
+   867 00,B5A5 18		 clc
+   868 00,B5A6 69 01		 adc #1
+   869 00,B5A8 9D FF AE		 sta param,x
+   870 00,B5AB C8		d7 iny
+   871 00,B5AC B1 FC		 lda (addr),y
+   872 00,B5AE 9D 17 AF		 sta czekaj,x
+   873 00,B5B1 C8		 iny
+   874 00,B5B2 B1 FC		 lda (addr),y
+   875 00,B5B4 29 3F		 and #$3f
+   876 00,B5B6 9D 1F AF		 sta dtyp,x
+   877 00,B5B9 9D 27 AF		 sta ltyp,x
+   878 00,B5BC C8		 iny
+   879 00,B5BD B1 FC		 lda (addr),y
+   880 00,B5BF 29 80		 and #$80
+   881 00,B5C1 F0 02		 beq d8
+   882 00,B5C3 A9 01		 lda #1
+   883 00,B5C5 9D 4F AF		d8 sta kolejn,x
+   884 00,B5C8 B1 FC		 lda (addr),y
+   885 00,B5CA 29 70		 and #$70
+   886 00,B5CC 4A		 lsr @
+   887 00,B5CD 4A		 lsr @
+   888 00,B5CE 4A		 lsr @
+   889 00,B5CF 4A		 lsr @
+   890 00,B5D0 9D 2F AF		 sta ilperm,x
+   891 00,B5D3 D0 03		 bne d6
+   892 00,B5D5 9D 4F AF		 sta kolejn,x
+   893 00,B5D8 B1 FC		d6 lda (addr),y
+   894 00,B5DA 29 0F		 and #15
+   895 00,B5DC 9D 3F AF		 sta dperm,x
+   896 00,B5DF 9D 47 AF		 sta lperm,x
+   897 00,B5E2 88		 dey
+   898 00,B5E3 B1 FC		 lda (addr),y
+   899 00,B5E5 29 C0		 and #$c0
+   900 00,B5E7 18		 clc
+   901 00,B5E8 7D 87 AE		 adc wysdzw,x
+   902 00,B5EB 9D 87 AE		 sta wysdzw,x
+   903 00,B5EE 9D C5 AB		 sta aktwys,x
+   904 00,B5F1 A8		 tay
+   905 00,B5F2 B9 DF AC		 lda frqtab,y
+   906 00,B5F5 9D 97 AE		 sta frq,x
+   907 00,B5F8 A9 00		 lda #0
+   908 00,B5FA 9D CF AE		 sta slupy,x
+   909 00,B5FD 9D 07 AF		 sta pomoc1,x
+   910 00,B600 9D 0F AF		 sta pomoc2,x
+   911 00,B603 9D 37 AF		 sta aperm,x
+   912 00,B606 A9 01		 lda #1
+   913 00,B608 9D 5F AE		 sta czygrx,x
+   914 00,B60B 60		 rts
+   915
+   916 				.endp
+Source: F:\!Atari\getris2\high_score\msx\toolate.asm
+    72
+    73 00,02E0-02E1> 85 AB	        run main
+    74
+    75 				;---

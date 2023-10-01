@@ -1,0 +1,1609 @@
+Mad-Assembler v1.6.9beta by TeBe/Madteam
+Source: D:\!Atari\getris2\high_score\H_Score_OK.asm
+     1 = 00,003E		scr40	equ %00111110	;obraz normalny	*-screen 40b
+     2
+     3 = 00,B000		pmBase	equ $b000
+     4 = 00,3800		fnt3    equ $3800
+     5 = 00,3C00		fnt3_2  equ $3c00
+     6
+     7
+     8 = 00,D000		Player0_PositionX equ $d000
+     9 = 00,D001		Player1_PositionX equ $d001
+    10 = 00,D002		Player2_PositionX equ $d002
+    11 = 00,D003		Player3_PositionX equ $d003
+    12
+    13 = 00,D004		Missile0_PositionX equ $d004
+    14 = 00,D005		Missile1_PositionX equ $d005
+    15 = 00,D006		Missile2_PositionX equ $d006
+    16 = 00,D007		Missile3_PositionX equ $d007
+    17
+    18 = 00,D008		Player0_Size equ $d008
+    19 = 00,D009		Player1_Size equ $d009
+    20 = 00,D00A		Player2_Size equ $d00a
+    21 = 00,D00B		Player3_Size equ $d00b
+    22
+    23 = 00,D00C		Missiles_Size equ $d00c
+    24
+    25 = 00,D012		Player0_Missile0_Color0_PM0 equ $d012
+    26 = 00,D013		Player1_Missile1_Color1_PM1 equ $d013
+    27 = 00,D014		Player2_Missile2_Color2_PM2 equ $d014
+    28 = 00,D015		Player3_Missile3_Color3_PM3 equ $d015
+    29
+    30 = 00,D016		Playfield_Color0_PF0	equ $d016
+    31 = 00,D017		Playfield_Color1_PF1	equ $d017
+    32 = 00,D018		Playfield_Color2_PF2	equ $d018
+    33 = 00,D019		Playfield_Color3_PF3	equ $d019
+    34 = 00,D01A		Background_BAK		equ $d01a
+    35
+    36 = 00,D01B		PRIOR_GTIACTL	equ $d01b
+    37 = 00,D409		CHARBASE	equ $d409
+    38
+    39 = 00,0080		rejA equ $80
+    40 = 00,0082		rejX equ rejA+2
+    41 = 00,0084		rejY equ rejX+2
+    42
+    43 = 00,0086		zp   equ rejY+2
+    44 = 00,0088		zp_  equ zp+2
+    45 = 00,008A		txt  equ zp_+2
+    46
+    47 				 org $2000
+    48
+    49 				main
+    50 				;-- init PMG
+    51 FFFF> 00,2000-28BF> A9 +	 lda >pmBase
+    52 00,2002 8D 07 D4		 sta $d407
+    53 00,2005 A9 03		 lda #3
+    54 00,2007 8D 1D D0		 sta $d01d		*- PMCTL - show PMG
+    55
+    56 00,200A A5 14		 lda 20			;czekamy 1 ramke zanim zrobimy jakies nieszczescie :)
+    57 00,200C C5 14		 cmp 20			*- wait 1 frame
+    58 00,200E F0 FC		 beq *-2
+    59
+    60 00,2010 78		 sei			;wylaczenie przerwan *- IRQ OFF, NMI OFF
+    61 00,2011 A9 00		 lda #0
+    62 00,2013 8D 0E D4		 sta $d40e
+    63 00,2016 A9 FE		 lda #$fe
+    64 00,2018 8D 01 D3		 sta $d301		;wylaczenie ROM-u *- ROM OFF
+    65
+    66 				 mwa #nmi $fffa		;nasza nowa obsluga przerwania NMI
+Macro: MWA [Source: d:\!atari\macro\xasm.mac]
+    36 00,201B A9 9F		      ldA <NMI
+    37 00,201D 8D FA FF		      stA $FFFA
+    38 00,2020 A9 23		      ldA >NMI
+    39 00,2022 8D FB FF		      stA $FFFA+1
+Source: D:\!Atari\getris2\high_score\H_Score_OK.asm
+    67
+    68 				 mwa #dli1 dliv+1
+Macro: MWA [Source: d:\!atari\macro\xasm.mac]
+    36 00,2025 A9 48		      ldA <DLI1
+    37 00,2027 8D AB 23		      stA DLIV+1
+    38 00,202A A9 20		      ldA >DLI1
+    39 00,202C 8D AC 23		      stA DLIV+1+1
+Source: D:\!Atari\getris2\high_score\H_Score_OK.asm
+    69
+    70 00,202F 20 06 28		 jsr save_color
+    71
+    72 00,2032 A9 C0		 lda #$c0
+    73 00,2034 8D 0E D4		 sta $d40e		;wlaczenie NMI z przerwaniami DLI
+    74
+    75 00,2037 20 7A 27		 jsr fade_in
+    76
+    77 				;kk lda $d20a
+    78 				; sta $d01a
+    79 				; jmp kk 
+    80
+    81 00,203A 20 4B 2A		 jsr input_string
+    82
+    83
+    84 				;--
+    85
+    86 00,203D 00		licz brk
+    87
+    88 00,203E A5 14		wait lda 20
+    89 00,2040 C5 14		 cmp 20
+    90 00,2042 F0 FC		 beq *-2
+    91 00,2044 CA		 dex
+    92 00,2045 D0 F7		 bne wait
+    93 00,2047 60		 rts
+    94
+    95 				;--
+    96
+    97 00,2048			dli1
+    98
+    99 00,2048 8D 0A D4		 sta $d40a                   ;line=0
+   100 00,204B 8D 0A D4		 sta $d40a                   ;line=1
+   101 00,204E 8D 0A D4		 sta $d40a                   ;line=2
+   102 00,2051 8D 0A D4		 sta $d40a                   ;line=3
+   103 00,2054 8D 0A D4		 sta $d40a                   ;line=4
+   104 00,2057 8D 0A D4		 sta $d40a                   ;line=5
+   105 00,205A A9 6A		c8 lda #$6A
+   106 00,205C A2 58		c9 ldx #$58
+   107 00,205E A0 44		c10 ldy #$44
+   108 00,2060 8D 0A D4		 sta $d40a                   ;line=6
+   109 00,2063 8D 16 D0		 sta Playfield_Color0_PF0
+   110 00,2066 8E 17 D0		 stx Playfield_Color1_PF1
+   111 00,2069 8C 18 D0		 sty Playfield_Color2_PF2
+   112 00,206C A9 75		 lda #$75
+   113 00,206E 8D 00 D0		 sta Player0_PositionX
+   114 00,2071 A9 2A		c11 lda #$2A
+   115 00,2073 8D 12 D0		 sta Player0_Missile0_Color0_PM0
+   116 				;--
+   117 00,2076 8D 0A D4		 sta $d40a                   ;line=7
+   118 00,2079 8D 0A D4		 sta $d40a                   ;line=8
+   119 00,207C 8D 0A D4		 sta $d40a                   ;line=9
+   120 00,207F 8D 0A D4		 sta $d40a                   ;line=10
+   121 00,2082 8D 0A D4		 sta $d40a                   ;line=11
+   122 00,2085 8D 0A D4		 sta $d40a                   ;line=12
+   123 00,2088 8D 0A D4		 sta $d40a                   ;line=13
+   124 00,208B A9 7F		 lda #$7F
+   125 00,208D A2 7D		 ldx #$7D
+   126 00,208F 8D 0A D4		 sta $d40a                   ;line=14
+   127 00,2092 8D 00 D0		 sta Player0_PositionX
+   128 00,2095 8E 04 D0		 stx Missile0_PositionX
+   129 00,2098 A9 4D		 lda #$4D
+   130 00,209A 8D 0A D4		 sta $d40a                   ;line=15
+   131 00,209D 8D 04 D0		 sta Missile0_PositionX
+   132 00,20A0 A9 84		 lda #$84
+   133 00,20A2 8D 0A D4		 sta $d40a                   ;line=16
+   134 00,20A5 8D 06 D0		 sta Missile2_PositionX
+   135 00,20A8 8D 0A D4		 sta $d40a                   ;line=17
+   136 00,20AB 8D 0A D4		 sta $d40a                   ;line=18
+   137 00,20AE A9 01		 lda #$01
+   138 00,20B0 A2 3D		 ldx #$3D
+   139 00,20B2 8D 0A D4		 sta $d40a                   ;line=19
+   140 00,20B5 8D 08 D0		 sta Player0_Size
+   141 00,20B8 8E 00 D0		 stx Player0_PositionX
+   142 00,20BB 8D 0A D4		 sta $d40a                   ;line=20
+   143 00,20BE 8D 0A D4		 sta $d40a                   ;line=21
+   144 00,20C1 A9 70		 lda #$70
+   145 00,20C3 8D 0A D4		 sta $d40a                   ;line=22
+   146 00,20C6 8D 03 D0		 sta Player3_PositionX
+   147 00,20C9 A9 76		 lda #$76
+   148 00,20CB 8D 0A D4		 sta $d40a                   ;line=23
+   149 00,20CE 8D 00 D0		 sta Player0_PositionX
+   150 00,20D1 A9 75		 lda #$75
+   151 00,20D3 A2 3F		 ldx #$3F
+   152 00,20D5 8D 0A D4		 sta $d40a                   ;line=24
+   153 00,20D8 8D 00 D0		 sta Player0_PositionX
+   154 00,20DB 8E 04 D0		 stx Missile0_PositionX
+   155 				; sta $d40a                   ;line=25
+   156 				; sta $d40a                   ;line=26
+   157 				; sta $d40a                   ;line=27
+   158 				; sta $d40a                   ;line=28
+   159 				; sta $d40a                   ;line=29
+   160 				; sta $d40a                   ;line=30
+   161 				; sta $d40a                   ;line=31
+   162 				 mwa #dli1_2 dliv+1
+Macro: MWA [Source: d:\!atari\macro\xasm.mac]
+    36 00,20DE A9 EF		      ldA <DLI1_2
+    37 00,20E0 8D AB 23		      stA DLIV+1
+    38 00,20E3 A9 20		      ldA >DLI1_2
+    39 00,20E5 8D AC 23		      stA DLIV+1+1
+Source: D:\!Atari\getris2\high_score\H_Score_OK.asm
+   163 				 mrti
+Macro: MRTI [Source: D:\!Atari\getris2\high_score\H_Score_OK.asm]
+     1 00,20E8 A5 80		 lda rejA
+     2 00,20EA A6 82		 ldx rejX
+     3 00,20EC A4 84		 ldy rejY
+     4 00,20EE 40		 rti
+Source: D:\!Atari\getris2\high_score\H_Score_OK.asm
+   164
+   165
+   166 00,20EF			dli1_2
+   167 00,20EF 8D 0A D4		 sta $d40a                   ;line=32
+   168 00,20F2 8D 0A D4		 sta $d40a                   ;line=33
+   169 00,20F5 A9 44		c12 lda #$44
+   170 00,20F7 8D 0A D4		 sta $d40a                   ;line=34
+   171 00,20FA 8D 12 D0		 sta Player0_Missile0_Color0_PM0
+   172 00,20FD A9 78		c13 lda #$78
+   173 00,20FF A2 76		c14 ldx #$76
+   174 00,2101 A0 74		c15 ldy #$74
+   175 00,2103 8D 0A D4		 sta $d40a                   ;line=35
+   176 00,2106 8D 16 D0		 sta Playfield_Color0_PF0
+   177 00,2109 8E 17 D0		 stx Playfield_Color1_PF1
+   178 00,210C 8C 18 D0		 sty Playfield_Color2_PF2
+   179 00,210F A9 A6		 lda #$A6
+   180 00,2111 8D 04 D0		 sta Missile0_PositionX
+   181
+   182 				 mwa #dli2 dliv+1
+Macro: MWA [Source: d:\!atari\macro\xasm.mac]
+    36 00,2114 A9 25		      ldA <DLI2
+    37 00,2116 8D AB 23		      stA DLIV+1
+    38 00,2119 A9 21		      ldA >DLI2
+    39 00,211B 8D AC 23		      stA DLIV+1+1
+Source: D:\!Atari\getris2\high_score\H_Score_OK.asm
+   183 				 mrti
+Macro: MRTI [Source: D:\!Atari\getris2\high_score\H_Score_OK.asm]
+     1 00,211E A5 80		 lda rejA
+     2 00,2120 A6 82		 ldx rejX
+     3 00,2122 A4 84		 ldy rejY
+     4 00,2124 40		 rti
+Source: D:\!Atari\getris2\high_score\H_Score_OK.asm
+   184
+   185
+   186 00,2125			dli2
+   187 00,2125 A9 3C		 lda >fnt3_2
+   188 00,2127 A2 AA		c16 ldx #$AA
+   189 00,2129 A0 D0		 ldy #$D0
+   190 00,212B 8D 0A D4		 sta $d40a                   ;line=40
+   191 00,212E 8D 09 D4		 sta CHARBASE
+   192 00,2131 8E 18 D0		 stx Playfield_Color2_PF2
+   193 00,2134 8C 00 D0		 sty Player0_PositionX
+   194 00,2137 A9 00		c17 lda #$00
+   195 00,2139 8D 12 D0		 sta Player0_Missile0_Color0_PM0
+   196 00,213C 8D 0A D4		 sta $d40a                   ;line=41
+   197 00,213F A9 00		c18 lda #$00
+   198 00,2141 8D 0A D4		 sta $d40a                   ;line=42
+   199 00,2144 8D 19 D0		 sta Playfield_Color3_PF3
+   200 00,2147 A9 A4		c19 lda #$A4
+   201 00,2149 8D 0A D4		 sta $d40a                   ;line=43
+   202 00,214C 8D 16 D0		 sta Playfield_Color0_PF0
+   203 00,214F 8D 0A D4		 sta $d40a                   ;line=44
+   204 00,2152 A9 A6		c20 lda #$A6
+   205 00,2154 8D 0A D4		 sta $d40a                   ;line=45
+   206 00,2157 8D 17 D0		 sta Playfield_Color1_PF1
+   207 00,215A 8D 0A D4		 sta $d40a                   ;line=46
+   208 				; sta $d40a                   ;line=47
+   209 00,215D A9 C4		c21 lda #$C4
+   210 00,215F A2 C6		c22 ldx #$C6
+   211 00,2161 A0 CC		c23 ldy #$CC
+   212 				; sta $d40a                   ;line=48
+   213 00,2163 8D 16 D0		 sta Playfield_Color0_PF0
+   214 00,2166 8E 17 D0		 stx Playfield_Color1_PF1
+   215 00,2169 8C 18 D0		 sty Playfield_Color2_PF2
+   216 				; sta $d40a                   ;line=49
+   217 				; sta $d40a                   ;line=50
+   218 				; sta $d40a                   ;line=51
+   219 				; sta $d40a                   ;line=52
+   220 				; sta $d40a                   ;line=53
+   221 				; sta $d40a                   ;line=54
+   222 				; sta $d40a                   ;line=55
+   223
+   224 				 mwa #dli2_2 dliv+1
+Macro: MWA [Source: d:\!atari\macro\xasm.mac]
+    36 00,216C A9 7D		      ldA <DLI2_2
+    37 00,216E 8D AB 23		      stA DLIV+1
+    38 00,2171 A9 21		      ldA >DLI2_2
+    39 00,2173 8D AC 23		      stA DLIV+1+1
+Source: D:\!Atari\getris2\high_score\H_Score_OK.asm
+   225 				 mrti
+Macro: MRTI [Source: D:\!Atari\getris2\high_score\H_Score_OK.asm]
+     1 00,2176 A5 80		 lda rejA
+     2 00,2178 A6 82		 ldx rejX
+     3 00,217A A4 84		 ldy rejY
+     4 00,217C 40		 rti
+Source: D:\!Atari\getris2\high_score\H_Score_OK.asm
+   226
+   227
+   228 00,217D			dli2_2
+   229 00,217D 8D 0A D4		 sta $d40a                   ;line=56
+   230 00,2180 8D 0A D4		 sta $d40a                   ;line=57
+   231 00,2183 A9 33		 lda #$33
+   232 00,2185 A2 06		c24 ldx #$06
+   233 00,2187 8D 0A D4		 sta $d40a                   ;line=58
+   234 00,218A 8D 02 D0		 sta Player2_PositionX
+   235 00,218D 8E 14 D0		 stx Player2_Missile2_Color2_PM2
+   236 00,2190 8D 0A D4		 sta $d40a                   ;line=59
+   237 00,2193 A9 00		 lda #$00
+   238 00,2195 A2 33		 ldx #$33
+   239 00,2197 A0 06		c25 ldy #$06
+   240 00,2199 8D 0A D4		 sta $d40a                   ;line=60
+   241 00,219C 8D 09 D0		 sta Player1_Size
+   242 00,219F 8E 01 D0		 stx Player1_PositionX
+   243 00,21A2 8C 13 D0		 sty Player1_Missile1_Color1_PM1
+   244 00,21A5 A9 33		 lda #$33
+   245 00,21A7 A2 08		c26 ldx #$08
+   246 00,21A9 A0 0E		c27 ldy #$0E
+   247 00,21AB 8D 0A D4		 sta $d40a                   ;line=61
+   248 00,21AE 8D 03 D0		 sta Player3_PositionX
+   249 00,21B1 8E 14 D0		 stx Player2_Missile2_Color2_PM2
+   250 00,21B4 8C 15 D0		 sty Player3_Missile3_Color3_PM3
+   251 00,21B7 8D 0A D4		 sta $d40a                   ;line=62
+   252 00,21BA A9 C8		c28 lda #$C8
+   253 00,21BC 8D 0A D4		 sta $d40a                   ;line=63
+   254 00,21BF 8D 19 D0		 sta Playfield_Color3_PF3
+   255 				 mwa #dli3 dliv+1
+Macro: MWA [Source: d:\!atari\macro\xasm.mac]
+    36 00,21C2 A9 D3		      ldA <DLI3
+    37 00,21C4 8D AB 23		      stA DLIV+1
+    38 00,21C7 A9 21		      ldA >DLI3
+    39 00,21C9 8D AC 23		      stA DLIV+1+1
+Source: D:\!Atari\getris2\high_score\H_Score_OK.asm
+   256 				 mrti
+Macro: MRTI [Source: D:\!Atari\getris2\high_score\H_Score_OK.asm]
+     1 00,21CC A5 80		 lda rejA
+     2 00,21CE A6 82		 ldx rejX
+     3 00,21D0 A4 84		 ldy rejY
+     4 00,21D2 40		 rti
+Source: D:\!Atari\getris2\high_score\H_Score_OK.asm
+   257
+   258
+   259 00,21D3			dli3
+   260 00,21D3 A9 38		 lda >fnt3
+   261 00,21D5 A2 A4		c29 ldx #$A4
+   262 00,21D7 A0 A6		c30 ldy #$A6
+   263 00,21D9 8D 0A D4		 sta $d40a                   ;line=88
+   264 00,21DC 8D 09 D4		 sta CHARBASE
+   265 00,21DF 8E 16 D0		 stx Playfield_Color0_PF0
+   266 00,21E2 8C 17 D0		 sty Playfield_Color1_PF1
+   267 00,21E5 A9 00		c31 lda #$00
+   268 00,21E7 8D 19 D0		 sta Playfield_Color3_PF3
+   269 00,21EA 8D 0A D4		 sta $d40a                   ;line=89
+   270 00,21ED A9 AC		c32 lda #$AC
+   271 00,21EF 8D 0A D4		 sta $d40a                   ;line=90
+   272 00,21F2 8D 18 D0		 sta Playfield_Color2_PF2
+   273 00,21F5 8D 0A D4		 sta $d40a                   ;line=91
+   274 00,21F8 8D 0A D4		 sta $d40a                   ;line=92
+   275 00,21FB A9 04		c33 lda #$04
+   276 00,21FD A2 06		c34 ldx #$06
+   277 00,21FF A0 0C		c35 ldy #$0C
+   278 00,2201 8D 0A D4		 sta $d40a                   ;line=93
+   279 00,2204 8D 13 D0		 sta Player1_Missile1_Color1_PM1
+   280 00,2207 8E 14 D0		 stx Player2_Missile2_Color2_PM2
+   281 00,220A 8C 15 D0		 sty Player3_Missile3_Color3_PM3
+   282 00,220D A9 34		c36 lda #$34
+   283 00,220F A2 36		c37 ldx #$36
+   284 00,2211 A0 3C		c38 ldy #$3C
+   285 00,2213 8D 0A D4		 sta $d40a                   ;line=94
+   286 00,2216 8D 16 D0		 sta Playfield_Color0_PF0
+   287 00,2219 8E 17 D0		 stx Playfield_Color1_PF1
+   288 00,221C 8C 18 D0		 sty Playfield_Color2_PF2
+   289 00,221F A9 38		c39 lda #$38
+   290 00,2221 8D 0A D4		 sta $d40a                   ;line=95
+   291 00,2224 8D 19 D0		 sta Playfield_Color3_PF3
+   292 00,2227 A9 3C		 lda >fnt3_2
+   293 00,2229 8D 0A D4		 sta $d40a                   ;line=96
+   294 00,222C 8D 09 D4		 sta CHARBASE
+   295 				 mwa #dli4 dliv+1
+Macro: MWA [Source: d:\!atari\macro\xasm.mac]
+    36 00,222F A9 40		      ldA <DLI4
+    37 00,2231 8D AB 23		      stA DLIV+1
+    38 00,2234 A9 22		      ldA >DLI4
+    39 00,2236 8D AC 23		      stA DLIV+1+1
+Source: D:\!Atari\getris2\high_score\H_Score_OK.asm
+   296 				 mrti
+Macro: MRTI [Source: D:\!Atari\getris2\high_score\H_Score_OK.asm]
+     1 00,2239 A5 80		 lda rejA
+     2 00,223B A6 82		 ldx rejX
+     3 00,223D A4 84		 ldy rejY
+     4 00,223F 40		 rti
+Source: D:\!Atari\getris2\high_score\H_Score_OK.asm
+   297
+   298
+   299 00,2240			dli4
+   300 00,2240 A9 38		 lda >fnt3
+   301 00,2242 A2 A4		c40 ldx #$A4
+   302 00,2244 A0 A6		c41 ldy #$A6
+   303 00,2246 8D 0A D4		 sta $d40a                   ;line=120
+   304 00,2249 8D 09 D4		 sta CHARBASE
+   305 00,224C 8E 16 D0		 stx Playfield_Color0_PF0
+   306 00,224F 8C 17 D0		 sty Playfield_Color1_PF1
+   307 00,2252 A9 00		c42 lda #$00
+   308 00,2254 8D 19 D0		 sta Playfield_Color3_PF3
+   309 00,2257 8D 0A D4		 sta $d40a                   ;line=121
+   310 00,225A A9 AC		c43 lda #$AC
+   311 00,225C 8D 0A D4		 sta $d40a                   ;line=122
+   312 00,225F 8D 18 D0		 sta Playfield_Color2_PF2
+   313 00,2262 8D 0A D4		 sta $d40a                   ;line=123
+   314 00,2265 A9 0E		c44 lda #$0E
+   315 00,2267 8D 0A D4		 sta $d40a                   ;line=124
+   316 00,226A 8D 15 D0		 sta Player3_Missile3_Color3_PM3
+   317 00,226D A9 0A		c45 lda #$0A
+   318 00,226F 8D 0A D4		 sta $d40a                   ;line=125
+   319 00,2272 8D 15 D0		 sta Player3_Missile3_Color3_PM3
+   320 00,2275 8D 0A D4		 sta $d40a                   ;line=126
+   321 00,2278 A9 98		c46 lda #$98
+   322 00,227A 8D 0A D4		 sta $d40a                   ;line=127
+   323 00,227D 8D 19 D0		 sta Playfield_Color3_PF3
+   324 00,2280 A9 3C		 lda >fnt3_2
+   325 00,2282 A2 94		c47 ldx #$94
+   326 00,2284 A0 96		c48 ldy #$96
+   327 00,2286 8D 0A D4		 sta $d40a                   ;line=128
+   328 00,2289 8D 09 D4		 sta CHARBASE
+   329 00,228C 8E 16 D0		 stx Playfield_Color0_PF0
+   330 00,228F 8C 17 D0		 sty Playfield_Color1_PF1
+   331 00,2292 A9 9C		c49 lda #$9C
+   332 00,2294 8D 18 D0		 sta Playfield_Color2_PF2
+   333 				 mwa #dli5 dliv+1
+Macro: MWA [Source: d:\!atari\macro\xasm.mac]
+    36 00,2297 A9 A8		      ldA <DLI5
+    37 00,2299 8D AB 23		      stA DLIV+1
+    38 00,229C A9 22		      ldA >DLI5
+    39 00,229E 8D AC 23		      stA DLIV+1+1
+Source: D:\!Atari\getris2\high_score\H_Score_OK.asm
+   334 				 mrti
+Macro: MRTI [Source: D:\!Atari\getris2\high_score\H_Score_OK.asm]
+     1 00,22A1 A5 80		 lda rejA
+     2 00,22A3 A6 82		 ldx rejX
+     3 00,22A5 A4 84		 ldy rejY
+     4 00,22A7 40		 rti
+Source: D:\!Atari\getris2\high_score\H_Score_OK.asm
+   335
+   336
+   337 00,22A8			dli5
+   338 00,22A8 A9 38		 lda >fnt3
+   339 00,22AA A2 A4		c50 ldx #$A4
+   340 00,22AC A0 A6		c51 ldy #$A6
+   341 00,22AE 8D 0A D4		 sta $d40a                   ;line=152
+   342 00,22B1 8D 09 D4		 sta CHARBASE
+   343 00,22B4 8E 16 D0		 stx Playfield_Color0_PF0
+   344 00,22B7 8C 17 D0		 sty Playfield_Color1_PF1
+   345 00,22BA A9 00		c52 lda #$00
+   346 00,22BC 8D 19 D0		 sta Playfield_Color3_PF3
+   347 00,22BF 8D 0A D4		 sta $d40a                   ;line=153
+   348 00,22C2 A9 AC		c53 lda #$AC
+   349 00,22C4 8D 0A D4		 sta $d40a                   ;line=154
+   350 00,22C7 8D 18 D0		 sta Playfield_Color2_PF2
+   351 00,22CA 8D 0A D4		 sta $d40a                   ;line=155
+   352 00,22CD A9 0E		c54 lda #$0E
+   353 00,22CF 8D 0A D4		 sta $d40a                   ;line=156
+   354 00,22D2 8D 15 D0		 sta Player3_Missile3_Color3_PM3
+   355 00,22D5 A9 08		c55 lda #$08
+   356 00,22D7 8D 0A D4		 sta $d40a                   ;line=157
+   357 00,22DA 8D 15 D0		 sta Player3_Missile3_Color3_PM3
+   358 00,22DD 8D 0A D4		 sta $d40a                   ;line=158
+   359 00,22E0 A9 F8		c56 lda #$F8
+   360 00,22E2 8D 0A D4		 sta $d40a                   ;line=159
+   361 00,22E5 8D 19 D0		 sta Playfield_Color3_PF3
+   362 00,22E8 A9 3C		 lda >fnt3_2
+   363 00,22EA A2 E4		c57 ldx #$E4
+   364 00,22EC A0 F6		c58 ldy #$F6
+   365 00,22EE 8D 0A D4		 sta $d40a                   ;line=160
+   366 00,22F1 8D 09 D4		 sta CHARBASE
+   367 00,22F4 8E 16 D0		 stx Playfield_Color0_PF0
+   368 00,22F7 8C 17 D0		 sty Playfield_Color1_PF1
+   369 00,22FA A9 FC		c59 lda #$FC
+   370 00,22FC 8D 18 D0		 sta Playfield_Color2_PF2
+   371 				 mwa #dli6 dliv+1
+Macro: MWA [Source: d:\!atari\macro\xasm.mac]
+    36 00,22FF A9 10		      ldA <DLI6
+    37 00,2301 8D AB 23		      stA DLIV+1
+    38 00,2304 A9 23		      ldA >DLI6
+    39 00,2306 8D AC 23		      stA DLIV+1+1
+Source: D:\!Atari\getris2\high_score\H_Score_OK.asm
+   372 				 mrti
+Macro: MRTI [Source: D:\!Atari\getris2\high_score\H_Score_OK.asm]
+     1 00,2309 A5 80		 lda rejA
+     2 00,230B A6 82		 ldx rejX
+     3 00,230D A4 84		 ldy rejY
+     4 00,230F 40		 rti
+Source: D:\!Atari\getris2\high_score\H_Score_OK.asm
+   373
+   374
+   375 00,2310			dli6
+   376 00,2310 A9 38		 lda >fnt3
+   377 00,2312 A2 A4		c60 ldx #$A4
+   378 00,2314 A0 A6		c61 ldy #$A6
+   379 00,2316 8D 0A D4		 sta $d40a                   ;line=184
+   380 00,2319 8D 09 D4		 sta CHARBASE
+   381 00,231C 8E 16 D0		 stx Playfield_Color0_PF0
+   382 00,231F 8C 17 D0		 sty Playfield_Color1_PF1
+   383 00,2322 A9 00		c62 lda #$00
+   384 00,2324 8D 19 D0		 sta Playfield_Color3_PF3
+   385 00,2327 8D 0A D4		 sta $d40a                   ;line=185
+   386 00,232A A9 AC		c63 lda #$AC
+   387 00,232C 8D 0A D4		 sta $d40a                   ;line=186
+   388 00,232F 8D 18 D0		 sta Playfield_Color2_PF2
+   389 00,2332 8D 0A D4		 sta $d40a                   ;line=187
+   390 00,2335 A9 06		c64 lda #$06
+   391 00,2337 8D 0A D4		 sta $d40a                   ;line=188
+   392 00,233A 8D 15 D0		 sta Player3_Missile3_Color3_PM3
+   393 00,233D 8D 0A D4		 sta $d40a                   ;line=189
+   394 00,2340 8D 0A D4		 sta $d40a                   ;line=190
+   395 00,2343 A9 28		c65 lda #$28
+   396 00,2345 8D 0A D4		 sta $d40a                   ;line=191
+   397 00,2348 8D 19 D0		 sta Playfield_Color3_PF3
+   398 00,234B A9 3C		 lda >fnt3_2
+   399 00,234D A2 24		c66 ldx #$24
+   400 00,234F A0 26		c67 ldy #$26
+   401 00,2351 8D 0A D4		 sta $d40a                   ;line=192
+   402 00,2354 8D 09 D4		 sta CHARBASE
+   403 00,2357 8E 16 D0		 stx Playfield_Color0_PF0
+   404 00,235A 8C 17 D0		 sty Playfield_Color1_PF1
+   405 00,235D A9 2C		c68 lda #$2C
+   406 00,235F 8D 18 D0		 sta Playfield_Color2_PF2
+   407 				; sta $d40a                   ;line=193
+   408 				; sta $d40a                   ;line=194
+   409 				; sta $d40a                   ;line=195
+   410 				; sta $d40a                   ;line=196
+   411 				; sta $d40a                   ;line=197
+   412 				; sta $d40a                   ;line=198
+   413 				; sta $d40a                   ;line=199
+   414 				 mwa #dli6_2 dliv+1
+Macro: MWA [Source: d:\!atari\macro\xasm.mac]
+    36 00,2362 A9 73		      ldA <DLI6_2
+    37 00,2364 8D AB 23		      stA DLIV+1
+    38 00,2367 A9 23		      ldA >DLI6_2
+    39 00,2369 8D AC 23		      stA DLIV+1+1
+Source: D:\!Atari\getris2\high_score\H_Score_OK.asm
+   415 				 mrti
+Macro: MRTI [Source: D:\!Atari\getris2\high_score\H_Score_OK.asm]
+     1 00,236C A5 80		 lda rejA
+     2 00,236E A6 82		 ldx rejX
+     3 00,2370 A4 84		 ldy rejY
+     4 00,2372 40		 rti
+Source: D:\!Atari\getris2\high_score\H_Score_OK.asm
+   416
+   417
+   418 00,2373			dli6_2
+   419 00,2373 A9 A4		c69 lda #$A4
+   420 00,2375 A2 A6		c70 ldx #$A6
+   421 00,2377 A0 00		c71 ldy #$00
+   422 00,2379 8D 0A D4		 sta $d40a                   ;line=216
+   423 00,237C 8D 16 D0		 sta Playfield_Color0_PF0
+   424 00,237F 8E 17 D0		 stx Playfield_Color1_PF1
+   425 00,2382 8C 19 D0		 sty Playfield_Color3_PF3
+   426 00,2385 8D 0A D4		 sta $d40a                   ;line=217
+   427 00,2388 A9 AC		c72 lda #$AC
+   428 00,238A 8D 0A D4		 sta $d40a                   ;line=218
+   429 00,238D 8D 18 D0		 sta Playfield_Color2_PF2
+   430 00,2390 A9 0E		c73 lda #$0E
+   431 00,2392 8D 0A D4		 sta $d40a                   ;line=219
+   432 00,2395 8D 15 D0		 sta Player3_Missile3_Color3_PM3
+   433 				 mrti
+Macro: MRTI [Source: D:\!Atari\getris2\high_score\H_Score_OK.asm]
+     1 00,2398 A5 80		 lda rejA
+     2 00,239A A6 82		 ldx rejX
+     3 00,239C A4 84		 ldy rejY
+     4 00,239E 40		 rti
+Source: D:\!Atari\getris2\high_score\H_Score_OK.asm
+   434
+   435
+   436 				;--
+   437
+   438 00,239F 2C 0F D4		nmi bit $d40f
+   439 00,23A2 10 09		 bpl vbl
+   440
+   441 00,23A4 85 80		 sta rejA
+   442 00,23A6 86 82		 stx rejX
+   443 00,23A8 84 84		 sty rejY
+   444
+   445 00,23AA 4C 38 24		dliv jmp dliQ
+   446
+   447 00,23AD 48		vbl pha			;przerwanie VBL *- VBL routine
+   448 				; txa
+   449 				; pha
+   450 				; tya
+   451 				; pha
+   452 00,23AE 8D 0F D4		 sta $d40f		;reset znacznika przerwania $d40f
+   453
+   454 00,23B1 E6 14		 inc $14
+   455
+   456 				 mwa #ant $d402		;adres programu ANTICA ($d402,$d403)
+Macro: MWA [Source: d:\!atari\macro\xasm.mac]
+    36 00,23B3 A9 39		      ldA <ANT
+    37 00,23B5 8D 02 D4		      stA $D402
+    38 00,23B8 A9 24		      ldA >ANT
+    39 00,23BA 8D 03 D4		      stA $D402+1
+Source: D:\!Atari\getris2\high_score\H_Score_OK.asm
+   457 				 mva #scr40 $d400	;ustawienie szerokosci obrazu $d400
+Macro: MVA [Source: d:\!atari\macro\xasm.mac]
+     5 00,23BD A9 3E		 ldA #SCR40
+     6 00,23BF 8D 00 D4		 stA $D400
+Source: D:\!Atari\getris2\high_score\H_Score_OK.asm
+Source: D:\!Atari\getris2\high_score\H_Score_OK.asm
+   458
+   459 				;-- init pierwszej linii
+   460
+   461 00,23C2 A9 38		 lda >fnt3
+   462 00,23C4 8D 09 D4		 sta CHARBASE
+   463 00,23C7 A9 00		c0 lda #$00
+   464 00,23C9 8D 1A D0		 sta Background_BAK
+   465 00,23CC A9 2A		c1 lda #$2A
+   466 00,23CE 8D 16 D0		 sta Playfield_Color0_PF0
+   467 00,23D1 A9 38		c2 lda #$38
+   468 00,23D3 8D 17 D0		 sta Playfield_Color1_PF1
+   469 00,23D6 A9 34		c3 lda #$34
+   470 00,23D8 8D 18 D0		 sta Playfield_Color2_PF2
+   471 00,23DB A9 38		c4 lda #$38
+   472 00,23DD 8D 19 D0		 sta Playfield_Color3_PF3
+   473 00,23E0 A9 04		 lda #$04
+   474 00,23E2 8D 1B D0		 sta PRIOR_GTIACTL
+   475 00,23E5 A9 00		 lda #$00
+   476 00,23E7 8D 08 D0		 sta Player0_Size
+   477 00,23EA 8D 0A D0		 sta Player2_Size
+   478 00,23ED 8D 0B D0		 sta Player3_Size
+   479 00,23F0 8D 0C D0		 sta Missiles_Size
+   480 00,23F3 A9 63		 lda #$63
+   481 00,23F5 8D 00 D0		 sta Player0_PositionX
+   482 00,23F8 A9 49		 lda #$49
+   483 00,23FA 8D 02 D0		 sta Player2_PositionX
+   484 00,23FD A9 73		 lda #$73
+   485 00,23FF 8D 03 D0		 sta Player3_PositionX
+   486 00,2402 A9 4D		 lda #$4D
+   487 00,2404 8D 04 D0		 sta Missile0_PositionX
+   488 00,2407 A9 7B		 lda #$7B
+   489 00,2409 8D 06 D0		 sta Missile2_PositionX
+   490 00,240C A9 3F		 lda #$3F
+   491 00,240E 8D 07 D0		 sta Missile3_PositionX
+   492 00,2411 A9 6A		c5 lda #$6A
+   493 00,2413 8D 12 D0		 sta Player0_Missile0_Color0_PM0
+   494 00,2416 A9 34		c6 lda #$34
+   495 00,2418 8D 14 D0		 sta Player2_Missile2_Color2_PM2
+   496 00,241B 8D 15 D0		 sta Player3_Missile3_Color3_PM3
+   497 00,241E A9 01		 lda #$01
+   498 00,2420 8D 09 D0		 sta Player1_Size
+   499 00,2423 A9 20		 lda #$20
+   500 00,2425 8D 01 D0		 sta Player1_PositionX
+   501 00,2428 A9 00		c7 lda #$00
+   502 00,242A 8D 13 D0		 sta Player1_Missile1_Color1_PM1
+   503
+   504 				 mwa #dli1 dliv+1
+Macro: MWA [Source: d:\!atari\macro\xasm.mac]
+    36 00,242D A9 48		      ldA <DLI1
+    37 00,242F 8D AB 23		      stA DLIV+1
+    38 00,2432 A9 20		      ldA >DLI1
+    39 00,2434 8D AC 23		      stA DLIV+1+1
+Source: D:\!Atari\getris2\high_score\H_Score_OK.asm
+   505
+   506 				; pla
+   507 				; tay
+   508 				; pla
+   509 				; tax
+   510 00,2437 68		 pla
+   511 00,2438 40		dliQ rti
+   512
+   513 				;--
+   514 				;--
+   515
+   516 00,2439 80 44 5A 24	ant dta $80,$44,a(text)
+   517 00,243D 04 04 84 84 70 +	 dta 4,4,$84,$84,$70,$f0,$70,4,4,$84,$70,4,4,$84,$70,4,4,$84,$70,4,4,$84,$70,4,4,$84
+   518 00,2457 41 39 24		 dta $41,a(ant)
+   519
+   520 00,245A			text
+   521 00,245A 00 00 00 00 00 +	 ins 'H_Score_OK.scr'
+   522
+   523
+   524 				/*
+   525 				  FADE ON-OUT
+   526 				*/
+   527 00,277A			 icl 'h_score_ok.fad'
+Source: D:\!Atari\getris2\high_score\h_score_ok.fad
+     1 = 00,004A		color_nr equ 74
+     2 = 00,0080		tmp	 equ $80
+     3
+     4 				;-----------;
+     5 				;- FADE IN -;
+     6 				;-----------;
+     7 00,277A			.proc fade_in
+     8
+     9 00,277A A2 06		 ldx #6
+    10 00,277C 20 3E 20		 jsr wait
+    11
+    12 00,277F A9 10		 lda #16
+    13 00,2781 8D 3D 20		 sta licz
+    14 00,2784			fad
+    15 00,2784 A2 02		 ldx #2
+    16 00,2786 20 3E 20		 jsr wait
+    17 00,2789 20 92 27		 jsr fade
+    18 00,278C CE 3D 20		 dec licz
+    19 00,278F D0 F3		 bne fad
+    20 00,2791 60		 rts
+    21
+    22 00,2792			fade
+    23
+    24 00,2792 A2 00		 ldx #0
+    25
+    26 00,2794			fade_l
+    27 00,2794 BD 2C 28		 lda l_tcol,x
+    28 00,2797 85 80		 sta tmp
+    29 00,2799 BD 76 28		 lda h_tcol,x
+    30 00,279C 85 81		 sta tmp+1
+    31
+    32 00,279E A0 01		 ldy #1
+    33 00,27A0 B1 80		 lda (tmp),y
+    34 00,27A2 A8		 tay
+    35
+    36 00,27A3 29 0F		 and #$0f
+    37 00,27A5 DD C0 28		 cmp t_satur,x
+    38 00,27A8 F0 01		 beq skp0
+    39
+    40 00,27AA C8		 iny
+    41
+    42 00,27AB			skp0
+    43
+    44 00,27AB 98		 tya
+    45 00,27AC 29 F0		 and #$f0
+    46 00,27AE DD 0A 29		 cmp t_color,x
+    47 00,27B1 F0 05		 beq skp1
+    48
+    49 00,27B3 98		 tya
+    50 00,27B4 18		 clc
+    51 00,27B5 69 10		 adc #$10
+    52 00,27B7 A8		 tay
+    53
+    54 00,27B8			skp1
+    55 00,27B8 98		 tya
+    56
+    57 00,27B9 A0 01		 ldy #1
+    58 00,27BB 91 80		 sta (tmp),y
+    59
+    60 00,27BD E8		 inx
+    61 00,27BE E0 4A		 cpx #color_nr
+    62 00,27C0 D0 D2		 bne fade_l
+    63 00,27C2 60		 rts
+    64 				.endp
+    65
+    66
+    67 				;------------;
+    68 				;- FADE OUT -;
+    69 				;------------;
+    70 00,27C3			.proc fade_out
+    71
+    72 00,27C3 A2 06		 ldx #6
+    73 00,27C5 20 3E 20		 jsr wait
+    74
+    75 00,27C8 A9 10		 lda #16
+    76 00,27CA 8D 3D 20		 sta licz
+    77 00,27CD			fad
+    78 00,27CD A2 02		 ldx #2
+    79 00,27CF 20 3E 20		 jsr wait
+    80 00,27D2 20 DB 27		 jsr fade
+    81 00,27D5 CE 3D 20		 dec licz
+    82 00,27D8 D0 F3		 bne fad
+    83 00,27DA 60		 rts
+    84
+    85 00,27DB			fade
+    86
+    87 00,27DB A2 00		 ldx #0
+    88
+    89 00,27DD			fade_l
+    90 00,27DD BD 2C 28		 lda l_tcol,x
+    91 00,27E0 85 80		 sta tmp
+    92 00,27E2 BD 76 28		 lda h_tcol,x
+    93 00,27E5 85 81		 sta tmp+1
+    94
+    95 00,27E7 A0 01		 ldy #1
+    96 00,27E9 B1 80		 lda (tmp),y
+    97 00,27EB A8		 tay
+    98
+    99 00,27EC 29 0F		 and #$0f
+   100 00,27EE F0 01		 beq skp0
+   101
+   102 00,27F0 88		 dey
+   103
+   104 00,27F1			skp0
+   105
+   106 00,27F1 98		 tya
+   107 00,27F2 29 F0		 and #$f0
+   108 00,27F4 F0 05		 beq skp1
+   109
+   110 00,27F6 98		 tya
+   111 00,27F7 38		 sec
+   112 00,27F8 E9 10		 sbc #$10
+   113 00,27FA A8		 tay
+   114
+   115 00,27FB			skp1
+   116 00,27FB 98		 tya
+   117
+   118 00,27FC A0 01		 ldy #1
+   119 00,27FE 91 80		 sta (tmp),y
+   120
+   121 00,2800 E8		 inx
+   122 00,2801 E0 4A		 cpx #color_nr
+   123 00,2803 D0 D8		 bne fade_l
+   124 00,2805 60		 rts
+   125 				.endp
+   126
+   127 				;--------------;
+   128 				;- SAVE COLOR -;
+   129 				;--------------;
+   130 00,2806			save_color
+   131 00,2806 A2 00		 ldx #0
+   132 00,2808			save_l
+   133 00,2808 BD 2C 28		 lda l_tcol,x
+   134 00,280B 85 80		 sta tmp
+   135 00,280D BD 76 28		 lda h_tcol,x
+   136 00,2810 85 81		 sta tmp+1
+   137
+   138 00,2812 A0 01		 ldy #1
+   139 00,2814 B1 80		 lda (tmp),y
+   140 00,2816 48		 pha
+   141 00,2817 29 0F		 and #$0f
+   142 00,2819 9D C0 28		 sta t_satur,x
+   143 00,281C 68		 pla
+   144 00,281D 29 F0		 and #$f0
+   145 00,281F 9D 0A 29		 sta t_color,x
+   146
+   147 00,2822 A9 00		 lda #0        ; black screen (all colors = $00)
+   148 00,2824 91 80		 sta (tmp),y
+   149
+   150 00,2826 E8		 inx
+   151 00,2827 E0 4A		 cpx #color_nr
+   152 00,2829 D0 DD		 bne save_l
+   153 00,282B 60		 rts
+   154
+   155 00,282C			l_tcol
+   156 00,282C C7 CC D1 D6 DB +	 dta l(c0,c1,c2,c3,c4,c5,c6,c7,c8,c9)
+   157 00,2836 5E 71 F5 FD FF +	 dta l(c10,c11,c12,c13,c14,c15,c16,c17,c18,c19)
+   158 00,2840 52 5D 5F 61 85 +	 dta l(c20,c21,c22,c23,c24,c25,c26,c27,c28,c29)
+   159 00,284A D7 E5 ED FB FD +	 dta l(c30,c31,c32,c33,c34,c35,c36,c37,c38,c39)
+   160 00,2854 42 44 52 5A 65 +	 dta l(c40,c41,c42,c43,c44,c45,c46,c47,c48,c49)
+   161 00,285E AA AC BA C2 CD +	 dta l(c50,c51,c52,c53,c54,c55,c56,c57,c58,c59)
+   162 00,2868 12 14 22 2A 35 +	 dta l(c60,c61,c62,c63,c64,c65,c66,c67,c68,c69)
+   163 00,2872 75 77 88 90	 dta l(c70,c71,c72,c73)
+   164
+   165 00,2876			h_tcol
+   166 00,2876 23 23 23 23 23 +	 dta h(c0,c1,c2,c3,c4,c5,c6,c7,c8,c9)
+   167 00,2880 20 20 20 20 20 +	 dta h(c10,c11,c12,c13,c14,c15,c16,c17,c18,c19)
+   168 00,288A 21 21 21 21 21 +	 dta h(c20,c21,c22,c23,c24,c25,c26,c27,c28,c29)
+   169 00,2894 21 21 21 21 21 +	 dta h(c30,c31,c32,c33,c34,c35,c36,c37,c38,c39)
+   170 00,289E 22 22 22 22 22 +	 dta h(c40,c41,c42,c43,c44,c45,c46,c47,c48,c49)
+   171 00,28A8 22 22 22 22 22 +	 dta h(c50,c51,c52,c53,c54,c55,c56,c57,c58,c59)
+   172 00,28B2 23 23 23 23 23 +	 dta h(c60,c61,c62,c63,c64,c65,c66,c67,c68,c69)
+   173 00,28BC 23 23 23 23	 dta h(c70,c71,c72,c73)
+   174
+   175 				t_satur .ds color_nr
+   175 00,28C0			org *+ color_nr
+   176 				t_color .ds color_nr
+   176 00,290A			org *+ color_nr
+   528
+   529
+   530 				/*
+   531 				  INPUT STRING
+   532 				*/
+   533 00,2954			 icl 'input_string.asm'
+Source: D:\!Atari\getris2\high_score\input_string.asm
+     1 				/*
+     2 				  INPUT STRING
+     3 				  wprowadza znaki z klawiatury pod adres 'newString'
+     4 				*/
+     5
+     6 = 00,245A		scren      equ text
+     7 = 00,2524		ekran      equ scren+5*40+2
+     8
+     9 = 00,0009		ile_znakow equ 9
+    10
+    11
+    12 				/*
+    13 				  NAME: LITERY
+    14 				  INFO: ksztalt liter opisany 6 bajtami (na podstawie 'HIGH_SCORE_ALL_2.G2F')
+    15 				        wczytujemy pierwsze 6 wierszy
+    16 				    IN: ---
+    17 				   OUT: ---
+    18 				*/
+    19 00,2954			litery
+    20 00,2954-2D18> 00 00 01 +	 ins 'score_alfabet.scr'
+    21
+    22
+    23 				/*
+    24 				  NAME: INPUT_STRING
+    25 				  
+    26 				  INFO: pod adresem 'COUNT' znajduje sie 7 bajtowa tablica reprezentujaca najwyzszy wynik gracza (high_score)
+    27 				        ten wynik porownywany jest z HIG1..HIG5, jesli jest wystarczajaco dobry
+    28 				        wyswietlamy go na odpowiedniej pozycji i pobieramy ciag znakow czyli pseudo gracza
+    29
+    30 				    IN: ---
+    31
+    32 				   OUT: pod adresem 'NEWSTRING' znajduja sie wpisane znaki   
+    33 				*/
+    34 00,2A44			.array count [6] .byte
+    35  [0002] 04		 [2] = 4
+    36  [0003] 04		 [3] = 4
+    37  [0004] 09		 [4] = 9
+    38  [0005] 06		 [5] = 6
+    39  [0006] 01		 [6] = 1
+    40 				.enda
+    41
+    42
+    43 00,2A4B			.proc input_string
+    44
+    45 00,2A4B A2 00		 ldx #0
+    46 00,2A4D			lp__
+    47 00,2A4D BD 36 2B		 lda l_hig,x
+    48 00,2A50 85 86		 sta zp
+    49 00,2A52 BD 3B 2B		 lda h_hig,x
+    50 00,2A55 85 87		 sta zp+1
+    51
+    52 00,2A57 A0 00		 ldy #0
+    53 00,2A59			tst_lp
+    54 00,2A59 B9 44 2A		 lda count,y
+    55 00,2A5C D1 86		 cmp (zp),y
+    56 00,2A5E F0 05		 beq tst_skp
+    57 00,2A60 90 0B		 bcc nxt
+    58
+    59 00,2A62 4C 73 2A		 jmp ok
+    60
+    61 00,2A65			tst_skp 
+    62 00,2A65 C8		 iny
+    63 00,2A66 C0 07		 cpy #7
+    64 00,2A68 D0 EF		 bne tst_lp
+    65
+    66 00,2A6A 4C 73 2A		 jmp ok
+    67
+    68 00,2A6D			nxt
+    69 00,2A6D E8		 inx
+    70 00,2A6E E0 05		 cpx #5
+    71 00,2A70 D0 DB		 bne lp__
+    72
+    73 00,2A72			nie_znalazl
+    74 00,2A72 60		 rts
+    75
+    76 00,2A73			ok
+    77 00,2A73 BD 22 2B		 lda l_score,x
+    78 00,2A76 8D 69 2B		 sta put_char.lscr+1
+    79 00,2A79 BD 27 2B		 lda h_score,x
+    80 00,2A7C 8D 6F 2B		 sta put_char.hscr+1
+    81
+    82 00,2A7F BD 2C 2B		 lda l_txt,x
+    83 00,2A82 85 8A		 sta txt
+    84 00,2A84 BD 31 2B		 lda h_txt,x
+    85 00,2A87 85 8B		 sta txt+1
+    86
+    87 				; przepisujemy wynik na wybrana pozycje
+    88 00,2A89 A0 07		 ldy #7
+    89 00,2A8B			mv
+    90 00,2A8B B9 44 2A		 lda count,y
+    91 00,2A8E 91 86		 sta (zp),y
+    92 00,2A90 88		 dey
+    93 00,2A91 10 F8		 bpl mv
+    94
+    95 00,2A93 A2 01		 ldx #1
+    96 00,2A95 8E 67 2B		 stx put_char.ofs+1
+    97 00,2A98 CA		 dex
+    98
+    99 00,2A99 A0 0B		 ldy #11
+   100
+   101 00,2A9B			cpr
+   102 00,2A9B BD 44 2A		 lda count,x
+   103 00,2A9E 18		 clc
+   104 00,2A9F 69 3D		 adc #"Z"+3
+   105
+   106 00,2AA1 20 40 2B		 jsr put_char
+   107
+   108 00,2AA4 C8		 iny
+   109 00,2AA5 E8		 inx 
+   110 00,2AA6 E0 07		 cpx #7
+   111 00,2AA8 D0 F1		 bne cpr
+   112
+   113
+   114 00,2AAA A0 00		 ldy #0
+   115 00,2AAC 8C 67 2B		 sty put_char.ofs+1
+   116 00,2AAF			cp
+   117 00,2AAF B1 8A		 lda (txt),y
+   118 00,2AB1 99 19 2D		 sta newString,y
+   119
+   120 00,2AB4 C8		 iny
+   121
+   122 00,2AB5 20 40 2B		 jsr put_char
+   123
+   124 00,2AB8 C9 9B		 cmp #$9b
+   125 00,2ABA D0 F3		 bne cp
+   126
+   127 00,2ABC A9 3B		 lda #"Z"+1
+   128 00,2ABE 20 40 2B		 jsr put_char
+   129
+   130 00,2AC1 88		 dey
+   131 00,2AC2 8C D8 2A		 sty _2+1
+   132
+   133
+   134 00,2AC5 20 E8 2B		_1 jsr get_key
+   135
+   136 00,2AC8 C9 9B		   cmp #$9b
+   137 00,2ACA F0 3A		   beq _end
+   138 00,2ACC C9 7E		   cmp #$7e
+   139 00,2ACE F0 1C		   beq _del
+   140
+   141 00,2AD0			char_ok
+   142 00,2AD0 AC D8 2A		   ldy _2+1
+   143 00,2AD3 C0 09		   cpy #ile_znakow              ; liczba znakow do wpisania
+   144 00,2AD5 F0 EE		   beq _1
+   145 00,2AD7 A0 00		_2 ldy #0
+   146 00,2AD9 99 19 2D		   sta newString,y
+   147 00,2ADC C8		   iny
+   148 00,2ADD 20 40 2B		   jsr put_char
+   149 00,2AE0 A9 3B		   lda #"Z"+1
+   150 00,2AE2 C8		   iny
+   151 00,2AE3 20 40 2B		   jsr put_char
+   152 00,2AE6 EE D8 2A		   inc _2+1
+   153 00,2AE9 4C C5 2A		   jmp _1
+   154
+   155 00,2AEC AC D8 2A		_del ldy _2+1
+   156 00,2AEF F0 D4		   beq _1
+   157 00,2AF1 A9 00		   lda #" "
+   158 00,2AF3 99 19 2D		   sta newString,y
+   159 00,2AF6 C8		   iny
+   160 00,2AF7 20 40 2B		   jsr put_char
+   161 00,2AFA CE D8 2A		   dec _2+1
+   162 00,2AFD A9 3B		_4 lda #"Z"+1
+   163 00,2AFF 88		   dey
+   164 00,2B00 20 40 2B		   jsr put_char
+   165 00,2B03 4C C5 2A		   jmp _1
+   166
+   167 00,2B06			_end
+   168 00,2B06 AC D8 2A		 ldy _2+1
+   169 00,2B09 C8		 iny
+   170 00,2B0A A9 00		 lda #" "
+   171 00,2B0C 20 40 2B		 jsr put_char
+   172
+   173 00,2B0F AC D8 2A		 ldy _2+1
+   174 00,2B12 A9 9B		 lda #$9b
+   175 00,2B14 99 19 2D		 sta newString,y
+   176
+   177 00,2B17 A0 09		 ldy #ile_znakow
+   178 00,2B19			cp_
+   179 00,2B19 B9 19 2D		 lda newString,y
+   180 00,2B1C 91 8A		 sta (txt),y
+   181 00,2B1E 88		 dey
+   182 00,2B1F 10 F8		 bpl cp_
+   183 00,2B21 60		 rts
+   184
+   185 00,2B22 24 9C 14 8C 04	l_score dta l( ekran , ekran+3*40 , ekran+6*40 , ekran+9*40 , ekran+12*40 )
+   186 00,2B27 25 25 26 26 27	h_score dta h( ekran , ekran+3*40 , ekran+6*40 , ekran+9*40 , ekran+12*40 )
+   187
+   188 00,2B2C 23 2D 37 41 4B	l_txt dta l( txt1 , txt2 , txt3 , txt4 , txt5 )
+   189 00,2B31 2D 2D 2D 2D 2D	h_txt dta h( txt1 , txt2 , txt3 , txt4 , txt5 )
+   190
+   191 00,2B36 55 5C 63 6A 71	l_hig dta l( hig1 , hig2 , hig3 , hig4 , hig5 )
+   192 00,2B3B 2D 2D 2D 2D 2D	h_hig dta h( hig1 , hig2 , hig3 , hig4 , hig5 )
+   193
+   194 				.endp
+   195
+   196
+   197 				/*
+   198 				  NAME: PUT_CHAR
+   199
+   200 				  INFO: wyswietla znak na wskazanej pozycji i o wskazanym kodzie
+   201 				        jesli kod znaku jest z przedzialy <$21..$3b+12> to wyswietlamy go
+   202 				        jesli jest inny to wyswietlamy znak numer 0 czyli kropke
+   203 				        regA i regY zostaja zachowane
+   204
+   205 				    IN: reg A - kod znaku
+   206 				        reg Y - pozycja pozioma
+   207
+   208 				   OUT: zwraca poczatkowa zawartosc regA i regY
+   209 				*/
+   210 00,2B40			.proc put_char
+   211 00,2B40 8C 96 2B		 sty regY
+   212 00,2B43 8D 94 2B		 sta regA
+   213
+   214 00,2B46 C9 21		 cmp #$21
+   215 00,2B48 90 07		 bcc bad_char
+   216 00,2B4A C9 47		 cmp #$3b+12
+   217 00,2B4C B0 03		 bcs bad_char
+   218
+   219 00,2B4E 4C 53 2B		 jmp ok_char
+   220
+   221 00,2B51 A9 20		bad_char lda #$20
+   222
+   223 00,2B53 38		ok_char sec
+   224 00,2B54 E9 20		 sbc #$20
+   225 00,2B56 A8		 tay
+   226
+   227 00,2B57 B9 98 2B		 lda l_adr,y
+   228 00,2B5A 85 86		 sta zp
+   229 00,2B5C B9 C0 2B		 lda h_adr,y
+   230 00,2B5F 85 87		 sta zp+1
+   231
+   232 00,2B61 AD 96 2B		 lda regY
+   233 00,2B64 0A		 asl @
+   234 00,2B65 18		 clc
+   235 00,2B66 69 00		ofs adc #0
+   236 00,2B68 69 00		lscr adc #0
+   237 00,2B6A 85 88		 sta zp_
+   238 00,2B6C A9 00		 lda #0
+   239 00,2B6E 69 00		hscr adc #0
+   240 00,2B70 85 89		 sta zp_+1
+   241
+   242 00,2B72 A0 00		 ldy #0
+   243 00,2B74 B1 86		 lda (zp),y
+   244 00,2B76 91 88		 sta (zp_),y
+   245 00,2B78 C8		 iny
+   246 00,2B79 B1 86		 lda (zp),y
+   247 00,2B7B 91 88		 sta (zp_),y
+   248 00,2B7D A0 28		 ldy #40
+   249 00,2B7F B1 86		 lda (zp),y
+   250 00,2B81 91 88		 sta (zp_),y
+   251 00,2B83 C8		 iny
+   252 00,2B84 B1 86		 lda (zp),y
+   253 00,2B86 91 88		 sta (zp_),y
+   254 00,2B88 A0 50		 ldy #80
+   255 00,2B8A B1 86		 lda (zp),y
+   256 00,2B8C 91 88		 sta (zp_),y
+   257 00,2B8E C8		 iny
+   258 00,2B8F B1 86		 lda (zp),y
+   259 00,2B91 91 88		 sta (zp_),y
+   260
+   261 00,2B93 A9 00		 lda #0
+   262 = 00,2B94		regA equ *-1
+   263 00,2B95 A0 00		 ldy #0
+   264 = 00,2B96		regY equ *-1
+   265 00,2B97 60		 rts
+   266
+   267 00,2B98			l_adr
+   268 = 00,2954		?tmp = litery
+   269 				.rept 20
+   270 				 dta l(?tmp)
+   271 				?tmp = ?tmp + 2
+   272 				.endr 
+Source: REPT
+   270 00,2B98 54		 dta l(?tmp)
+   271 = 00,2956		?tmp = ?tmp + 2
+   270 00,2B99 56		 dta l(?tmp)
+   271 = 00,2958		?tmp = ?tmp + 2
+   270 00,2B9A 58		 dta l(?tmp)
+   271 = 00,295A		?tmp = ?tmp + 2
+   270 00,2B9B 5A		 dta l(?tmp)
+   271 = 00,295C		?tmp = ?tmp + 2
+   270 00,2B9C 5C		 dta l(?tmp)
+   271 = 00,295E		?tmp = ?tmp + 2
+   270 00,2B9D 5E		 dta l(?tmp)
+   271 = 00,2960		?tmp = ?tmp + 2
+   270 00,2B9E 60		 dta l(?tmp)
+   271 = 00,2962		?tmp = ?tmp + 2
+   270 00,2B9F 62		 dta l(?tmp)
+   271 = 00,2964		?tmp = ?tmp + 2
+   270 00,2BA0 64		 dta l(?tmp)
+   271 = 00,2966		?tmp = ?tmp + 2
+   270 00,2BA1 66		 dta l(?tmp)
+   271 = 00,2968		?tmp = ?tmp + 2
+   270 00,2BA2 68		 dta l(?tmp)
+   271 = 00,296A		?tmp = ?tmp + 2
+   270 00,2BA3 6A		 dta l(?tmp)
+   271 = 00,296C		?tmp = ?tmp + 2
+   270 00,2BA4 6C		 dta l(?tmp)
+   271 = 00,296E		?tmp = ?tmp + 2
+   270 00,2BA5 6E		 dta l(?tmp)
+   271 = 00,2970		?tmp = ?tmp + 2
+   270 00,2BA6 70		 dta l(?tmp)
+   271 = 00,2972		?tmp = ?tmp + 2
+   270 00,2BA7 72		 dta l(?tmp)
+   271 = 00,2974		?tmp = ?tmp + 2
+   270 00,2BA8 74		 dta l(?tmp)
+   271 = 00,2976		?tmp = ?tmp + 2
+   270 00,2BA9 76		 dta l(?tmp)
+   271 = 00,2978		?tmp = ?tmp + 2
+   270 00,2BAA 78		 dta l(?tmp)
+   271 = 00,297A		?tmp = ?tmp + 2
+   270 00,2BAB 7A		 dta l(?tmp)
+   271 = 00,297C		?tmp = ?tmp + 2
+Source: D:\!Atari\getris2\high_score\input_string.asm
+   273
+   274 = 00,29CC		?tmp = litery+3*40
+   275 				.rept 20
+   276 				 dta l(?tmp)
+   277 				?tmp = ?tmp + 2
+   278 				.endr 
+Source: REPT
+   276 00,2BAC CC		 dta l(?tmp)
+   277 = 00,29CE		?tmp = ?tmp + 2
+   276 00,2BAD CE		 dta l(?tmp)
+   277 = 00,29D0		?tmp = ?tmp + 2
+   276 00,2BAE D0		 dta l(?tmp)
+   277 = 00,29D2		?tmp = ?tmp + 2
+   276 00,2BAF D2		 dta l(?tmp)
+   277 = 00,29D4		?tmp = ?tmp + 2
+   276 00,2BB0 D4		 dta l(?tmp)
+   277 = 00,29D6		?tmp = ?tmp + 2
+   276 00,2BB1 D6		 dta l(?tmp)
+   277 = 00,29D8		?tmp = ?tmp + 2
+   276 00,2BB2 D8		 dta l(?tmp)
+   277 = 00,29DA		?tmp = ?tmp + 2
+   276 00,2BB3 DA		 dta l(?tmp)
+   277 = 00,29DC		?tmp = ?tmp + 2
+   276 00,2BB4 DC		 dta l(?tmp)
+   277 = 00,29DE		?tmp = ?tmp + 2
+   276 00,2BB5 DE		 dta l(?tmp)
+   277 = 00,29E0		?tmp = ?tmp + 2
+   276 00,2BB6 E0		 dta l(?tmp)
+   277 = 00,29E2		?tmp = ?tmp + 2
+   276 00,2BB7 E2		 dta l(?tmp)
+   277 = 00,29E4		?tmp = ?tmp + 2
+   276 00,2BB8 E4		 dta l(?tmp)
+   277 = 00,29E6		?tmp = ?tmp + 2
+   276 00,2BB9 E6		 dta l(?tmp)
+   277 = 00,29E8		?tmp = ?tmp + 2
+   276 00,2BBA E8		 dta l(?tmp)
+   277 = 00,29EA		?tmp = ?tmp + 2
+   276 00,2BBB EA		 dta l(?tmp)
+   277 = 00,29EC		?tmp = ?tmp + 2
+   276 00,2BBC EC		 dta l(?tmp)
+   277 = 00,29EE		?tmp = ?tmp + 2
+   276 00,2BBD EE		 dta l(?tmp)
+   277 = 00,29F0		?tmp = ?tmp + 2
+   276 00,2BBE F0		 dta l(?tmp)
+   277 = 00,29F2		?tmp = ?tmp + 2
+   276 00,2BBF F2		 dta l(?tmp)
+   277 = 00,29F4		?tmp = ?tmp + 2
+Source: D:\!Atari\getris2\high_score\input_string.asm
+   279
+   280 00,2BC0			h_adr
+   281 = 00,2954		?tmp = litery
+   282 				.rept 20
+   283 				 dta h(?tmp)
+   284 				?tmp = ?tmp + 2
+   285 				.endr 
+Source: REPT
+   283 00,2BC0 29		 dta h(?tmp)
+   284 = 00,2956		?tmp = ?tmp + 2
+   283 00,2BC1 29		 dta h(?tmp)
+   284 = 00,2958		?tmp = ?tmp + 2
+   283 00,2BC2 29		 dta h(?tmp)
+   284 = 00,295A		?tmp = ?tmp + 2
+   283 00,2BC3 29		 dta h(?tmp)
+   284 = 00,295C		?tmp = ?tmp + 2
+   283 00,2BC4 29		 dta h(?tmp)
+   284 = 00,295E		?tmp = ?tmp + 2
+   283 00,2BC5 29		 dta h(?tmp)
+   284 = 00,2960		?tmp = ?tmp + 2
+   283 00,2BC6 29		 dta h(?tmp)
+   284 = 00,2962		?tmp = ?tmp + 2
+   283 00,2BC7 29		 dta h(?tmp)
+   284 = 00,2964		?tmp = ?tmp + 2
+   283 00,2BC8 29		 dta h(?tmp)
+   284 = 00,2966		?tmp = ?tmp + 2
+   283 00,2BC9 29		 dta h(?tmp)
+   284 = 00,2968		?tmp = ?tmp + 2
+   283 00,2BCA 29		 dta h(?tmp)
+   284 = 00,296A		?tmp = ?tmp + 2
+   283 00,2BCB 29		 dta h(?tmp)
+   284 = 00,296C		?tmp = ?tmp + 2
+   283 00,2BCC 29		 dta h(?tmp)
+   284 = 00,296E		?tmp = ?tmp + 2
+   283 00,2BCD 29		 dta h(?tmp)
+   284 = 00,2970		?tmp = ?tmp + 2
+   283 00,2BCE 29		 dta h(?tmp)
+   284 = 00,2972		?tmp = ?tmp + 2
+   283 00,2BCF 29		 dta h(?tmp)
+   284 = 00,2974		?tmp = ?tmp + 2
+   283 00,2BD0 29		 dta h(?tmp)
+   284 = 00,2976		?tmp = ?tmp + 2
+   283 00,2BD1 29		 dta h(?tmp)
+   284 = 00,2978		?tmp = ?tmp + 2
+   283 00,2BD2 29		 dta h(?tmp)
+   284 = 00,297A		?tmp = ?tmp + 2
+   283 00,2BD3 29		 dta h(?tmp)
+   284 = 00,297C		?tmp = ?tmp + 2
+Source: D:\!Atari\getris2\high_score\input_string.asm
+   286
+   287 = 00,29CC		?tmp = litery+3*40
+   288 				.rept 20
+   289 				 dta h(?tmp)
+   290 				?tmp = ?tmp + 2
+   291 				.endr 
+Source: REPT
+   289 00,2BD4 29		 dta h(?tmp)
+   290 = 00,29CE		?tmp = ?tmp + 2
+   289 00,2BD5 29		 dta h(?tmp)
+   290 = 00,29D0		?tmp = ?tmp + 2
+   289 00,2BD6 29		 dta h(?tmp)
+   290 = 00,29D2		?tmp = ?tmp + 2
+   289 00,2BD7 29		 dta h(?tmp)
+   290 = 00,29D4		?tmp = ?tmp + 2
+   289 00,2BD8 29		 dta h(?tmp)
+   290 = 00,29D6		?tmp = ?tmp + 2
+   289 00,2BD9 29		 dta h(?tmp)
+   290 = 00,29D8		?tmp = ?tmp + 2
+   289 00,2BDA 29		 dta h(?tmp)
+   290 = 00,29DA		?tmp = ?tmp + 2
+   289 00,2BDB 29		 dta h(?tmp)
+   290 = 00,29DC		?tmp = ?tmp + 2
+   289 00,2BDC 29		 dta h(?tmp)
+   290 = 00,29DE		?tmp = ?tmp + 2
+   289 00,2BDD 29		 dta h(?tmp)
+   290 = 00,29E0		?tmp = ?tmp + 2
+   289 00,2BDE 29		 dta h(?tmp)
+   290 = 00,29E2		?tmp = ?tmp + 2
+   289 00,2BDF 29		 dta h(?tmp)
+   290 = 00,29E4		?tmp = ?tmp + 2
+   289 00,2BE0 29		 dta h(?tmp)
+   290 = 00,29E6		?tmp = ?tmp + 2
+   289 00,2BE1 29		 dta h(?tmp)
+   290 = 00,29E8		?tmp = ?tmp + 2
+   289 00,2BE2 29		 dta h(?tmp)
+   290 = 00,29EA		?tmp = ?tmp + 2
+   289 00,2BE3 29		 dta h(?tmp)
+   290 = 00,29EC		?tmp = ?tmp + 2
+   289 00,2BE4 29		 dta h(?tmp)
+   290 = 00,29EE		?tmp = ?tmp + 2
+   289 00,2BE5 29		 dta h(?tmp)
+   290 = 00,29F0		?tmp = ?tmp + 2
+   289 00,2BE6 29		 dta h(?tmp)
+   290 = 00,29F2		?tmp = ?tmp + 2
+   289 00,2BE7 29		 dta h(?tmp)
+   290 = 00,29F4		?tmp = ?tmp + 2
+Source: D:\!Atari\getris2\high_score\input_string.asm
+   292
+   293 				.endp
+   294
+   295
+   296 				/*
+   297 				  NAME: GET_KEY
+   298 				  INFO: czeka na nacisniecie klawisza
+   299 				    IN: ---
+   300 				   OUT: w reg A znajdzie sie kod nacisnietego klawisza
+   301 				*/
+   302 00,2BE8			.proc get_key
+   303
+   304 00,2BE8 A5 14		 lda 20
+   305 00,2BEA C5 14		 cmp 20
+   306 00,2BEC F0 FC		 beq *-2
+   307
+   308 00,2BEE AD 0F D2		 lda $d20f
+   309 00,2BF1 29 04		 and #4
+   310 00,2BF3 D0 F3		 bne get_key
+   311
+   312 00,2BF5 AC 09 D2		 ldy $d209
+   313 00,2BF8 B9 19 2C		 lda tab,y
+   314 00,2BFB C9 FF		 cmp #$ff
+   315 00,2BFD F0 E9		 beq get_key
+   316
+   317 00,2BFF C9 00		 cmp #0
+   318 = 00,2C00		old_key equ *-1
+   319 00,2C01 D0 0D		 bne skp
+   320
+   321 00,2C03 A2 06		 ldx #6
+   322 = 00,2C04		delay equ *-1
+   323 00,2C05 CA		 dex
+   324 00,2C06 8E 04 2C		 stx delay
+   325 00,2C09 D0 DD		 bne get_key
+   326
+   327 00,2C0B A2 06		 ldx #6
+   328 00,2C0D 8E 04 2C		 stx delay 
+   329
+   330 00,2C10			skp
+   331 00,2C10 8D 00 2C		 sta old_key
+   332
+   333 00,2C13 A2 06		 ldx #6
+   334 00,2C15 8E 04 2C		 stx delay
+   335 00,2C18 60		 rts
+   336
+   337 				.endp
+   338
+   339
+   340 				/*
+   341 				  NAME: TAB
+   342 				  INFO: tablica 256 bajtow z kodami nacisnietego klawisza
+   343 				    IN: ---
+   344 				   OUT: ---
+   345 				*/
+   346 00,2C19			.array tab [255] .byte = $20
+   347
+   348  [003F] 21 [007F] 21	 [63]:[127] = "A"
+   349  [0015] 22 [0055] 22	 [21]:[85]  = "B"
+   350  [0012] 23 [0052] 23	 [18]:[82]  = "C"
+   351  [003A] 24 [007A] 24	 [58]:[122] = "D"
+   352  [002A] 25 [006A] 25	 [42]:[106] = "E"
+   353  [0038] 26 [0078] 26	 [56]:[120] = "F"
+   354  [003D] 27 [007D] 27	 [61]:[125] = "G"
+   355  [0039] 28 [0079] 28	 [57]:[121] = "H"
+   356  [000D] 29 [004D] 29	 [13]:[77]  = "I"
+   357  [0001] 2A [0041] 2A	 [1]:[65]   = "J"
+   358  [0005] 2B [0045] 2B	 [5]:[69]   = "K"
+   359  [0000] 2C [0040] 2C	 [0]:[64]   = "L"
+   360  [0025] 2D [0065] 2D	 [37]:[101] = "M"
+   361  [0023] 2E [0063] 2E	 [35]:[99]  = "N"
+   362  [0008] 2F [0048] 2F	 [8]:[72]   = "O"
+   363  [000A] 30 [004A] 30	 [10]:[74]  = "P"
+   364  [002F] 31 [006F] 31	 [47]:[111] = "Q"
+   365  [0028] 32 [0068] 32	 [40]:[104] = "R"
+   366  [003E] 33 [007E] 33	 [62]:[126] = "S"
+   367  [002D] 34 [006D] 34	 [45]:[109] = "T"
+   368  [000B] 35 [004B] 35	 [11]:[75]  = "U"
+   369  [0010] 36 [0050] 36	 [16]:[80]  = "V"
+   370  [002E] 37 [006E] 37	 [46]:[110] = "W"
+   371  [0016] 38 [0056] 38	 [22]:[86]  = "X"
+   372  [002B] 39 [006B] 39	 [43]:[107] = "Y"
+   373  [0017] 3A [0057] 3A	 [23]:[87]  = "Z"
+   374
+   375  [0034] 7E [00B4] 7E	 [52]:[180] = $7e
+   376  [000C] 9B [004C] 9B	 [12]:[76]  = $9b
+   377
+   378 				.enda
+   379
+   380
+   381 				/*
+   382 				  NAME: NEWSTRING
+   383 				  INFO: obszar 10 bajtow przeznaczony na wpisywana z klawiatury nazwe
+   384 				    IN: ---
+   385 				   OUT: ---
+   386 				*/
+   387 				newstring .ds 10
+   387 00,2D19			org *+ 10
+   388
+   389
+   390 				/*
+   391 				  NAME: TXT1, TXT2, TXT3, TXT4, TXT5
+   392 				  INFO: pseudonimy na liscie High Score
+   393 				        po 10 znakow kazdy <0..9>
+   394 				    IN: ---
+   395 				   OUT: ---
+   396 				*/
+   397 00,2D23			.array txt1 [ile_znakow] .byte = $9b
+   398  [0000] 36		 [0] = "V"
+   399  [0001] 29		 [1] = "I"
+   400  [0002] 24		 [2] = "D"
+   401  [0003] 2F		 [3] = "O"
+   402  [0004] 2C		 [4] = "L"
+   403 				.enda
+   404
+   405 00,2D2D			.array txt2 [ile_znakow] .byte = $9b
+   406  [0000] 33		 [0] = "S"
+   407  [0001] 2C		 [1] = "L"
+   408  [0002] 21		 [2] = "A"
+   409  [0003] 36		 [3] = "V"
+   410  [0004] 25		 [4] = "E"
+   411  [0005] 33		 [5] = "S"
+   412 				.enda
+   413
+   414 00,2D37			.array txt3 [ile_znakow] .byte = $9b
+   415  [0000] 24		 [0] = "D"
+   416  [0001] 25		 [1] = "E"
+   417  [0002] 2C		 [2] = "L"
+   418  [0003] 39		 [3] = "Y"
+   419 				.enda
+   420
+   421 00,2D41			.array txt4 [ile_znakow] .byte = $9b
+   422  [0000] 24		 [0] = "D"
+   423  [0001] 32		 [1] = "R"
+   424  [0002] 21		 [2] = "A"
+   425  [0003] 23		 [3] = "C"
+   426  [0004] 2F		 [4] = "O"
+   427  [0005] 2E		 [5] = "N" 
+   428 				.enda
+   429
+   430 00,2D4B			.array txt5 [ile_znakow] .byte = $9b
+   431  [0000] 2D		 [0] = "M"
+   432  [0001] 21		 [1] = "A"
+   433  [0002] 23		 [2] = "C"
+   434  [0003] 27		 [3] = "G"
+   435  [0004] 39		 [4] = "Y"
+   436  [0005] 36		 [5] = "V"
+   437  [0006] 25		 [6] = "E"
+   438  [0007] 32		 [7] = "R" 
+   439 				.enda
+   440
+   441
+   442 				/*
+   443 				  NAME: HIG1, HIG2, HIG3, HIG4, HIG5
+   444 				  INFO: lista najlepszych wynikow
+   445 				        5 pozycji po 7 cyfr kazda <0..6>
+   446 				    IN: ---
+   447 				   OUT: ---
+   448 				*/
+   449 00,2D55			.array hig1 [6] .byte
+   450  [0002] 06		 [2] = 6
+   451  [0003] 02		 [3] = 2
+   452  [0004] 08		 [4] = 8
+   453  [0005] 05		 [5] = 5
+   454  [0006] 00		 [6] = 0
+   455 				.enda
+   456
+   457 00,2D5C			.array hig2 [6] .byte
+   458  [0002] 04		 [2] = 4
+   459  [0003] 03		 [3] = 3
+   460  [0004] 08		 [4] = 8
+   461  [0005] 01		 [5] = 1
+   462  [0006] 00		 [6] = 0
+   463 				.enda
+   464
+   465 00,2D63			.array hig3 [6] .byte
+   466  [0002] 02		 [2] = 2
+   467  [0003] 07		 [3] = 7
+   468  [0004] 01		 [4] = 1
+   469  [0005] 09		 [5] = 9
+   470  [0006] 00		 [6] = 0
+   471 				.enda
+   472
+   473 00,2D6A			.array hig4 [6] .byte
+   474  [0003] 03		 [3] = 3
+   475  [0004] 02		 [4] = 2
+   476  [0005] 09		 [5] = 9
+   477  [0006] 00		 [6] = 0
+   478 				.enda
+   479
+   480 00,2D71			.array hig5 [6] .byte
+   481  [0003] 01		 [3] = 1
+   482  [0004] 08		 [4] = 8
+   483  [0005] 07		 [5] = 7
+   484  [0006] 00		 [6] = 0
+   485 				.enda
+   534
+   535 				;--
+   536 				;--
+   537
+   538 00,2D78			 org fnt3
+   539 00,3800-3AD7> 00 00 00 +	 ins 'H_Score_OK.fnt',0,91*8
+   540
+   541 00,3AD8			 org fnt3_2
+   542 00,3C00-3F57> 00 00 00 +	 ins 'H_Score_OK.fnt',128*8,107*8
+   543
+   544 				;--
+   545 				;--
+   546
+   547 00,3F58			 org pmBase+$300
+   548 00,B300			 icl 'H_Score_OK.pmg'
+Source: D:\!Atari\getris2\high_score\H_Score_OK.pmg
+     1 00,B300-B7FF> 00		 brk
+     2
+     3 00,B301 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03,$03
+     4 00,B311 C3 C2 83 42 00 +	 dta $C3,$C2,$83,$42,$00,$82,$02,$A2,$10,$22,$D0,$20,$00,$90,$40,$00
+     5 00,B321 02 10 02 01 03 +	 dta $02,$10,$02,$01,$03,$02,$03,$03,$03,$03,$00,$01,$00,$00,$00,$00
+     6 00,B331 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+     7 00,B341 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+     8 00,B351 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+     9 00,B361 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    10 00,B371 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    11 00,B381 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    12 00,B391 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    13 00,B3A1 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    14 00,B3B1 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    15 00,B3C1 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    16 00,B3D1 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    17 00,B3E1 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    18 00,B3F1 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    19
+    20 00,B401 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$C0,$C0,$C0,$C0,$C0,$C0,$C0
+    21 00,B411 40 80 40 00 00 +	 dta $40,$80,$40,$00,$00,$00,$BF,$57,$00,$00,$00,$F0,$EC,$00,$00,$01
+    22 00,B421 7F 3F 00 00 00 +	 dta $7F,$3F,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    23 00,B431 FF FF FF FF FF +	 dta $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00,$00,$00,$00,$00,$00,$00,$00
+    24 00,B441 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    25 00,B451 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    26 00,B461 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    27 00,B471 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    28 00,B481 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    29 00,B491 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    30 00,B4A1 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    31 00,B4B1 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    32 00,B4C1 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    33 00,B4D1 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    34 00,B4E1 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    35 00,B4F1 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    36
+    37 00,B501 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    38 00,B511 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    39 00,B521 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    40 00,B531 FF FF FF FF FF +	 dta $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00,$00,$00,$00,$00,$00,$00,$00
+    41 00,B541 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$20,$40,$00,$00,$00,$00,$00,$00
+    42 00,B551 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    43 00,B561 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$22,$41,$08,$14,$00,$00,$00,$20
+    44 00,B571 44 00 01 02 44 +	 dta $44,$00,$01,$02,$44,$08,$10,$00,$00,$01,$02,$00,$00,$00,$00,$00
+    45 00,B581 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$22,$41,$08,$04,$00,$20,$44,$08
+    46 00,B591 01 01 08 04 00 +	 dta $01,$01,$08,$04,$00,$00,$00,$40,$20,$00,$00,$00,$00,$08,$41,$22
+    47 00,B5A1 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$01,$02,$08,$10,$00,$20,$00,$00
+    48 00,B5B1 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$01
+    49 00,B5C1 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$01,$02,$00,$00,$00,$00,$00,$00
+    50 00,B5D1 10 00 40 20 11 +	 dta $10,$00,$40,$20,$11,$08,$04,$40,$20,$00,$00,$00,$14,$08,$41,$22
+    51 00,B5E1 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    52 00,B5F1 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    53
+    54 00,B601 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    55 00,B611 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$A3,$11,$00,$04,$08
+    56 00,B621 04 08 0C 00 00 +	 dta $04,$08,$0C,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    57 00,B631 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    58 00,B641 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$10,$20,$00,$00,$00,$00,$00,$00
+    59 00,B651 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    60 00,B661 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$14,$00,$55,$00,$00,$00,$20,$40
+    61 00,B671 00 05 08 10 20 +	 dta $00,$05,$08,$10,$20,$50,$00,$00,$00,$00,$01,$02,$00,$00,$00,$00
+    62 00,B681 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$14,$00,$55,$00,$20,$40,$00,$05
+    63 00,B691 02 12 05 00 00 +	 dta $02,$12,$05,$00,$00,$00,$00,$00,$40,$20,$00,$00,$00,$55,$00,$14
+    64 00,B6A1 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$01,$02,$00,$10,$08,$00,$00
+    65 00,B6B1 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$01,$02
+    66 00,B6C1 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$02,$04,$00,$00,$00,$00,$00,$00
+    67 00,B6D1 00 50 08 04 02 +	 dta $00,$50,$08,$04,$02,$05,$00,$00,$40,$20,$00,$00,$00,$55,$00,$14
+    68 00,B6E1 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    69 00,B6F1 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    70
+    71 00,B701 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    72 00,B711 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$20,$CD,$A6,$30,$10,$00,$00,$00,$00,$00,$00
+    73 00,B721 5C 2A 00 00 00 +	 dta $5C,$2A,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    74 00,B731 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    75 00,B741 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$08,$18,$18,$18,$18,$18,$18,$18
+    76 00,B751 18 18 18 18 18 +	 dta $18,$18,$18,$18,$18,$18,$18,$18,$18,$18,$18,$18,$18,$18,$3C,$3C
+    77 00,B761 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$08,$3E,$22,$63,$63,$63,$43,$03
+    78 00,B771 03 02 06 0C 18 +	 dta $03,$02,$06,$0C,$18,$20,$60,$60,$60,$60,$60,$61,$63,$63,$7F,$7F
+    79 00,B781 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$08,$3E,$22,$63,$43,$03,$03,$02
+    80 00,B791 1C 0C 02 03 03 +	 dta $1C,$0C,$02,$03,$03,$03,$03,$03,$03,$43,$63,$63,$63,$22,$3E,$08
+    81 00,B7A1 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$01,$0B,$0B,$13,$33,$63
+    82 00,B7B1 7F 7F 03 03 03 +	 dta $7F,$7F,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$02,$00
+    83 00,B7C1 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$7C,$78,$60,$60,$60,$60,$60,$60
+    84 00,B7D1 60 20 30 18 0C +	 dta $60,$20,$30,$18,$0C,$02,$03,$03,$03,$43,$63,$63,$63,$22,$3E,$08
+    85 00,B7E1 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    86 00,B7F1 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF	//,$FF
+   549
+   550 00,02E0-02E1> 00 20	 run main
+   551
+   552 				;--
+   553 				;--
+   554
+Source: d:\!atari\macro\xasm.mac

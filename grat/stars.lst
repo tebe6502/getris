@@ -1,0 +1,490 @@
+Mad-Assembler v1.6.9beta by TeBe/Madteam
+Source: F:\!Atari\getris2\grat\stars.asm
+     1 = 00,B000		pmg_stars	equ $b000
+     2
+     3 = 00,003F		scr48	equ %00111111	;screen 48b
+     4 = 00,003E		scr40	equ %00111110	;screen 40b
+     5 = 00,003D		scr32	equ %00111101	;screen 32b
+     6
+     7 = 00,000B		sile    equ 11
+     8
+     9 = 00,0080		zp_free	equ $80
+    10
+    11 = 00,0080		tmp	equ zp_free
+    12
+    13
+    14 				 org $2000
+    15
+    16 				main
+    17
+    18 				;-- init PMG
+    19 				 mva >pmg_stars $d407	;missiles and players data address
+Macro: MVA [Source: f:\!atari\macro\xasm.mac]
+     5 FFFF> 00,2000-223A> A9 +	 ldA >PMG_STARS
+     6 00,2002 8D 07 D4		 stA $D407
+Source: F:\!Atari\getris2\grat\stars.asm
+Source: F:\!Atari\getris2\grat\stars.asm
+    20 				 mva #3 $d01d		;enable players and missiles
+Macro: MVA [Source: f:\!atari\macro\xasm.mac]
+     5 00,2005 A9 03		 ldA #3
+     6 00,2007 8D 1D D0		 stA $D01D
+Source: F:\!Atari\getris2\grat\stars.asm
+Source: F:\!Atari\getris2\grat\stars.asm
+    21
+    22 				; lda:cmp:req 20		;wait 1 frame
+    23
+    24 				;mwa #ant 560
+    25 				 mva #scr40 559
+Macro: MVA [Source: f:\!atari\macro\xasm.mac]
+     5 00,200A A9 3E		 ldA #SCR40
+     6 00,200C 8D 2F 02		 stA 559
+Source: F:\!Atari\getris2\grat\stars.asm
+Source: F:\!Atari\getris2\grat\stars.asm
+    26
+    27 				 mva #120 $d000
+Macro: MVA [Source: f:\!atari\macro\xasm.mac]
+     5 00,200F A9 78		 ldA #120
+     6 00,2011 8D 00 D0		 stA $D000
+Source: F:\!Atari\getris2\grat\stars.asm
+Source: F:\!Atari\getris2\grat\stars.asm
+    28 				 mva #$fc 704
+Macro: MVA [Source: f:\!atari\macro\xasm.mac]
+     5 00,2014 A9 FC		 ldA #$FC
+     6 00,2016 8D C0 02		 stA 704
+Source: F:\!Atari\getris2\grat\stars.asm
+Source: F:\!Atari\getris2\grat\stars.asm
+    29
+    30
+    31 00,2019 A0 00		 ldy #0
+    32 00,201B 98		 tya
+    33 00,201C 99 00 B4		hh sta pmg_stars+$400,y
+    34 00,201F C8		 iny
+    35 00,2020 D0 FA		 bne hh
+    36
+    37 00,2022 20 39 20		 jsr stars_init
+    38
+    39 00,2025			kk
+    40
+    41 00,2025 20 59 20		 jsr stars_losuj
+    42
+    43 00,2028 A2 06		 ldx #6
+    44 				wai lda:cmp:req 20
+    44 00,202A A5 14		 lda 20
+    44 00,202C C5 14		 cmp 20
+    44 00,202E F0 FC		 req$202C 20
+    45 00,2030 CA		 dex
+    46 00,2031 D0 F7		 bne wai
+    47
+    48 00,2033 20 CB 20		 jsr stars_animuj
+    49 00,2036 4C 25 20		 jmp kk
+    50
+    51
+    52 				;---
+    53
+    54
+    55 00,2039			.proc STARS_INIT
+    56
+    57 				 mwa #tstars tmp
+Macro: MWA [Source: f:\!atari\macro\xasm.mac]
+    36 00,2039 A9 9B		      ldA <TSTARS
+    37 00,203B 85 80		      stA TMP
+    38 00,203D A9 21		      ldA >TSTARS
+    39 00,203F 85 81		      stA TMP+1
+Source: F:\!Atari\getris2\grat\stars.asm
+    58
+    59 				 mva #sile-1 count
+Macro: MVA [Source: f:\!atari\macro\xasm.mac]
+     5 00,2041 A9 0A		 ldA #SILE-1
+     6 00,2043 8D 58 20		 stA COUNT
+Source: F:\!Atari\getris2\grat\stars.asm
+Source: F:\!Atari\getris2\grat\stars.asm
+    60
+    61 00,2046			loop
+    62 00,2046 A0 03		 ldy #tstars_dta.faza
+    63 00,2048 AD 0A D2		 lda $d20a
+    64 00,204B 29 07		 and #7
+    65 00,204D 91 80		 sta (tmp),y
+    66
+    67 00,204F 20 26 21		 jsr add_tmp
+    68
+    69 00,2052 CE 58 20		 dec count
+    70 00,2055 10 EF		 bpl loop
+    71 00,2057 60		 rts
+    72
+    73 00,2058 00		count	brk
+    74 				.endp
+    75
+    76
+    77
+    78 00,2059			.proc STARS_LOSUJ
+    79
+    80 = 00,0082		msk equ tmp+2
+    81
+    82 				 mwa #maska msk
+Macro: MWA [Source: f:\!atari\macro\xasm.mac]
+    36 00,2059 A9 E3		      ldA <MASKA
+    37 00,205B 85 82		      stA MSK
+    38 00,205D A9 21		      ldA >MASKA
+    39 00,205F 85 83		      stA MSK+1
+Source: F:\!Atari\getris2\grat\stars.asm
+    83
+    84 				 mwa #tstars tmp
+Macro: MWA [Source: f:\!atari\macro\xasm.mac]
+    36 00,2061 A9 9B		      ldA <TSTARS
+    37 00,2063 85 80		      stA TMP
+    38 00,2065 A9 21		      ldA >TSTARS
+    39 00,2067 85 81		      stA TMP+1
+Source: F:\!Atari\getris2\grat\stars.asm
+    85
+    86 				 mva #sile-1 count
+Macro: MVA [Source: f:\!atari\macro\xasm.mac]
+     5 00,2069 A9 0A		 ldA #SILE-1
+     6 00,206B 8D CA 20		 stA COUNT
+Source: F:\!Atari\getris2\grat\stars.asm
+Source: F:\!Atari\getris2\grat\stars.asm
+    87
+    88 00,206E			loop
+    89 00,206E A0 03		 ldy #tstars_dta.faza
+    90 00,2070 B1 80		 lda (tmp),y
+    91 00,2072 F0 07		 beq _ok
+    92 00,2074 C9 08		 cmp #8
+    93 00,2076 B0 03		 bcs _ok
+    94 00,2078 4C B6 20		 jmp _skip
+    95
+    96 00,207B			_ok
+    97 00,207B A0 00		 ldy #tstars_dta.addr		; zerujemy gwiazdke na tej pozycji Y
+    98 00,207D A9 4B		 lda <stars_0
+    99 00,207F 91 80		 sta (tmp),y
+   100 00,2081 C8		 iny >stars_0
+   101 00,2082 91 80		 sta (tmp),y
+   102
+   103 00,2084 A0 03		 ldy #tstars_dta.faza
+   104 00,2086 A9 00		 lda #0
+   105 00,2088 91 80		 sta (tmp),y
+   106
+   107 00,208A AD 0A D2		 lda $d20a
+   108 00,208D 29 07		 and #7
+   109 00,208F A8		 tay
+   110
+   111 00,2090 B1 82		 lda (msk),y
+   112 00,2092 F0 22		 beq _skip
+   113
+   114 00,2094 0A 0A		 :2 asl @
+   115 00,2096 18		 clc
+   116 00,2097 69 60		 adc #48+12*4
+   117 00,2099 A0 02		 ldy #tstars_dta.posx
+   118 00,209B 91 80		 sta (tmp),y
+   119
+   120 00,209D AD 0A D2		 lda $d20a
+   121 00,20A0 29 01		 and #1
+   122 00,20A2 AA		 tax
+   123
+   124 00,20A3 A0 00		 ldy #tstars_dta.addr
+   125 00,20A5 BD D4 21		 lda l_stars,x
+   126 00,20A8 91 80		 sta (tmp),y
+   127 00,20AA C8		 iny
+   128 00,20AB BD D6 21		 lda h_stars,x
+   129 00,20AE 91 80		 sta (tmp),y
+   130
+   131 00,20B0 A0 03		 ldy #tstars_dta.faza
+   132 00,20B2 A9 00		 lda #0
+   133 00,20B4 91 80		 sta (tmp),y
+   134
+   135 00,20B6			_skip
+   136
+   137 00,20B6 20 26 21		 jsr add_tmp
+   138
+   139 00,20B9 A5 82		 lda msk
+   140 00,20BB 18		 clc
+   141 00,20BC 69 08		 adc #8
+   142 00,20BE 85 82		 sta msk
+   143 00,20C0 90 02		 scc$20C4
+   144 00,20C2 E6 83		 inc msk+1
+   145
+   146 00,20C4 CE CA 20		 dec count
+   147 00,20C7 10 A5		 bpl loop
+   148 00,20C9 60		 rts
+   149
+   150 00,20CA 00		count	brk
+   151 				.endp
+   152
+   153
+   154
+   155 00,20CB			.proc STARS_ANIMUJ
+   156
+   157 				// zero page declaractions
+   158 = 00,0082		s_addr	equ tmp+2
+   159 = 00,0083		s_faza	equ s_addr+1
+   160 = 00,0084		s_posx	equ s_faza+1
+   161
+   162 				// program
+   163 				 mwa #tstars tmp
+Macro: MWA [Source: f:\!atari\macro\xasm.mac]
+    36 00,20CB A9 9B		      ldA <TSTARS
+    37 00,20CD 85 80		      stA TMP
+    38 00,20CF A9 21		      ldA >TSTARS
+    39 00,20D1 85 81		      stA TMP+1
+Source: F:\!Atari\getris2\grat\stars.asm
+   164
+   165 				 mva #sile-1 count
+Macro: MVA [Source: f:\!atari\macro\xasm.mac]
+     5 00,20D3 A9 0A		 ldA #SILE-1
+     6 00,20D5 8D 25 21		 stA COUNT
+Source: F:\!Atari\getris2\grat\stars.asm
+Source: F:\!Atari\getris2\grat\stars.asm
+   166
+   167 00,20D8			loop
+   168 00,20D8 A0 00		 ldy #tstars_dta.addr
+   169 00,20DA B1 80		 lda (tmp),y
+   170 00,20DC 85 82		 sta s_addr
+   171 00,20DE C8		 iny
+   172 00,20DF B1 80		 lda (tmp),y
+   173 00,20E1 85 83		 sta s_addr+1
+   174
+   175 00,20E3 A0 02		 ldy #tstars_dta.posx
+   176 00,20E5 B1 80		 lda (tmp),y
+   177 				; ???
+   178
+   179 00,20E7 A0 03		 ldy #tstars_dta.faza
+   180 00,20E9 B1 80		 lda (tmp),y
+   181 00,20EB C9 08		 cmp #8
+   182 00,20ED B0 2D		 bcs _skip
+   183
+   184 00,20EF AA		 tax
+   185
+   186 00,20F0 18		 clc
+   187 00,20F1 69 01		 adc #1
+   188 00,20F3 91 80		 sta (tmp),y
+   189
+   190 00,20F5 BC CB 21		 ldy tmul5,x
+   191
+   192 00,20F8 AE 25 21		 ldx count
+   193 00,20FB BD D8 21		 lda posy,x
+   194 00,20FE AA		 tax
+   195
+   196 00,20FF B1 82		 lda (s_addr),y
+   197 00,2101 9D 00 B4		 sta pmg_stars+$400,x
+   198 00,2104 C8		 iny
+   199 00,2105 B1 82		 lda (s_addr),y
+   200 00,2107 9D 01 B4		 sta pmg_stars+$401,x
+   201 00,210A C8		 iny
+   202 00,210B B1 82		 lda (s_addr),y
+   203 00,210D 9D 02 B4		 sta pmg_stars+$402,x
+   204 00,2110 C8		 iny
+   205 00,2111 B1 82		 lda (s_addr),y
+   206 00,2113 9D 03 B4		 sta pmg_stars+$403,x
+   207 00,2116 C8		 iny
+   208 00,2117 B1 82		 lda (s_addr),y
+   209 00,2119 9D 04 B4		 sta pmg_stars+$404,x
+   210
+   211 00,211C			_skip
+   212
+   213 00,211C 20 26 21		 jsr add_tmp
+   214
+   215 00,211F CE 25 21		 dec count
+   216 00,2122 10 B4		 bpl loop
+   217 00,2124 60		 rts 
+   218
+   219 00,2125 00		count	brk
+   220 				.endp
+   221
+   222
+   223 00,2126			.proc ADD_TMP
+   224
+   225 00,2126 A5 80		 lda tmp
+   226 00,2128 18		 clc
+   227 00,2129 69 04		 adc #tstars_dta	 ; structure TSTARS_DTA length
+   228 00,212B 85 80		 sta tmp
+   229 00,212D 90 02		 scc$2131
+   230 00,212F E6 81		 inc tmp+1
+   231 00,2131 60		 rts
+   232
+   233 				.endp
+   234
+   235 				;---
+   236
+   237 				// animacje gwiazdek STARS1, STARS2, STARS3
+   238 				// 8 klatek po 5 bajtow kazda
+   239 00,2132			stars1
+   240 00,2132 00		 dta %00000000
+   241 00,2133 00		 dta %00000000
+   242 00,2134 04		 dta %00000100
+   243 00,2135 00		 dta %00000000
+   244 00,2136 00		 dta %00000000
+   245
+   246 00,2137 00		 dta %00000000
+   247 00,2138 04		 dta %00000100
+   248 00,2139 0E		 dta %00001110
+   249 00,213A 04		 dta %00000100
+   250 00,213B 00		 dta %00000000
+   251
+   252 00,213C 04		 dta %00000100
+   253 00,213D 04		 dta %00000100
+   254 00,213E 1F		 dta %00011111
+   255 00,213F 04		 dta %00000100
+   256 00,2140 04		 dta %00000100
+   257
+   258 00,2141 00		 dta %00000000
+   259 00,2142 04		 dta %00000100
+   260 00,2143 0E		 dta %00001110
+   261 00,2144 04		 dta %00000100
+   262 00,2145 00		 dta %00000000
+   263
+   264 00,2146 00		 dta %00000000
+   265 00,2147 00		 dta %00000000
+   266 00,2148 04		 dta %00000100
+   267 00,2149 00		 dta %00000000
+   268 00,214A 00		 dta %00000000
+   269
+   270 00,214B			stars_0
+   271 00,214B 00 00 00 00 00 +	 :40 brk
+   272
+   273
+   274 00,2173			stars2
+   275 00,2173 00		 dta %00000000
+   276 00,2174 00		 dta %00000000
+   277 00,2175 04		 dta %00000100
+   278 00,2176 00		 dta %00000000
+   279 00,2177 00		 dta %00000000
+   280
+   281 00,2178 00		 dta %00000000
+   282 00,2179 04		 dta %00000100
+   283 00,217A 0E		 dta %00001110
+   284 00,217B 04		 dta %00000100
+   285 00,217C 00		 dta %00000000
+   286
+   287 00,217D 04		 dta %00000100
+   288 00,217E 04		 dta %00000100
+   289 00,217F 0E		 dta %00001110
+   290 00,2180 04		 dta %00000100
+   291 00,2181 04		 dta %00000100
+   292
+   293 00,2182 00		 dta %00000000
+   294 00,2183 04		 dta %00000100
+   295 00,2184 1F		 dta %00011111
+   296 00,2185 04		 dta %00000100
+   297 00,2186 00		 dta %00000000
+   298
+   299 00,2187 00		 dta %00000000
+   300 00,2188 04		 dta %00000100
+   301 00,2189 0E		 dta %00001110
+   302 00,218A 04		 dta %00000100
+   303 00,218B 00		 dta %00000000
+   304
+   305 00,218C 00		 dta %00000000
+   306 00,218D 00		 dta %00000000
+   307 00,218E 04		 dta %00000100
+   308 00,218F 00		 dta %00000000
+   309 00,2190 00		 dta %00000000
+   310
+   311 00,2191 00 00 00 00 00 +	 :10 brk
+   312
+   313 				/*
+   314 				stars3
+   315 				 dta %00000000
+   316 				 dta %00000000
+   317 				 dta %00010000
+   318 				 dta %00000000
+   319 				 dta %00000000
+   320
+   321 				 dta %00000000
+   322 				 dta %00101000
+   323 				 dta %00010000
+   324 				 dta %00101000
+   325 				 dta %00000000
+   326
+   327 				 dta %01000000
+   328 				 dta %00101000
+   329 				 dta %00010000
+   330 				 dta %00101000
+   331 				 dta %00000100
+   332
+   333 				 dta %01000100
+   334 				 dta %00101000
+   335 				 dta %00010000
+   336 				 dta %00101000
+   337 				 dta %01000100
+   338
+   339 				 dta %00000100
+   340 				 dta %00101000
+   341 				 dta %00010000
+   342 				 dta %00101000
+   343 				 dta %01000000
+   344
+   345 				 dta %00000000
+   346 				 dta %00101000
+   347 				 dta %00010000
+   348 				 dta %00101000
+   349 				 dta %00000000
+   350
+   351 				 dta %00000000
+   352 				 dta %00000000
+   353 				 dta %00010000
+   354 				 dta %00000000
+   355 				 dta %00000000
+   356
+   357 				 :5 brk
+   358 				*/
+   359
+   360
+   361 				;---
+   362
+   363 				// tablica z opisem 11 pozycji gwiazdek
+   364
+   365 00,219B			.struct tstars_dta
+   366 = 00,0000		addr .word
+   367 = 00,0002		posx .byte
+   368 = 00,0003		faza .byte
+   369 				.ends
+   370
+   371 00,219B 4B 21 00 00 4B +	tstars dta tstars_dta [sile] (stars_0,0,0)
+   372
+   373 00,21CB 00 05 0A 0F 14 +	tmul5  dta 0,5,10,15,20,25,30,35,40
+   374
+   375 00,21D4 32 73		l_stars dta l( stars1, stars2 )
+   376 00,21D6 21 21		h_stars dta h( stars1, stars2 )
+   377
+   378 				// pozycja pionowa ducha (11 pozycji co 8 linii)
+   379 00,21D8			posy
+   380 				.rept sile
+   381 				 dta 40+.r*8
+   382 				.endr
+Source: REPT
+   381 00,21D8 #00 28		 dta 40+.r*8
+   381 00,21D9 #01 30		 dta 40+.r*8
+   381 00,21DA #02 38		 dta 40+.r*8
+   381 00,21DB #03 40		 dta 40+.r*8
+   381 00,21DC #04 48		 dta 40+.r*8
+   381 00,21DD #05 50		 dta 40+.r*8
+   381 00,21DE #06 58		 dta 40+.r*8
+   381 00,21DF #07 60		 dta 40+.r*8
+   381 00,21E0 #08 68		 dta 40+.r*8
+   381 00,21E1 #09 70		 dta 40+.r*8
+   381 00,21E2 #0A 78		 dta 40+.r*8
+Source: F:\!Atari\getris2\grat\stars.asm
+   383
+   384
+   385 00,21E3			maska
+   386 				.rept 11
+   387 				 ins 'grat_logos_maska_ok.scr',12+.r*32,8
+   388 				.endr
+Source: REPT
+   387 00,21E3 00 00 00 00 00 +	 ins 'grat_logos_maska_ok.scr',12+.r*32,8
+   387 00,21EB 00 00 00 01 01 +	 ins 'grat_logos_maska_ok.scr',12+.r*32,8
+   387 00,21F3 00 00 00 01 01 +	 ins 'grat_logos_maska_ok.scr',12+.r*32,8
+   387 00,21FB 00 00 00 01 01 +	 ins 'grat_logos_maska_ok.scr',12+.r*32,8
+   387 00,2203 00 00 00 01 01 +	 ins 'grat_logos_maska_ok.scr',12+.r*32,8
+   387 00,220B 00 00 00 01 01 +	 ins 'grat_logos_maska_ok.scr',12+.r*32,8
+   387 00,2213 00 00 01 01 01 +	 ins 'grat_logos_maska_ok.scr',12+.r*32,8
+   387 00,221B 00 01 01 01 01 +	 ins 'grat_logos_maska_ok.scr',12+.r*32,8
+   387 00,2223 00 00 01 01 01 +	 ins 'grat_logos_maska_ok.scr',12+.r*32,8
+   387 00,222B 00 00 00 00 01 +	 ins 'grat_logos_maska_ok.scr',12+.r*32,8
+   387 00,2233 00 00 00 01 01 +	 ins 'grat_logos_maska_ok.scr',12+.r*32,8
+Source: F:\!Atari\getris2\grat\stars.asm
+   389
+   390 				;---
+   391 00,02E0-02E1> 00 20	 run main
+   392
+   393 				;---
+   394
+Source: f:\!atari\macro\xasm.mac

@@ -1,0 +1,300 @@
+Mad-Assembler v1.6.3beta by TeBe/Madteam
+Source: D:\!Atari\getris2\game_over\pause.asm
+     1
+     2 = 00,003D		scr32           equ %00111101   ;obraz waski    *-screen 32b
+     3 = 00,F300		pmBase_Text     equ $f000+$300
+     4
+     5 = 00,D000		Player0_PositionX equ $D000
+     6 = 00,D001		Player1_PositionX equ $D001
+     7 = 00,D002		Player2_PositionX equ $D002
+     8 = 00,D003		Player3_PositionX equ $D003
+     9
+    10 = 00,D004		Missile0_PositionX equ $D004
+    11 = 00,D005		Missile1_PositionX equ $D005
+    12 = 00,D006		Missile2_PositionX equ $D006
+    13 = 00,D007		Missile3_PositionX equ $D007
+    14
+    15 = 00,D008		Player0_Size equ $D008
+    16 = 00,D009		Player1_Size equ $D009
+    17 = 00,D00A		Player2_Size equ $D00A
+    18 = 00,D00B		Player3_Size equ $D00B
+    19
+    20 = 00,D00C		Missiles_Size equ $D00C
+    21
+    22 = 00,D012		Player0_Missile0_Color0_PM0 equ $D012
+    23 = 00,D013		Player1_Missile1_Color1_PM1 equ $D013
+    24 = 00,D014		Player2_Missile2_Color2_PM2 equ $D014
+    25 = 00,D015		Player3_Missile3_Color3_PM3 equ $D015
+    26
+    27 = 00,D016		Playfield_Color0_PF0 equ $D016
+    28 = 00,D017		Playfield_Color1_PF1 equ $D017
+    29 = 00,D018		Playfield_Color2_PF2 equ $D018
+    30 = 00,D019		Playfield_Color3_PF3 equ $D019
+    31
+    32 = 00,D01A		Background_BAK equ $D01A
+    33 = 00,D01B		PRIOR_GTIACTL equ $D01B
+    34
+    35 = 00,D409		CHARBASE equ $D409
+    36
+    37 = 00,0080		rejA equ $80
+    38 = 00,0081		rejX equ rejA+1
+    39 = 00,0082		rejY equ rejX+1
+    40
+    41
+    42 				;-- MAIN PROGRAM
+    43 				 org $2000
+    44
+    45 				main
+    46 				;-- init PMG
+    47 				 mva >pmBase_Text $d407 ;PMCTL - wyswietlac duchy i pociski
+Source: MVA
+     5 FFFF> 00,2000-218F> A9 +	 ldA >PMBASE_TEXT
+     6 00,2002 8D 07 D4		 stA $D407
+    48 				 mva #3 $d01d           ;PMCTL - show PMG
+Source: MVA
+     5 00,2005 A9 03		 ldA #3
+     6 00,2007 8D 1D D0		 stA $D01D
+    49
+    50 00,200A A5 14		 lda 20                 ;czekamy 1 ramke zanim zrobimy jakies nieszczescie :)
+    51 00,200C C5 14		 cmp 20                 *- wait 1 frame
+    52 00,200E F0 FC		 beq *-2
+    53
+    54 00,2010 78		 sei                    ;wylaczenie przerwan *- IRQ OFF, NMI OFF
+    55 				 mva #0 $d40e
+Source: MVA
+     5 00,2011 A9 00		 ldA #0
+     6 00,2013 8D 0E D4		 stA $D40E
+    56 				 mva #$fe $d301         ;wylaczenie ROM-u *- ROM OFF
+Source: MVA
+     5 00,2016 A9 FE		 ldA #$FE
+     6 00,2018 8D 01 D3		 stA $D301
+    57
+    58 				 mwa #nmi $fffa         ;nasza nowa obsluga przerwania NMI
+Source: MWA
+    36 00,201B A9 1D		      ldA <NMI
+    37 00,201D 8D FA FF		      stA $FFFA
+    38 00,2020 A9 21		      ldA >NMI
+    39 00,2022 8D FB FF		      stA $FFFA+1
+    59
+    60 				 mva #$c0 $d40e         ;wlaczenie NMI z przerwaniami DLI
+Source: MVA
+     5 00,2025 A9 C0		 ldA #$C0
+     6 00,2027 8D 0E D4		 stA $D40E
+    61
+    62 00,202A 20 47 20		 jsr clr_pmg
+    63
+    64 00,202D A0 1A		 ldy #26
+    65 00,202F			copy
+    66 00,202F B9 00 3C		 lda pmg,y
+    67 00,2032 99 70 F3		 sta pmBase_Text+112,y
+    68 00,2035 B9 1B 3C		 lda pmg+27,y
+    69 00,2038 99 70 F6		 sta pmBase_Text+$300+112,y
+    70 00,203B B9 36 3C		 lda pmg+27*2,y
+    71 00,203E 99 70 F7		 sta pmBase_Text+$400+112,y
+    72 00,2041 88		 dey
+    73 00,2042 10 EB		 bpl copy
+    74
+    75 00,2044 4C 44 20		null jmp null
+    76
+    77
+    78 00,2047			.proc clr_pmg
+    79 00,2047 A0 00		 ldy #0
+    80 00,2049 98		 tya
+    81 00,204A			clr
+    82 00,204A 99 00 F3		 sta pmBase_Text,y
+    83 00,204D 99 00 F4		 sta pmBase_Text+$100,y
+    84 00,2050 99 00 F5		 sta pmBase_Text+$200,y
+    85 00,2053 99 00 F6		 sta pmBase_Text+$300,y
+    86 00,2056 99 00 F7		 sta pmBase_Text+$400,y
+    87 00,2059 C8		 iny
+    88 00,205A D0 EE		 bne clr
+    89
+    90 00,205C 60		 rts
+    91 				.endp
+    92
+    93
+    94 				;--
+    95
+    96 00,205D			dli1
+    97 00,205D 85 80		 sta rejA
+    98 00,205F 86 81		 stx rejX
+    99 00,2061 84 82		 sty rejY
+   100
+   101 00,2063 8D 0A D4		 sta $d40a                   ;line=104
+   102 00,2066 A9 59		 lda #$59
+   103 00,2068 8D 0A D4		 sta $d40a                   ;line=105
+   104 00,206B 8D 03 D0		 sta Player3_PositionX
+   105 00,206E A9 79		 lda #$79
+   106 00,2070 8D 0A D4		 sta $d40a                   ;line=106
+   107 00,2073 8D 02 D0		 sta Player2_PositionX
+   108 00,2076 A9 77		 lda #$77
+   109 00,2078 A2 58		 ldx #$58
+   110 00,207A 8D 0A D4		 sta $d40a                   ;line=107
+   111 00,207D 8D 02 D0		 sta Player2_PositionX
+   112 00,2080 8E 03 D0		 stx Player3_PositionX
+   113 00,2083 A9 98		 lda #$98
+   114 00,2085 8D 0A D4		 sta $d40a                   ;line=108
+   115 00,2088 8D 06 D0		 sta Missile2_PositionX
+   116 00,208B 8D 0A D4		 sta $d40a                   ;line=109
+   117 00,208E 8D 0A D4		 sta $d40a                   ;line=110
+   118 00,2091 8D 0A D4		 sta $d40a                   ;line=111
+   119 00,2094 A9 78		 lda #$78
+   120 00,2096 8D 0A D4		 sta $d40a                   ;line=112
+   121 00,2099 8D 02 D0		 sta Player2_PositionX
+   122 00,209C 8D 0A D4		 sta $d40a                   ;line=113
+   123 00,209F 8D 0A D4		 sta $d40a                   ;line=114
+   124 00,20A2 A9 77		 lda #$77
+   125 00,20A4 8D 0A D4		 sta $d40a                   ;line=115
+   126 00,20A7 8D 02 D0		 sta Player2_PositionX
+   127 00,20AA A9 99		 lda #$99
+   128 00,20AC 8D 0A D4		 sta $d40a                   ;line=116
+   129 00,20AF 8D 06 D0		 sta Missile2_PositionX
+   130 00,20B2 8D 0A D4		 sta $d40a                   ;line=117
+   131 00,20B5 8D 0A D4		 sta $d40a                   ;line=118
+   132 00,20B8 A9 56		 lda #$56
+   133 00,20BA 8D 0A D4		 sta $d40a                   ;line=119
+   134 00,20BD 8D 03 D0		 sta Player3_PositionX
+   135 00,20C0 8D 0A D4		 sta $d40a                   ;line=120
+   136 00,20C3 A9 58		 lda #$58
+   137 00,20C5 8D 0A D4		 sta $d40a                   ;line=121
+   138 00,20C8 8D 03 D0		 sta Player3_PositionX
+   139 00,20CB 8D 0A D4		 sta $d40a                   ;line=122
+   140 00,20CE 8D 0A D4		 sta $d40a                   ;line=123
+   141 00,20D1 8D 0A D4		 sta $d40a                   ;line=124
+   142 00,20D4 8D 0A D4		 sta $d40a                   ;line=125
+   143 00,20D7 8D 0A D4		 sta $d40a                   ;line=126
+   144 00,20DA 8D 0A D4		 sta $d40a                   ;line=127
+   145 00,20DD A9 57		 lda #$57
+   146 00,20DF 8D 0A D4		 sta $d40a                   ;line=128
+   147 00,20E2 8D 03 D0		 sta Player3_PositionX
+   148 00,20E5 8D 0A D4		 sta $d40a                   ;line=129
+   149 00,20E8 A9 58		 lda #$58
+   150 00,20EA 8D 0A D4		 sta $d40a                   ;line=130
+   151 00,20ED 8D 03 D0		 sta Player3_PositionX
+   152 00,20F0 8D 0A D4		 sta $d40a                   ;line=131
+   153 00,20F3 8D 0A D4		 sta $d40a                   ;line=132
+   154 00,20F6 8D 0A D4		 sta $d40a                   ;line=133
+   155 00,20F9 8D 0A D4		 sta $d40a                   ;line=134
+   156 00,20FC 8D 0A D4		 sta $d40a                   ;line=135
+   157 00,20FF A9 57		 lda #$57
+   158 00,2101 A2 38		 ldx #$38
+   159 00,2103 A0 79		 ldy #$79
+   160 00,2105 8D 0A D4		 sta $d40a                   ;line=136
+   161 00,2108 8D 02 D0		 sta Player2_PositionX
+   162 00,210B 8E 03 D0		 stx Player3_PositionX
+   163 00,210E 8C 06 D0		 sty Missile2_PositionX
+   164 00,2111 A9 75		 lda #$75
+   165 00,2113 8D 07 D0		 sta Missile3_PositionX
+   166
+   167 00,2116 A5 80		 lda rejA
+   168 00,2118 A6 81		 ldx rejX
+   169 00,211A A4 82		 ldy rejY
+   170 00,211C 40		 rti
+   171
+   172 				;--
+   173
+   174 00,211D 2C 0F D4		nmi bit $d40f
+   175 00,2120 10 03		 bpl vbl
+   176
+   177 00,2122 4C 5D 20		dliv jmp dli1
+   178
+   179 00,2125 48		vbl pha                 ;przerwanie VBL *- VBL routine
+   180 				; txa
+   181 				; pha
+   182 				; tya
+   183 				; pha
+   184 00,2126 8D 0F D4		 sta $d40f              ;reset znacznika przerwania $d40f
+   185
+   186 				 mwa #ant $d402         ;adres programu ANTICA ($d402,$d403)
+Source: MWA
+    36 00,2129 A9 00		      ldA <ANT
+    37 00,212B 8D 02 D4		      stA $D402
+    38 00,212E A9 36		      ldA >ANT
+    39 00,2130 8D 03 D4		      stA $D402+1
+   187 				 mva #scr32 $d400       ;ustawienie szerokosci obrazu $d400
+Source: MVA
+     5 00,2133 A9 3D		 ldA #SCR32
+     6 00,2135 8D 00 D4		 stA $D400
+   188
+   189 				;-- init pierwszej linii
+   190
+   191 00,2138 A9 38		 lda >fnt+$400*$00
+   192 00,213A 8D 09 D4		 sta CHARBASE
+   193 00,213D A9 00		c0 lda #$00
+   194 00,213F 8D 1A D0		 sta Background_BAK
+   195 00,2142 A9 38		c1 lda #$38
+   196 00,2144 8D 16 D0		 sta Playfield_Color0_PF0
+   197 00,2147 A9 24		c2 lda #$24
+   198 00,2149 8D 17 D0		 sta Playfield_Color1_PF1
+   199 00,214C A9 2A		c3 lda #$2A
+   200 00,214E 8D 18 D0		 sta Playfield_Color2_PF2
+   201 00,2151 A9 00		c4 lda #$00
+   202 00,2153 8D 19 D0		 sta Playfield_Color3_PF3
+   203 00,2156 A9 04		 lda #$04
+   204 00,2158 8D 1B D0		 sta PRIOR_GTIACTL
+   205 00,215B A9 03		 lda #$03
+   206 00,215D 8D 0A D0		 sta Player2_Size
+   207 00,2160 8D 0B D0		 sta Player3_Size
+   208 00,2163 A9 30		 lda #$30
+   209 00,2165 8D 0C D0		 sta Missiles_Size
+   210 00,2168 A9 77		 lda #$77
+   211 00,216A 8D 02 D0		 sta Player2_PositionX
+   212 00,216D A9 58		 lda #$58
+   213 00,216F 8D 03 D0		 sta Player3_PositionX
+   214 00,2172 A9 99		 lda #$99
+   215 00,2174 8D 06 D0		 sta Missile2_PositionX
+   216 00,2177 A9 95		 lda #$95
+   217 00,2179 8D 07 D0		 sta Missile3_PositionX
+   218 00,217C A9 1C		c5 lda #$1C
+   219 00,217E 8D 14 D0		 sta Player2_Missile2_Color2_PM2
+   220 00,2181 8D 15 D0		 sta Player3_Missile3_Color3_PM3
+   221
+   222 				 mwa #dli1 dliv+1       ;odpalamy synchro pierwszej linii
+Source: MWA
+    36 00,2184 A9 5D		      ldA <DLI1
+    37 00,2186 8D 23 21		      stA DLIV+1
+    38 00,2189 A9 20		      ldA >DLI1
+    39 00,218B 8D 24 21		      stA DLIV+1+1
+   223
+   224 				;-- tutaj miejsce na twoja procedurke, tylko zachowaj wartosci rejestrow X i Y
+   225 				;*- this area is for yours routine, register X,Y must survive
+   226
+   227 				; pla
+   228 				; tay
+   229 				; pla
+   230 				; tax
+   231 00,218E 68		 pla
+   232 00,218F 40		 rti
+   233
+   234 				;--
+   235 00,2190			 org $3000
+   236 00,3000			text
+   237 00,3000-307F> 00 00 00 +	 ins 'texts_all.scr',12*40+4,32
+   238 00,3020 00 00 00 00 00 +	 ins 'texts_all.scr',13*40+4,32
+   239 00,3040 00 00 00 00 00 +	 ins 'texts_all.scr',14*40+4,32
+   240 00,3060 00 00 00 00 00 +	 ins 'texts_all.scr',15*40+4,32
+   241
+   242 				;-- ANTIC PROGRAM
+   243 00,3080			 org $3600
+   244 00,3600			ant
+   245 00,3600-3615> 70 70 70 +	 dta d'pppppppppppp',$f0,$44,a(text),4,4,4
+   246 00,3613 41 00 36		 dta $41,a(ant)
+   247
+   248 				;-- FONTS
+   249 00,3616			 org $3800
+   250 00,3800-3C50> 00 00 00 +	fnt ins 'texts_all.fnt'
+   251
+   252 				;--
+   253 00,3C00			pmg
+   254 00,3C00 10 20 30 20 10 +	 dta $10,$20,$30,$20,$10,$00,$00,$00,$00,$00,$20,$00,$00,$00,$00,$10
+   255 00,3C10 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$80,$80
+   256
+   257 00,3C1B 44 44 CC 44 44 +	 dta $44,$44,$CC,$44,$44,$00,$00,$00,$20,$00,$88,$00,$00,$00,$00,$00
+   258 00,3C2B 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   259
+   260 00,3C36 44 CC CC 44 44 +	 dta $44,$CC,$CC,$44,$44,$00,$00,$00,$00,$00,$88,$00,$00,$00,$00,$21
+   261 00,3C46 03 02 00 00 00 +	 dta $03,$02,$00,$00,$00,$00,$00,$00,$02,$00,$00
+   262
+   263 00,02E0-02E1> 00 20	 run main
+   264
+Source: d:\!atari\macro\xasm.mac

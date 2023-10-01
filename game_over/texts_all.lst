@@ -1,0 +1,583 @@
+Mad-Assembler v1.6.3beta by TeBe/Madteam
+Source: D:\!Atari\getris2\game_over\texts_all.asm
+     1
+     2 = 00,003E		scr40   equ %00111110   ;obraz normalny *-screen 40b
+     3 = 00,B000		pmBase  equ $B000
+     4
+     5 = 00,D000		Player0_PositionX equ $D000
+     6 = 00,D001		Player1_PositionX equ $D001
+     7 = 00,D002		Player2_PositionX equ $D002
+     8 = 00,D003		Player3_PositionX equ $D003
+     9
+    10 = 00,D004		Missile0_PositionX equ $D004
+    11 = 00,D005		Missile1_PositionX equ $D005
+    12 = 00,D006		Missile2_PositionX equ $D006
+    13 = 00,D007		Missile3_PositionX equ $D007
+    14
+    15 = 00,D008		Player0_Size equ $D008
+    16 = 00,D009		Player1_Size equ $D009
+    17 = 00,D00A		Player2_Size equ $D00A
+    18 = 00,D00B		Player3_Size equ $D00B
+    19
+    20 = 00,D00C		Missiles_Size equ $D00C
+    21
+    22 = 00,D012		Player0_Missile0_Color0_PM0 equ $D012
+    23 = 00,D013		Player1_Missile1_Color1_PM1 equ $D013
+    24 = 00,D014		Player2_Missile2_Color2_PM2 equ $D014
+    25 = 00,D015		Player3_Missile3_Color3_PM3 equ $D015
+    26
+    27 = 00,D016		Playfield_Color0_PF0 equ $D016
+    28 = 00,D017		Playfield_Color1_PF1 equ $D017
+    29 = 00,D018		Playfield_Color2_PF2 equ $D018
+    30 = 00,D019		Playfield_Color3_PF3 equ $D019
+    31
+    32 = 00,D01A		Background_BAK equ $D01A
+    33 = 00,D01B		PRIOR_GTIACTL equ $D01B
+    34
+    35 = 00,D409		CHARBASE equ $D409
+    36
+    37 				;-- BASIC switch OFF
+    38 				 org $2000
+    39 FFFF> 00,2000-2005> A9 +	 lda #$ff
+    40 00,2002 8D 01 D3		 sta $d301
+    41 00,2005 60		 rts
+    42 00,02E2-02E3> 00 20	 ini $2000
+    43
+    44 				;-- MAIN PROGRAM
+    45 00,02E4			 org $2000
+    46
+    47 00,2000			main
+    48 				;-- init PMG
+    49 				 mva >pmBase $d407      ;PMCTL - wyswietlac duchy i pociski
+Source: MVA
+     5 00,2000-202C> A9 B0	 ldA >PMBASE
+     6 00,2002 8D 07 D4		 stA $D407
+    50 				 mva #3 $d01d           ;PMCTL - show PMG
+Source: MVA
+     5 00,2005 A9 03		 ldA #3
+     6 00,2007 8D 1D D0		 stA $D01D
+    51
+    52 00,200A A5 14		 lda 20                 ;czekamy 1 ramke zanim zrobimy jakies nieszczescie :)
+    53 00,200C C5 14		 cmp 20                 *- wait 1 frame
+    54 00,200E F0 FC		 beq *-2
+    55
+    56 00,2010 78		 sei                    ;wylaczenie przerwan *- IRQ OFF, NMI OFF
+    57 				 mva #0 $d40e
+Source: MVA
+     5 00,2011 A9 00		 ldA #0
+     6 00,2013 8D 0E D4		 stA $D40E
+    58 				 mva #$fe $d301         ;wylaczenie ROM-u *- ROM OFF
+Source: MVA
+     5 00,2016 A9 FE		 ldA #$FE
+     6 00,2018 8D 01 D3		 stA $D301
+    59
+    60 				 mwa #nmi $fffa         ;nasza nowa obsluga przerwania NMI
+Source: MWA
+    36 00,201B A9 0D		      ldA <NMI
+    37 00,201D 8D FA FF		      stA $FFFA
+    38 00,2020 A9 24		      ldA >NMI
+    39 00,2022 8D FB FF		      stA $FFFA+1
+    61 				                        *- new NMI routine
+    62
+    63 				 mva #$c0 $d40e         ;wlaczenie NMI z przerwaniami DLI
+Source: MVA
+     5 00,2025 A9 C0		 ldA #$C0
+     6 00,2027 8D 0E D4		 stA $D40E
+    64 				                        *- NMI ON with DLI interrupt
+    65
+    66 00,202A 4C F0 20		null jmp dli1           ;tutaj CPU sie nudzi, nie wolno nic tutaj robic
+    67 				                        *- over, no more routines or system crash
+    68 				;--
+    69
+    70 				;-- MAIN PROGRAM
+    71 00,202D			 org $2100-16
+    72
+    73 00,20F0			dli1
+    74 00,20F0-249E> AD 0B D4	 lda $d40b
+    75 00,20F3 C9 02		 cmp #2
+    76 00,20F5 D0 F9		 bne dli1
+    77 00,20F7 8D 0A D4 8D 0A +	 :3 sta $d40a
+    78
+    79 00,2100 8D 0A D4		 sta $d40a                   ;line=0
+    80 00,2103 A9 61		 lda #$61
+    81 00,2105 8D 0A D4		 sta $d40a                   ;line=1
+    82 00,2108 8D 02 D0		 sta Player2_PositionX
+    83 00,210B A9 81		 lda #$81
+    84 00,210D 8D 0A D4		 sta $d40a                   ;line=2
+    85 00,2110 8D 03 D0		 sta Player3_PositionX
+    86 00,2113 8D 0A D4		 sta $d40a                   ;line=3
+    87 00,2116 A9 5F		 lda #$5F
+    88 00,2118 A2 80		 ldx #$80
+    89 00,211A 8D 0A D4		 sta $d40a                   ;line=4
+    90 00,211D 8D 02 D0		 sta Player2_PositionX
+    91 00,2120 8E 03 D0		 stx Player3_PositionX
+    92 00,2123 A9 61		 lda #$61
+    93 00,2125 8D 0A D4		 sta $d40a                   ;line=5
+    94 00,2128 8D 02 D0		 sta Player2_PositionX
+    95 00,212B 8D 0A D4		 sta $d40a                   ;line=6
+    96 00,212E 8D 0A D4		 sta $d40a                   ;line=7
+    97 00,2131 A9 60		 lda #$60
+    98 00,2133 8D 0A D4		 sta $d40a                   ;line=8
+    99 00,2136 8D 02 D0		 sta Player2_PositionX
+   100 00,2139 A9 61		 lda #$61
+   101 00,213B 8D 0A D4		 sta $d40a                   ;line=9
+   102 00,213E 8D 02 D0		 sta Player2_PositionX
+   103 00,2141 A9 60		 lda #$60
+   104 00,2143 8D 0A D4		 sta $d40a                   ;line=10
+   105 00,2146 8D 02 D0		 sta Player2_PositionX
+   106 00,2149 A9 61		 lda #$61
+   107 00,214B 8D 0A D4		 sta $d40a                   ;line=11
+   108 00,214E 8D 02 D0		 sta Player2_PositionX
+   109 00,2151 8D 0A D4		 sta $d40a                   ;line=12
+   110 00,2154 8D 0A D4		 sta $d40a                   ;line=13
+   111 00,2157 8D 0A D4		 sta $d40a                   ;line=14
+   112 00,215A 8D 0A D4		 sta $d40a                   ;line=15
+   113 00,215D 8D 0A D4		 sta $d40a                   ;line=16
+   114 00,2160 8D 0A D4		 sta $d40a                   ;line=17
+   115 00,2163 8D 0A D4		 sta $d40a                   ;line=18
+   116 00,2166 8D 0A D4		 sta $d40a                   ;line=19
+   117 00,2169 8D 0A D4		 sta $d40a                   ;line=20
+   118 00,216C 8D 0A D4		 sta $d40a                   ;line=21
+   119 00,216F 8D 0A D4		 sta $d40a                   ;line=22
+   120 00,2172 8D 0A D4		 sta $d40a                   ;line=23
+   121 00,2175 8D 0A D4		 sta $d40a                   ;line=24
+   122 00,2178 8D 0A D4		 sta $d40a                   ;line=25
+   123 00,217B 8D 0A D4		 sta $d40a                   ;line=26
+   124 00,217E 8D 0A D4		 sta $d40a                   ;line=27
+   125 00,2181 8D 0A D4		 sta $d40a                   ;line=28
+   126 00,2184 8D 0A D4		 sta $d40a                   ;line=29
+   127 00,2187 8D 0A D4		 sta $d40a                   ;line=30
+   128 00,218A A9 8C		 lda #$8C
+   129 00,218C 8D 0A D4		 sta $d40a                   ;line=31
+   130 00,218F 8D 06 D0		 sta Missile2_PositionX
+   131 00,2192 A9 7F		 lda #$7F
+   132 00,2194 8D 0A D4		 sta $d40a                   ;line=32
+   133 00,2197 8D 03 D0		 sta Player3_PositionX
+   134 00,219A A9 81		 lda #$81
+   135 00,219C 8D 0A D4		 sta $d40a                   ;line=33
+   136 00,219F 8D 03 D0		 sta Player3_PositionX
+   137 00,21A2 8D 0A D4		 sta $d40a                   ;line=34
+   138 00,21A5 A9 80		 lda #$80
+   139 00,21A7 8D 0A D4		 sta $d40a                   ;line=35
+   140 00,21AA 8D 03 D0		 sta Player3_PositionX
+   141 00,21AD A9 60		 lda #$60
+   142 00,21AF 8D 0A D4		 sta $d40a                   ;line=36
+   143 00,21B2 8D 02 D0		 sta Player2_PositionX
+   144 00,21B5 A9 61		 lda #$61
+   145 00,21B7 8D 0A D4		 sta $d40a                   ;line=37
+   146 00,21BA 8D 02 D0		 sta Player2_PositionX
+   147 00,21BD 8D 0A D4		 sta $d40a                   ;line=38
+   148 00,21C0 8D 0A D4		 sta $d40a                   ;line=39
+   149 00,21C3 8D 0A D4		 sta $d40a                   ;line=40
+   150 00,21C6 8D 0A D4		 sta $d40a                   ;line=41
+   151 00,21C9 A9 60		 lda #$60
+   152 00,21CB 8D 0A D4		 sta $d40a                   ;line=42
+   153 00,21CE 8D 02 D0		 sta Player2_PositionX
+   154 00,21D1 A9 61		 lda #$61
+   155 00,21D3 8D 0A D4		 sta $d40a                   ;line=43
+   156 00,21D6 8D 02 D0		 sta Player2_PositionX
+   157 00,21D9 8D 0A D4		 sta $d40a                   ;line=44
+   158 00,21DC 8D 0A D4		 sta $d40a                   ;line=45
+   159 00,21DF 8D 0A D4		 sta $d40a                   ;line=46
+   160 00,21E2 8D 0A D4		 sta $d40a                   ;line=47
+   161 00,21E5 8D 0A D4		 sta $d40a                   ;line=48
+   162 00,21E8 8D 0A D4		 sta $d40a                   ;line=49
+   163 00,21EB 8D 0A D4		 sta $d40a                   ;line=50
+   164 00,21EE 8D 0A D4		 sta $d40a                   ;line=51
+   165 00,21F1 A9 88		 lda #$88
+   166 00,21F3 8D 0A D4		 sta $d40a                   ;line=52
+   167 00,21F6 8D 06 D0		 sta Missile2_PositionX
+   168 00,21F9 8D 0A D4		 sta $d40a                   ;line=53
+   169 00,21FC 8D 0A D4		 sta $d40a                   ;line=54
+   170 00,21FF 8D 0A D4		 sta $d40a                   ;line=55
+   171 00,2202 8D 0A D4		 sta $d40a                   ;line=56
+   172 00,2205 8D 0A D4		 sta $d40a                   ;line=57
+   173 00,2208 8D 0A D4		 sta $d40a                   ;line=58
+   174 00,220B 8D 0A D4		 sta $d40a                   ;line=59
+   175 00,220E 8D 0A D4		 sta $d40a                   ;line=60
+   176 00,2211 A9 68		 lda #$68
+   177 00,2213 8D 0A D4		 sta $d40a                   ;line=61
+   178 00,2216 8D 06 D0		 sta Missile2_PositionX
+   179 00,2219 A9 7F		 lda #$7F
+   180 00,221B 8D 0A D4		 sta $d40a                   ;line=62
+   181 00,221E 8D 03 D0		 sta Player3_PositionX
+   182 00,2221 A9 48		c7 lda #$48
+   183 00,2223 A2 74		c8 ldx #$74
+   184 00,2225 A0 0A		c9 ldy #$0A
+   185 00,2227 8D 0A D4		 sta $d40a                   ;line=63
+   186 00,222A 8D 16 D0		 sta Playfield_Color0_PF0
+   187 00,222D 8E 17 D0		 stx Playfield_Color1_PF1
+   188 00,2230 8C 18 D0		 sty Playfield_Color2_PF2
+   189 00,2233 A9 0E		c10 lda #$0E
+   190 00,2235 8D 15 D0		 sta Player3_Missile3_Color3_PM3
+   191 00,2238 A9 78		c11 lda #$78
+   192 00,223A A2 84		c12 ldx #$84
+   193 00,223C A0 6A		c13 ldy #$6A
+   194 00,223E 8D 0A D4		 sta $d40a                   ;line=64
+   195 00,2241 8D 16 D0		 sta Playfield_Color0_PF0
+   196 00,2244 8E 17 D0		 stx Playfield_Color1_PF1
+   197 00,2247 8C 18 D0		 sty Playfield_Color2_PF2
+   198 00,224A A9 14		c14 lda #$14
+   199 00,224C 8D 19 D0		 sta Playfield_Color3_PF3
+   200 00,224F A9 39		 lda #$39
+   201 00,2251 8D 02 D0		 sta Player2_PositionX
+   202 				;--
+   203 00,2254 A9 89		 lda #$89
+   204 00,2256 8D 03 D0		 sta Player3_PositionX
+   205 00,2259 A9 6D		 lda #$6D
+   206 00,225B 8D 06 D0		 sta Missile2_PositionX
+   207 00,225E A9 0C		c15 lda #$0C
+   208 00,2260 8D 15 D0		 sta Player3_Missile3_Color3_PM3
+   209 00,2263 8D 0A D4		 sta $d40a                   ;line=65
+   210 00,2266 8D 0A D4		 sta $d40a                   ;line=66
+   211 00,2269 8D 0A D4		 sta $d40a                   ;line=67
+   212 00,226C A9 58		 lda #$58
+   213 00,226E A2 A8		 ldx #$A8
+   214 00,2270 A0 38		 ldy #$38
+   215 00,2272 8D 0A D4		 sta $d40a                   ;line=68
+   216 00,2275 8D 00 D0		 sta Player0_PositionX
+   217 00,2278 8E 01 D0		 stx Player1_PositionX
+   218 00,227B 8C 02 D0		 sty Player2_PositionX
+   219 00,227E A9 88		 lda #$88
+   220 00,2280 8D 03 D0		 sta Player3_PositionX
+   221 00,2283 8D 0A D4		 sta $d40a                   ;line=69
+   222 00,2286 8D 0A D4		 sta $d40a                   ;line=70
+   223 00,2289 8D 0A D4		 sta $d40a                   ;line=71
+   224 00,228C 8D 0A D4		 sta $d40a                   ;line=72
+   225 00,228F 8D 0A D4		 sta $d40a                   ;line=73
+   226 00,2292 8D 0A D4		 sta $d40a                   ;line=74
+   227 00,2295 8D 0A D4		 sta $d40a                   ;line=75
+   228 00,2298 A9 87		 lda #$87
+   229 00,229A A2 5F		 ldx #$5F
+   230 00,229C A0 64		 ldy #$64
+   231 00,229E 8D 0A D4		 sta $d40a                   ;line=76
+   232 00,22A1 8D 03 D0		 sta Player3_PositionX
+   233 00,22A4 8E 04 D0		 stx Missile0_PositionX
+   234 00,22A7 8C 07 D0		 sty Missile3_PositionX
+   235 00,22AA 8D 0A D4		 sta $d40a                   ;line=77
+   236 00,22AD 8D 0A D4		 sta $d40a                   ;line=78
+   237 00,22B0 A9 54		 lda #$54
+   238 00,22B2 8D 0A D4		 sta $d40a                   ;line=79
+   239 00,22B5 8D 06 D0		 sta Missile2_PositionX
+   240 00,22B8 8D 0A D4		 sta $d40a                   ;line=80
+   241 00,22BB 8D 0A D4		 sta $d40a                   ;line=81
+   242 00,22BE A9 A0		 lda #$A0
+   243 00,22C0 8D 0A D4		 sta $d40a                   ;line=82
+   244 00,22C3 8D 06 D0		 sta Missile2_PositionX
+   245 00,22C6 A9 60		 lda #$60
+   246 00,22C8 8D 0A D4		 sta $d40a                   ;line=83
+   247 00,22CB 8D 04 D0		 sta Missile0_PositionX
+   248 00,22CE A9 39		 lda #$39
+   249 00,22D0 8D 0A D4		 sta $d40a                   ;line=84
+   250 00,22D3 8D 02 D0		 sta Player2_PositionX
+   251 00,22D6 8D 0A D4		 sta $d40a                   ;line=85
+   252 00,22D9 8D 0A D4		 sta $d40a                   ;line=86
+   253 00,22DC 8D 0A D4		 sta $d40a                   ;line=87
+   254 00,22DF A9 37		 lda #$37
+   255 00,22E1 8D 0A D4		 sta $d40a                   ;line=88
+   256 00,22E4 8D 02 D0		 sta Player2_PositionX
+   257 00,22E7 A9 C4		 lda #$C4
+   258 00,22E9 8D 0A D4		 sta $d40a                   ;line=89
+   259 00,22EC 8D 06 D0		 sta Missile2_PositionX
+   260 00,22EF 8D 0A D4		 sta $d40a                   ;line=90
+   261 00,22F2 8D 0A D4		 sta $d40a                   ;line=91
+   262 00,22F5 8D 0A D4		 sta $d40a                   ;line=92
+   263 00,22F8 8D 0A D4		 sta $d40a                   ;line=93
+   264 00,22FB 8D 0A D4		 sta $d40a                   ;line=94
+   265 00,22FE A9 74		c16 lda #$74
+   266 00,2300 A2 00		c17 ldx #$00
+   267 00,2302 8D 0A D4		 sta $d40a                   ;line=95
+   268 00,2305 8D 17 D0		 sta Playfield_Color1_PF1
+   269 00,2308 8E 19 D0		 stx Playfield_Color3_PF3
+   270 00,230B A9 38		c18 lda #$38
+   271 00,230D A2 24		c19 ldx #$24
+   272 00,230F A0 2A		c20 ldy #$2A
+   273 00,2311 8D 0A D4		 sta $d40a                   ;line=96
+   274 00,2314 8D 16 D0		 sta Playfield_Color0_PF0
+   275 00,2317 8E 17 D0		 stx Playfield_Color1_PF1
+   276 00,231A 8C 18 D0		 sty Playfield_Color2_PF2
+   277 00,231D A9 30		 lda #$30
+   278 00,231F 8D 0C D0		 sta Missiles_Size
+   279 00,2322 A9 77		 lda #$77
+   280 00,2324 8D 02 D0		 sta Player2_PositionX
+   281 				;--
+   282 00,2327 A9 58		 lda #$58
+   283 00,2329 8D 03 D0		 sta Player3_PositionX
+   284 00,232C A9 99		 lda #$99
+   285 00,232E 8D 06 D0		 sta Missile2_PositionX
+   286 00,2331 A9 95		 lda #$95
+   287 00,2333 8D 07 D0		 sta Missile3_PositionX
+   288 00,2336 A9 1C		c21 lda #$1C
+   289 00,2338 8D 14 D0		 sta Player2_Missile2_Color2_PM2
+   290 00,233B 8D 15 D0		 sta Player3_Missile3_Color3_PM3
+   291 				;--
+   292 00,233E A9 59		 lda #$59
+   293 00,2340 8D 0A D4		 sta $d40a                   ;line=97
+   294 00,2343 8D 03 D0		 sta Player3_PositionX
+   295 00,2346 A9 79		 lda #$79
+   296 00,2348 8D 0A D4		 sta $d40a                   ;line=98
+   297 00,234B 8D 02 D0		 sta Player2_PositionX
+   298 00,234E A9 77		 lda #$77
+   299 00,2350 A2 58		 ldx #$58
+   300 00,2352 8D 0A D4		 sta $d40a                   ;line=99
+   301 00,2355 8D 02 D0		 sta Player2_PositionX
+   302 00,2358 8E 03 D0		 stx Player3_PositionX
+   303 00,235B A9 98		 lda #$98
+   304 00,235D 8D 0A D4		 sta $d40a                   ;line=100
+   305 00,2360 8D 06 D0		 sta Missile2_PositionX
+   306 00,2363 8D 0A D4		 sta $d40a                   ;line=101
+   307 00,2366 8D 0A D4		 sta $d40a                   ;line=102
+   308 00,2369 8D 0A D4		 sta $d40a                   ;line=103
+   309 00,236C A9 78		 lda #$78
+   310 00,236E 8D 0A D4		 sta $d40a                   ;line=104
+   311 00,2371 8D 02 D0		 sta Player2_PositionX
+   312 00,2374 8D 0A D4		 sta $d40a                   ;line=105
+   313 00,2377 8D 0A D4		 sta $d40a                   ;line=106
+   314 00,237A A9 77		 lda #$77
+   315 00,237C 8D 0A D4		 sta $d40a                   ;line=107
+   316 00,237F 8D 02 D0		 sta Player2_PositionX
+   317 00,2382 A9 99		 lda #$99
+   318 00,2384 8D 0A D4		 sta $d40a                   ;line=108
+   319 00,2387 8D 06 D0		 sta Missile2_PositionX
+   320 00,238A 8D 0A D4		 sta $d40a                   ;line=109
+   321 00,238D 8D 0A D4		 sta $d40a                   ;line=110
+   322 00,2390 A9 56		 lda #$56
+   323 00,2392 8D 0A D4		 sta $d40a                   ;line=111
+   324 00,2395 8D 03 D0		 sta Player3_PositionX
+   325 00,2398 8D 0A D4		 sta $d40a                   ;line=112
+   326 00,239B A9 58		 lda #$58
+   327 00,239D 8D 0A D4		 sta $d40a                   ;line=113
+   328 00,23A0 8D 03 D0		 sta Player3_PositionX
+   329 00,23A3 8D 0A D4		 sta $d40a                   ;line=114
+   330 00,23A6 8D 0A D4		 sta $d40a                   ;line=115
+   331 00,23A9 8D 0A D4		 sta $d40a                   ;line=116
+   332 00,23AC 8D 0A D4		 sta $d40a                   ;line=117
+   333 00,23AF 8D 0A D4		 sta $d40a                   ;line=118
+   334 00,23B2 8D 0A D4		 sta $d40a                   ;line=119
+   335 00,23B5 A9 57		 lda #$57
+   336 00,23B7 8D 0A D4		 sta $d40a                   ;line=120
+   337 00,23BA 8D 03 D0		 sta Player3_PositionX
+   338 00,23BD 8D 0A D4		 sta $d40a                   ;line=121
+   339 00,23C0 A9 58		 lda #$58
+   340 00,23C2 8D 0A D4		 sta $d40a                   ;line=122
+   341 00,23C5 8D 03 D0		 sta Player3_PositionX
+   342 00,23C8 8D 0A D4		 sta $d40a                   ;line=123
+   343 00,23CB 8D 0A D4		 sta $d40a                   ;line=124
+   344 00,23CE 8D 0A D4		 sta $d40a                   ;line=125
+   345 00,23D1 8D 0A D4		 sta $d40a                   ;line=126
+   346 00,23D4 8D 0A D4		 sta $d40a                   ;line=127
+   347 00,23D7 A9 57		 lda #$57
+   348 00,23D9 A2 38		 ldx #$38
+   349 00,23DB A0 79		 ldy #$79
+   350 00,23DD 8D 0A D4		 sta $d40a                   ;line=128
+   351 00,23E0 8D 02 D0		 sta Player2_PositionX
+   352 00,23E3 8E 03 D0		 stx Player3_PositionX
+   353 00,23E6 8C 06 D0		 sty Missile2_PositionX
+   354 00,23E9 A9 75		 lda #$75
+   355 00,23EB 8D 07 D0		 sta Missile3_PositionX
+   356 00,23EE A9 48		c22 lda #$48
+   357 00,23F0 A2 74		c23 ldx #$74
+   358 00,23F2 A0 0A		c24 ldy #$0A
+   359 00,23F4 8D 0A D4		 sta $d40a                   ;line=129
+   360 00,23F7 8D 16 D0		 sta Playfield_Color0_PF0
+   361 00,23FA 8E 17 D0		 stx Playfield_Color1_PF1
+   362 00,23FD 8C 18 D0		 sty Playfield_Color2_PF2
+   363 				 mwa #null null+1
+Source: MWA
+    36 00,2400 A9 2A		      ldA <NULL
+    37 00,2402 8D 2B 20		      stA NULL+1
+    38 00,2405 A9 20		      ldA >NULL
+    39 00,2407 8D 2C 20		      stA NULL+1+1
+   364 00,240A 4C 2A 20		 jmp null
+   365
+   366 				;--
+   367
+   368 00,240D 2C 0F D4		nmi bit $d40f
+   369 00,2410 10 03		 bpl vbl
+   370
+   371 00,2412 4C 9E 24		dliv jmp dliQ
+   372
+   373 00,2415 48		vbl pha                 ;przerwanie VBL *- VBL routine
+   374 				; txa
+   375 				; pha
+   376 				; tya
+   377 				; pha
+   378 00,2416 8D 0F D4		 sta $d40f              ;reset znacznika przerwania $d40f
+   379
+   380 				 mwa #ant $d402         ;adres programu ANTICA ($d402,$d403)
+Source: MWA
+    36 00,2419 A9 00		      ldA <ANT
+    37 00,241B 8D 02 D4		      stA $D402
+    38 00,241E A9 36		      ldA >ANT
+    39 00,2420 8D 03 D4		      stA $D402+1
+   381 				 mva #scr40 $d400       ;ustawienie szerokosci obrazu $d400
+Source: MVA
+     5 00,2423 A9 3E		 ldA #SCR40
+     6 00,2425 8D 00 D4		 stA $D400
+   382
+   383 				;-- init pierwszej linii
+   384
+   385 00,2428 A9 38		 lda >fnt+$400*$00
+   386 00,242A 8D 09 D4		 sta CHARBASE
+   387 00,242D A9 00		c0 lda #$00
+   388 00,242F 8D 1A D0		 sta Background_BAK
+   389 00,2432 A9 C8		c1 lda #$C8
+   390 00,2434 8D 16 D0		 sta Playfield_Color0_PF0
+   391 00,2437 A9 B4		c2 lda #$B4
+   392 00,2439 8D 17 D0		 sta Playfield_Color1_PF1
+   393 00,243C A9 EA		c3 lda #$EA
+   394 00,243E 8D 18 D0		 sta Playfield_Color2_PF2
+   395 00,2441 A9 00		c4 lda #$00
+   396 00,2443 8D 19 D0		 sta Playfield_Color3_PF3
+   397 00,2446 A9 04		 lda #$04
+   398 00,2448 8D 1B D0		 sta PRIOR_GTIACTL
+   399 00,244B A9 03		 lda #$03
+   400 00,244D 8D 0A D0		 sta Player2_Size
+   401 00,2450 8D 0B D0		 sta Player3_Size
+   402 00,2453 A9 00		 lda #$00
+   403 00,2455 8D 0C D0		 sta Missiles_Size
+   404 00,2458 A9 5F		 lda #$5F
+   405 00,245A 8D 02 D0		 sta Player2_PositionX
+   406 00,245D A9 7F		 lda #$7F
+   407 00,245F 8D 03 D0		 sta Player3_PositionX
+   408 00,2462 A9 68		 lda #$68
+   409 00,2464 8D 06 D0		 sta Missile2_PositionX
+   410 00,2467 A9 0C		c5 lda #$0C
+   411 00,2469 8D 14 D0		 sta Player2_Missile2_Color2_PM2
+   412 00,246C 8D 15 D0		 sta Player3_Missile3_Color3_PM3
+   413 00,246F A9 03		 lda #$03
+   414 00,2471 8D 08 D0		 sta Player0_Size
+   415 00,2474 8D 09 D0		 sta Player1_Size
+   416 00,2477 A9 59		 lda #$59
+   417 00,2479 8D 00 D0		 sta Player0_PositionX
+   418 00,247C A9 A9		 lda #$A9
+   419 00,247E 8D 01 D0		 sta Player1_PositionX
+   420 00,2481 A9 5C		 lda #$5C
+   421 00,2483 8D 04 D0		 sta Missile0_PositionX
+   422 00,2486 A9 9D		 lda #$9D
+   423 00,2488 8D 07 D0		 sta Missile3_PositionX
+   424 00,248B A9 0C		c6 lda #$0C
+   425 00,248D 8D 12 D0		 sta Player0_Missile0_Color0_PM0
+   426 00,2490 8D 13 D0		 sta Player1_Missile1_Color1_PM1
+   427
+   428 				 mwa #dli1 null+1       ;odpalamy synchro pierwszej linii
+Source: MWA
+    36 00,2493 A9 F0		      ldA <DLI1
+    37 00,2495 8D 2B 20		      stA NULL+1
+    38 00,2498 A9 20		      ldA >DLI1
+    39 00,249A 8D 2C 20		      stA NULL+1+1
+   429
+   430 				;-- tutaj miejsce na twoja procedurke, tylko zachowaj wartosci rejestrow X i Y
+   431 				;*- this area is for yours routine, register X,Y must survive
+   432
+   433 				; pla
+   434 				; tay
+   435 				; pla
+   436 				; tax
+   437 00,249D 68		 pla
+   438 00,249E 40		dliQ rti
+   439
+   440 				;--
+   441 00,249F			 org $3000
+   442 00,3000-34AF> 00 00 00 +	text  ins 'texts_all.scr'
+   443
+   444 				;-- ANTIC PROGRAM
+   445 00,34B0			 org $3600
+   446 00,3600-3622> 44 00 30	ant dta $44,a(text)
+   447 00,3603 04 04 04 04 04 +	 dta 4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4
+   448 00,3620 41 00 36		 dta $41,a(ant)
+   449
+   450 				;-- FONTS
+   451 00,3623			 org $3800
+   452 00,3800-3BFF> 00 00 00 +	fnt ins 'texts_all.fnt'
+   453
+   454 				;--
+   455 00,3C00			 org pmBase+$300
+   456 00,B300-B7FF> 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   457 00,B310 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$20,$10,$10,$00
+   458 00,B320 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   459 00,B330 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$10,$00,$20,$00,$00,$00,$00,$00,$00
+   460 00,B340 20 00 00 00 00 +	 dta $20,$00,$00,$00,$00,$00,$00,$00,$81,$00,$00,$00,$00,$00,$00,$00
+   461 00,B350 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$01,$01,$62,$20,$80,$00,$10,$00,$20,$00,$00
+   462 00,B360 02 10 10 00 00 +	 dta $02,$10,$10,$00,$00,$00,$00,$00,$10,$20,$30,$20,$10,$00,$00,$00
+   463 00,B370 00 00 20 00 00 +	 dta $00,$00,$20,$00,$00,$00,$00,$10,$00,$00,$00,$00,$00,$00,$00,$00
+   464 00,B380 00 80 80 00 00 +	 dta $00,$80,$80,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   465 00,B390 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   466 00,B3A0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   467 00,B3B0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   468 00,B3C0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   469 00,B3D0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   470 00,B3E0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   471 00,B3F0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+   472
+   473 00,B400 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   474 00,B410 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   475 00,B420 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   476 00,B430 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   477 00,B440 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$04,$88,$CC,$88,$44,$00,$00,$00
+   478 00,B450 00 00 88 00 00 +	 dta $00,$00,$88,$00,$00,$00,$00,$02,$00,$00,$00,$00,$00,$00,$00,$00
+   479 00,B460 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   480 00,B470 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   481 00,B480 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   482 00,B490 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   483 00,B4A0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   484 00,B4B0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   485 00,B4C0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   486 00,B4D0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   487 00,B4E0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   488 00,B4F0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+   489
+   490 00,B500 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   491 00,B510 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   492 00,B520 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   493 00,B530 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   494 00,B540 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$44,$88,$CC,$88,$44,$00,$00,$00
+   495 00,B550 00 00 88 00 00 +	 dta $00,$00,$88,$00,$00,$00,$00,$20,$02,$00,$00,$00,$00,$00,$00,$00
+   496 00,B560 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   497 00,B570 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   498 00,B580 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   499 00,B590 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   500 00,B5A0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   501 00,B5B0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   502 00,B5C0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   503 00,B5D0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   504 00,B5E0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   505 00,B5F0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+   506
+   507 00,B600 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$44,$88,$CC,$88,$44,$00,$00,$00
+   508 00,B610 20 00 88 00 00 +	 dta $20,$00,$88,$00,$00,$00,$00,$04,$00,$00,$00,$00,$00,$00,$00,$00
+   509 00,B620 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$44,$88,$CC,$88,$44,$00,$00,$00
+   510 00,B630 00 00 88 00 00 +	 dta $00,$00,$88,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   511 00,B640 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$44,$88,$CC,$88,$44,$00,$00,$00
+   512 00,B650 00 00 88 00 00 +	 dta $00,$00,$88,$00,$00,$00,$00,$00,$02,$02,$00,$00,$20,$00,$00,$00
+   513 00,B660 02 00 00 00 00 +	 dta $02,$00,$00,$00,$00,$00,$00,$00,$44,$44,$CC,$44,$44,$00,$00,$00
+   514 00,B670 20 00 88 00 00 +	 dta $20,$00,$88,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   515 00,B680 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   516 00,B690 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   517 00,B6A0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   518 00,B6B0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   519 00,B6C0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   520 00,B6D0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   521 00,B6E0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   522 00,B6F0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+   523
+   524 00,B700 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$44,$44,$CC,$CC,$44,$00,$00,$00
+   525 00,B710 00 00 88 00 00 +	 dta $00,$00,$88,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   526 00,B720 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$44,$8C,$CC,$44,$44,$00,$00,$00
+   527 00,B730 00 00 88 00 00 +	 dta $00,$00,$88,$00,$00,$00,$00,$02,$00,$00,$00,$00,$00,$00,$00,$00
+   528 00,B740 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$40,$88,$CC,$88,$44,$00,$00,$00
+   529 00,B750 00 00 88 00 01 +	 dta $00,$00,$88,$00,$01,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   530 00,B760 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$44,$CC,$CC,$44,$44,$00,$00,$00
+   531 00,B770 00 00 88 00 00 +	 dta $00,$00,$88,$00,$00,$00,$00,$21,$03,$02,$00,$00,$00,$00,$00,$00
+   532 00,B780 02 00 00 00 00 +	 dta $02,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   533 00,B790 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   534 00,B7A0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   535 00,B7B0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   536 00,B7C0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   537 00,B7D0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   538 00,B7E0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   539 00,B7F0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+   540
+   541 00,02E0-02E1> 00 20	 run main
+   542
+Source: d:\!atari\macro\xasm.mac

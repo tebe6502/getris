@@ -1,0 +1,624 @@
+Mad-Assembler v1.6.?beta by TeBe/Madteam
+Source: D:\!Atari\getris2\game_over\Over.asm
+     1
+     2 = 00,003E		scr40   	equ %00111110	;obraz normalny	*-screen 40b
+     3 = 00,F300		pmBase_Text	equ $f000+$300
+     4
+     5 = 00,D000		Player0_PositionX equ $D000
+     6 = 00,D001		Player1_PositionX equ $D001
+     7 = 00,D002		Player2_PositionX equ $D002
+     8 = 00,D003		Player3_PositionX equ $D003
+     9
+    10 = 00,D004		Missile0_PositionX equ $D004
+    11 = 00,D005		Missile1_PositionX equ $D005
+    12 = 00,D006		Missile2_PositionX equ $D006
+    13 = 00,D007		Missile3_PositionX equ $D007
+    14
+    15 = 00,D008		Player0_Size equ $D008
+    16 = 00,D009		Player1_Size equ $D009
+    17 = 00,D00A		Player2_Size equ $D00A
+    18 = 00,D00B		Player3_Size equ $D00B
+    19
+    20 = 00,D00C		Missiles_Size equ $D00C
+    21
+    22 = 00,D012		Player0_Missile0_Color0_PM0 equ $D012
+    23 = 00,D013		Player1_Missile1_Color1_PM1 equ $D013
+    24 = 00,D014		Player2_Missile2_Color2_PM2 equ $D014
+    25 = 00,D015		Player3_Missile3_Color3_PM3 equ $D015
+    26
+    27 = 00,D016		Playfield_Color0_PF0 equ $D016
+    28 = 00,D017		Playfield_Color1_PF1 equ $D017
+    29 = 00,D018		Playfield_Color2_PF2 equ $D018
+    30 = 00,D019		Playfield_Color3_PF3 equ $D019
+    31
+    32 = 00,D01A		Background_BAK equ $D01A
+    33 = 00,D01B		PRIOR_GTIACTL equ $D01B
+    34
+    35 = 00,D409		CHARBASE equ $D409
+    36
+    37
+    38 = 00,0080		rejA    equ $80
+    39 = 00,0081		rejX    equ rejA+1
+    40 = 00,0082		rejY    equ rejX+1
+    41
+    42
+    43 				;-- MAIN PROGRAM
+    44 				 org $2000
+    45
+    46 				main
+    47 				;-- init PMG
+    48 				 mva >pmBase_Text $d407	;PMCTL - wyswietlac duchy i pociski
+Macro: MVA [Source: d:\!atari\macro\xasm.mac]
+     5 FFFF> 00,2000-22CA> A9 +	 ldA >PMBASE_TEXT
+     6 00,2002 8D 07 D4		 stA $D407
+Source: D:\!Atari\getris2\game_over\Over.asm
+Source: D:\!Atari\getris2\game_over\Over.asm
+    49 				 mva #3 $d01d		;PMCTL - show PMG
+Macro: MVA [Source: d:\!atari\macro\xasm.mac]
+     5 00,2005 A9 03		 ldA #3
+     6 00,2007 8D 1D D0		 stA $D01D
+Source: D:\!Atari\getris2\game_over\Over.asm
+Source: D:\!Atari\getris2\game_over\Over.asm
+    50
+    51 00,200A A5 14		 lda 20			;czekamy 1 ramke zanim zrobimy jakies nieszczescie :)
+    52 00,200C C5 14		 cmp 20			*- wait 1 frame
+    53 00,200E F0 FC		 beq *-2
+    54
+    55 00,2010 78		 sei			;wylaczenie przerwan *- IRQ OFF, NMI OFF
+    56 				 mva #0 $d40e
+Macro: MVA [Source: d:\!atari\macro\xasm.mac]
+     5 00,2011 A9 00		 ldA #0
+     6 00,2013 8D 0E D4		 stA $D40E
+Source: D:\!Atari\getris2\game_over\Over.asm
+Source: D:\!Atari\getris2\game_over\Over.asm
+    57 				 mva #$fe $d301		;wylaczenie ROM-u *- ROM OFF
+Macro: MVA [Source: d:\!atari\macro\xasm.mac]
+     5 00,2016 A9 FE		 ldA #$FE
+     6 00,2018 8D 01 D3		 stA $D301
+Source: D:\!Atari\getris2\game_over\Over.asm
+Source: D:\!Atari\getris2\game_over\Over.asm
+    58
+    59 				 mwa #nmi $fffa		;nasza nowa obsluga przerwania NMI
+Macro: MWA [Source: d:\!atari\macro\xasm.mac]
+    36 00,201B A9 39		      ldA <NMI
+    37 00,201D 8D FA FF		      stA $FFFA
+    38 00,2020 A9 22		      ldA >NMI
+    39 00,2022 8D FB FF		      stA $FFFA+1
+Source: D:\!Atari\getris2\game_over\Over.asm
+    60
+    61 				 mva #$c0 $d40e		;wlaczenie NMI z przerwaniami DLI
+Macro: MVA [Source: d:\!atari\macro\xasm.mac]
+     5 00,2025 A9 C0		 ldA #$C0
+     6 00,2027 8D 0E D4		 stA $D40E
+Source: D:\!Atari\getris2\game_over\Over.asm
+Source: D:\!Atari\getris2\game_over\Over.asm
+    62
+    63 00,202A 20 55 20		 jsr clr_pmg
+    64
+    65 = 00,0030		?ofs = 48
+    66
+    67 00,202D A0 00		 ldy #0
+    68 00,202F			copy
+    69 				.rept 5
+    70 					lda pmg+.r*$100,y
+    71 					sta pmBase_Text+.r*$100+?ofs,y
+    72 				.endr
+Source: REPT
+    70 00,202F B9 00 40			lda pmg+.r*$100,y
+    71 00,2032 99 30 F3			sta pmBase_Text+.r*$100+?ofs,y
+    70 00,2035 B9 00 41			lda pmg+.r*$100,y
+    71 00,2038 99 30 F4			sta pmBase_Text+.r*$100+?ofs,y
+    70 00,203B B9 00 42			lda pmg+.r*$100,y
+    71 00,203E 99 30 F5			sta pmBase_Text+.r*$100+?ofs,y
+    70 00,2041 B9 00 43			lda pmg+.r*$100,y
+    71 00,2044 99 30 F6			sta pmBase_Text+.r*$100+?ofs,y
+    70 00,2047 B9 00 44			lda pmg+.r*$100,y
+    71 00,204A 99 30 F7			sta pmBase_Text+.r*$100+?ofs,y
+Source: D:\!Atari\getris2\game_over\Over.asm
+    73
+    74 00,204D C8		 iny
+    75 00,204E C0 D0		 cpy #256-?ofs
+    76 00,2050 D0 DD		 bne copy
+    77
+    78 00,2052 4C 52 20		null jmp null
+    79
+    80
+    81 00,2055			.proc clr_pmg
+    82 00,2055 A0 00		 ldy #0
+    83 00,2057 98		 tya
+    84 00,2058			clr
+    85 				.rept 5
+    86 				 sta pmBase_Text+.r*$100,y
+    87 				.endr
+Source: REPT
+    86 00,2058 99 00 F3		 sta pmBase_Text+.r*$100,y
+    86 00,205B 99 00 F4		 sta pmBase_Text+.r*$100,y
+    86 00,205E 99 00 F5		 sta pmBase_Text+.r*$100,y
+    86 00,2061 99 00 F6		 sta pmBase_Text+.r*$100,y
+    86 00,2064 99 00 F7		 sta pmBase_Text+.r*$100,y
+Source: D:\!Atari\getris2\game_over\Over.asm
+    88
+    89 00,2067 C8		 iny
+    90 00,2068 D0 EE		 bne clr
+    91
+    92 00,206A 60		 rts
+    93 				.endp
+    94
+    95 				;--
+    96
+    97 				;-- dli program
+    98
+    99 00,206B			dli1
+   100 00,206B 85 80		 sta rejA
+   101
+   102 00,206D A9 83		 lda #$83
+   103 00,206F 8D 0A D4		 sta $d40a                   ;line=64
+   104 00,2072 8D 06 D0		 sta Missile2_PositionX
+   105 00,2075 8D 0A D4		 sta $d40a                   ;line=65
+   106 00,2078 8D 0A D4		 sta $d40a                   ;line=66
+   107 00,207B 8D 0A D4		 sta $d40a                   ;line=67
+   108 00,207E A9 6E		 lda #$6E
+   109 00,2080 8D 0A D4		 sta $d40a                   ;line=68
+   110 00,2083 8D 06 D0		 sta Missile2_PositionX
+   111 				; sta $d40a                   ;line=69
+   112 				; sta $d40a                   ;line=70
+   113 				; sta $d40a                   ;line=71
+   114
+   115 				 mwa #dli1_2 dliv+1
+Macro: MWA [Source: d:\!atari\macro\xasm.mac]
+    36 00,2086 A9 91		      ldA <DLI1_2
+    37 00,2088 8D 3F 22		      stA DLIV+1
+    38 00,208B A9 20		      ldA >DLI1_2
+    39 00,208D 8D 40 22		      stA DLIV+1+1
+Source: D:\!Atari\getris2\game_over\Over.asm
+   116 00,2090 40		 rti
+   117
+   118
+   119 00,2091			dli1_2
+   120 00,2091 85 80		 sta rejA
+   121 00,2093 86 81		 stx rejX
+   122
+   123 				; sta $d40a                   ;line=72
+   124 				; sta $d40a                   ;line=73
+   125 				; sta $d40a                   ;line=74
+   126 				; sta $d40a                   ;line=75
+   127 				; sta $d40a                   ;line=76
+   128 				; sta $d40a                   ;line=77
+   129 				; sta $d40a                   ;line=78
+   130 				; sta $d40a                   ;line=79
+   131 00,2095 A9 83		 lda #$83
+   132 00,2097 8D 0A D4		 sta $d40a                   ;line=80
+   133 00,209A 8D 06 D0		 sta Missile2_PositionX
+   134 00,209D 8D 0A D4		 sta $d40a                   ;line=81
+   135 00,20A0 A9 7A		 lda #$7A
+   136 00,20A2 A2 6F		 ldx #$6F
+   137 00,20A4 8D 0A D4		 sta $d40a                   ;line=82
+   138 00,20A7 8D 01 D0		 sta Player1_PositionX
+   139 00,20AA 8E 06 D0		 stx Missile2_PositionX
+   140 00,20AD 8D 0A D4		 sta $d40a                   ;line=83
+   141 00,20B0 8D 0A D4		 sta $d40a                   ;line=84
+   142 00,20B3 A9 01		 lda #$01
+   143 00,20B5 A2 84		 ldx #$84
+   144 00,20B7 8D 0A D4		 sta $d40a                   ;line=85
+   145 00,20BA 8D 09 D0		 sta Player1_Size
+   146 00,20BD 8E 01 D0		 stx Player1_PositionX
+   147 				; sta $d40a                   ;line=86
+   148 				; sta $d40a                   ;line=87
+   149
+   150 				 mwa #dli1_3 dliv+1
+Macro: MWA [Source: d:\!atari\macro\xasm.mac]
+    36 00,20C0 A9 CF		      ldA <DLI1_3
+    37 00,20C2 8D 3F 22		      stA DLIV+1
+    38 00,20C5 A9 20		      ldA >DLI1_3
+    39 00,20C7 8D 40 22		      stA DLIV+1+1
+Source: D:\!Atari\getris2\game_over\Over.asm
+   151 00,20CA A5 80		 lda rejA
+   152 00,20CC A6 81		 ldx rejX
+   153 00,20CE 40		 rti
+   154
+   155
+   156
+   157 00,20CF			dli1_3 
+   158 00,20CF 85 80		 sta rejA
+   159
+   160 				; sta $d40a                   ;line=88
+   161 				; sta $d40a                   ;line=89
+   162 				; sta $d40a                   ;line=90
+   163 				; sta $d40a                   ;line=91
+   164 				; sta $d40a                   ;line=92
+   165 				; sta $d40a                   ;line=93
+   166 				; sta $d40a                   ;line=94
+   167 				; sta $d40a                   ;line=95
+   168 00,20D1 8D 0A D4		 sta $d40a                   ;line=96
+   169 00,20D4 8D 0A D4		 sta $d40a                   ;line=97
+   170 00,20D7 8D 0A D4		 sta $d40a                   ;line=98
+   171 00,20DA 8D 0A D4		 sta $d40a                   ;line=99
+   172 00,20DD A9 70		 lda #$70
+   173 00,20DF 8D 0A D4		 sta $d40a                   ;line=100
+   174 00,20E2 8D 06 D0		 sta Missile2_PositionX
+   175 				; sta $d40a                   ;line=101
+   176 				; sta $d40a                   ;line=102
+   177 				; sta $d40a                   ;line=103
+   178
+   179 				 mwa #dli1_4 dliv+1
+Macro: MWA [Source: d:\!atari\macro\xasm.mac]
+    36 00,20E5 A9 F2		      ldA <DLI1_4
+    37 00,20E7 8D 3F 22		      stA DLIV+1
+    38 00,20EA A9 20		      ldA >DLI1_4
+    39 00,20EC 8D 40 22		      stA DLIV+1+1
+Source: D:\!Atari\getris2\game_over\Over.asm
+   180 00,20EF A5 80		 lda rejA
+   181 00,20F1 40		 rti
+   182
+   183
+   184 00,20F2			dli1_4
+   185 00,20F2 85 80		 sta rejA
+   186
+   187 00,20F4 8D 0A D4		 sta $d40a                   ;line=104
+   188 00,20F7 A9 6D		 lda #$6D
+   189 00,20F9 8D 0A D4		 sta $d40a                   ;line=105
+   190 00,20FC 8D 06 D0		 sta Missile2_PositionX
+   191 				; sta $d40a                   ;line=106
+   192 				; sta $d40a                   ;line=107
+   193 				; sta $d40a                   ;line=108
+   194 				; sta $d40a                   ;line=109
+   195 				; sta $d40a                   ;line=110
+   196 				; sta $d40a                   ;line=111
+   197
+   198 				 mwa #dli1_5 dliv+1
+Macro: MWA [Source: d:\!atari\macro\xasm.mac]
+    36 00,20FF A9 0C		      ldA <DLI1_5
+    37 00,2101 8D 3F 22		      stA DLIV+1
+    38 00,2104 A9 21		      ldA >DLI1_5
+    39 00,2106 8D 40 22		      stA DLIV+1+1
+Source: D:\!Atari\getris2\game_over\Over.asm
+   199 00,2109 A5 80		 lda rejA
+   200 00,210B 40		 rti
+   201
+   202
+   203
+   204 00,210C			dli1_5
+   205 00,210C 85 80		 sta rejA
+   206 00,210E 86 81		 stx rejX
+   207 00,2110 84 82		 sty rejY
+   208
+   209 				; sta $d40a                   ;line=112
+   210 				; sta $d40a                   ;line=113
+   211 				; sta $d40a                   ;line=114
+   212 				; sta $d40a                   ;line=115
+   213 				; sta $d40a                   ;line=116
+   214 				; sta $d40a                   ;line=117
+   215 				; sta $d40a                   ;line=118
+   216 				; sta $d40a                   ;line=119
+   217 00,2112 8D 0A D4		 sta $d40a                   ;line=120
+   218 00,2115 8D 0A D4		 sta $d40a                   ;line=121
+   219 00,2118 8D 0A D4		 sta $d40a                   ;line=122
+   220 00,211B 8D 0A D4		 sta $d40a                   ;line=123
+   221 00,211E 8D 0A D4		 sta $d40a                   ;line=124
+   222 00,2121 A9 39		 lda #$39
+   223 00,2123 A2 0C		c8 ldx #$0C
+   224 00,2125 8D 0A D4		 sta $d40a                   ;line=125
+   225 00,2128 8D 02 D0		 sta Player2_PositionX
+   226 00,212B 8E 14 D0		 stx Player2_Missile2_Color2_PM2
+   227 00,212E 8D 0A D4		 sta $d40a                   ;line=126
+   228 00,2131 8D 0A D4		 sta $d40a                   ;line=127
+   229
+   230 00,2134 8D 0A D4		 sta $d40a                   ;line=128
+   231 00,2137 A9 9D		 lda #$9D
+   232 00,2139 8D 0A D4		 sta $d40a                   ;line=129
+   233 00,213C 8D 07 D0		 sta Missile3_PositionX
+   234 00,213F 8D 0A D4		 sta $d40a                   ;line=130
+   235 00,2142 8D 0A D4		 sta $d40a                   ;line=131
+   236 00,2145 A9 03		 lda #$03
+   237 00,2147 A2 0C		c9 ldx #$0C
+   238 00,2149 8D 0A D4		 sta $d40a                   ;line=132
+   239 00,214C 8D 09 D0		 sta Player1_Size
+   240 00,214F 8E 13 D0		 stx Player1_Missile1_Color1_PM1
+   241 00,2152 8D 0A D4		 sta $d40a                   ;line=133
+   242 00,2155 8D 0A D4		 sta $d40a                   ;line=134
+   243 00,2158 8D 0A D4		 sta $d40a                   ;line=135
+   244 00,215B A9 0C		c10 lda #$0C
+   245 00,215D 8D 0A D4		 sta $d40a                   ;line=136
+   246 00,2160 8D 15 D0		 sta Player3_Missile3_Color3_PM3
+   247 00,2163 8D 0A D4		 sta $d40a                   ;line=137
+   248 00,2166 A9 03		 lda #$03
+   249 00,2168 A2 A9		 ldx #$A9
+   250 00,216A A0 89		 ldy #$89
+   251 00,216C 8D 0A D4		 sta $d40a                   ;line=138
+   252 00,216F 8D 0B D0		 sta Player3_Size
+   253 00,2172 8E 01 D0		 stx Player1_PositionX
+   254 00,2175 8C 03 D0		 sty Player3_PositionX
+   255
+   256 				 mwa #dli2 dliv+1
+Macro: MWA [Source: d:\!atari\macro\xasm.mac]
+    36 00,2178 A9 89		      ldA <DLI2
+    37 00,217A 8D 3F 22		      stA DLIV+1
+    38 00,217D A9 21		      ldA >DLI2
+    39 00,217F 8D 40 22		      stA DLIV+1+1
+Source: D:\!Atari\getris2\game_over\Over.asm
+   257 00,2182 A5 80		 lda rejA
+   258 00,2184 A6 81		 ldx rejX
+   259 00,2186 A4 82		 ldy rejY
+   260 00,2188 40		 rti
+   261
+   262
+   263
+   264 00,2189			dli2
+   265 00,2189 85 80		 sta rejA
+   266 00,218B 86 81		 stx rejX
+   267 00,218D 84 82		 sty rejY
+   268
+   269 00,218F A9 3C		 lda >fnt+$400*$01
+   270 00,2191 A2 6A		c11 ldx #$6A
+   271 00,2193 A0 84		c12 ldy #$84
+   272 00,2195 8D 0A D4		 sta $d40a                   ;line=144
+   273 00,2198 8D 09 D4		 sta CHARBASE
+   274 00,219B 8E 16 D0		 stx Playfield_Color0_PF0
+   275 00,219E 8C 17 D0		 sty Playfield_Color1_PF1
+   276 00,21A1 A9 78		c13 lda #$78
+   277 00,21A3 8D 18 D0		 sta Playfield_Color2_PF2
+   278 00,21A6 8D 0A D4		 sta $d40a                   ;line=145
+   279 00,21A9 8D 0A D4		 sta $d40a                   ;line=146
+   280 00,21AC 8D 0A D4		 sta $d40a                   ;line=147
+   281 00,21AF A9 58		 lda #$58
+   282 00,21B1 A2 A8		 ldx #$A8
+   283 00,21B3 A0 38		 ldy #$38
+   284 00,21B5 8D 0A D4		 sta $d40a                   ;line=148
+   285 00,21B8 8D 00 D0		 sta Player0_PositionX
+   286 00,21BB 8E 01 D0		 stx Player1_PositionX
+   287 00,21BE 8C 02 D0		 sty Player2_PositionX
+   288 00,21C1 A9 88		 lda #$88
+   289 00,21C3 8D 03 D0		 sta Player3_PositionX
+   290 00,21C6 8D 0A D4		 sta $d40a                   ;line=149
+   291 00,21C9 8D 0A D4		 sta $d40a                   ;line=150
+   292 00,21CC 8D 0A D4		 sta $d40a                   ;line=151
+   293 00,21CF 8D 0A D4		 sta $d40a                   ;line=152
+   294 00,21D2 8D 0A D4		 sta $d40a                   ;line=153
+   295 00,21D5 8D 0A D4		 sta $d40a                   ;line=154
+   296 00,21D8 8D 0A D4		 sta $d40a                   ;line=155
+   297
+   298
+   299 00,21DB A9 87		 lda #$87
+   300 00,21DD A2 5F		 ldx #$5F
+   301 00,21DF A0 64		 ldy #$64
+   302 00,21E1 8D 0A D4		 sta $d40a                   ;line=156
+   303 00,21E4 8D 03 D0		 sta Player3_PositionX
+   304 00,21E7 8E 04 D0		 stx Missile0_PositionX
+   305 00,21EA 8C 07 D0		 sty Missile3_PositionX
+   306 00,21ED 8D 0A D4		 sta $d40a                   ;line=157
+   307 00,21F0 8D 0A D4		 sta $d40a                   ;line=158
+   308 00,21F3 A9 54		 lda #$54
+   309 00,21F5 8D 0A D4		 sta $d40a                   ;line=159
+   310 00,21F8 8D 06 D0		 sta Missile2_PositionX
+   311 00,21FB 8D 0A D4		 sta $d40a                   ;line=160
+   312 00,21FE 8D 0A D4		 sta $d40a                   ;line=161
+   313 00,2201 A9 A0		 lda #$A0
+   314 00,2203 8D 0A D4		 sta $d40a                   ;line=162
+   315 00,2206 8D 06 D0		 sta Missile2_PositionX
+   316 00,2209 A9 60		 lda #$60
+   317 00,220B 8D 0A D4		 sta $d40a                   ;line=163
+   318 00,220E 8D 04 D0		 sta Missile0_PositionX
+   319 00,2211 A9 39		 lda #$39
+   320 00,2213 8D 0A D4		 sta $d40a                   ;line=164
+   321 00,2216 8D 02 D0		 sta Player2_PositionX
+   322 00,2219 8D 0A D4		 sta $d40a                   ;line=165
+   323 00,221C 8D 0A D4		 sta $d40a                   ;line=166
+   324 00,221F 8D 0A D4		 sta $d40a                   ;line=167
+   325 00,2222 A9 37		 lda #$37
+   326 00,2224 8D 0A D4		 sta $d40a                   ;line=168
+   327 00,2227 8D 02 D0		 sta Player2_PositionX
+   328 00,222A A9 C4		 lda #$C4
+   329 00,222C 8D 0A D4		 sta $d40a                   ;line=169
+   330 00,222F 8D 06 D0		 sta Missile2_PositionX
+   331
+   332 00,2232 A5 80		 lda rejA
+   333 00,2234 A6 81		 ldx rejX
+   334 00,2236 A4 82		 ldy rejY
+   335 00,2238 40		 rti
+   336
+   337
+   338 				;--
+   339
+   340 00,2239 2C 0F D4		nmi bit $d40f
+   341 00,223C 10 03		 bpl vbl
+   342
+   343 00,223E 4C CA 22		dliv jmp dliQ
+   344
+   345 00,2241 48		vbl pha			;przerwanie VBL *- VBL routine
+   346 				; txa
+   347 				; pha
+   348 				; tya
+   349 				; pha
+   350 00,2242 8D 0F D4		 sta $d40f		;reset znacznika przerwania $d40f
+   351
+   352 				 mwa #ant $d402		;adres programu ANTICA ($d402,$d403)
+Macro: MWA [Source: d:\!atari\macro\xasm.mac]
+    36 00,2245 A9 00		      ldA <ANT
+    37 00,2247 8D 02 D4		      stA $D402
+    38 00,224A A9 36		      ldA >ANT
+    39 00,224C 8D 03 D4		      stA $D402+1
+Source: D:\!Atari\getris2\game_over\Over.asm
+   353 				 mva #scr40 $d400	;ustawienie szerokosci obrazu $d400
+Macro: MVA [Source: d:\!atari\macro\xasm.mac]
+     5 00,224F A9 3E		 ldA #SCR40
+     6 00,2251 8D 00 D4		 stA $D400
+Source: D:\!Atari\getris2\game_over\Over.asm
+Source: D:\!Atari\getris2\game_over\Over.asm
+   354
+   355 				;-- init pierwszej linii
+   356
+   357 00,2254 A9 38		 lda >fnt+$400*$00
+   358 00,2256 8D 09 D4		 sta CHARBASE
+   359 00,2259 A9 00		c0 lda #$00
+   360 00,225B 8D 1A D0		 sta Background_BAK
+   361 00,225E A9 1A		c1 lda #$1A
+   362 00,2260 8D 16 D0		 sta Playfield_Color0_PF0
+   363 00,2263 A9 E4		c2 lda #$E4
+   364 00,2265 8D 17 D0		 sta Playfield_Color1_PF1
+   365 00,2268 A9 F8		c3 lda #$F8
+   366 00,226A 8D 18 D0		 sta Playfield_Color2_PF2
+   367 00,226D A9 14		c4 lda #$14
+   368 00,226F 8D 19 D0		 sta Playfield_Color3_PF3
+   369
+   370 00,2272 A9 04		 lda #$04
+   371 00,2274 8D 1B D0		 sta PRIOR_GTIACTL
+   372
+   373 00,2277 A9 03		 lda #$03
+   374 00,2279 8D 08 D0		 sta Player0_Size
+   375 00,227C 8D 0A D0		 sta Player2_Size
+   376
+   377 00,227F A9 00		 lda #$00
+   378 00,2281 8D 0B D0		 sta Player3_Size
+   379 00,2284 8D 0C D0		 sta Missiles_Size
+   380 00,2287 8D 09 D0		 sta Player1_Size
+   381
+   382 00,228A A9 59		 lda #$59
+   383 00,228C 8D 00 D0		 sta Player0_PositionX
+   384 00,228F A9 91		 lda #$91
+   385 00,2291 8D 01 D0		 sta Player1_PositionX
+   386 00,2294 A9 67		 lda #$67
+   387 00,2296 8D 02 D0		 sta Player2_PositionX
+   388 00,2299 A9 79		 lda #$79
+   389 00,229B 8D 03 D0		 sta Player3_PositionX
+   390 00,229E A9 5C		 lda #$5C
+   391 00,22A0 8D 04 D0		 sta Missile0_PositionX
+   392 00,22A3 A9 7F		 lda #$7F
+   393 00,22A5 8D 06 D0		 sta Missile2_PositionX
+   394 00,22A8 A9 72		 lda #$72
+   395 00,22AA 8D 07 D0		 sta Missile3_PositionX
+   396
+   397 00,22AD A9 0C		c5 lda #$0C
+   398 00,22AF 8D 12 D0		 sta Player0_Missile0_Color0_PM0
+   399 00,22B2 A9 1C		c6 lda #$1C
+   400 00,22B4 8D 13 D0		 sta Player1_Missile1_Color1_PM1
+   401 00,22B7 8D 14 D0		 sta Player2_Missile2_Color2_PM2
+   402 00,22BA A9 14		c7 lda #$14
+   403 00,22BC 8D 15 D0		 sta Player3_Missile3_Color3_PM3
+   404
+   405 				 mwa #dli1 dliv+1	;DLI ustawiamy na poczatek
+Macro: MWA [Source: d:\!atari\macro\xasm.mac]
+    36 00,22BF A9 6B		      ldA <DLI1
+    37 00,22C1 8D 3F 22		      stA DLIV+1
+    38 00,22C4 A9 20		      ldA >DLI1
+    39 00,22C6 8D 40 22		      stA DLIV+1+1
+Source: D:\!Atari\getris2\game_over\Over.asm
+   406
+   407 				;-- tutaj miejsce na twoja procedurke, tylko zachowaj wartosci rejestrow X i Y
+   408 				;*- this area is for yours routine, register X,Y must survive
+   409
+   410 				; pla
+   411 				; tay
+   412 				; pla
+   413 				; tax
+   414 00,22C9 68		 pla
+   415 00,22CA 40		dliQ rti
+   416
+   417 				;--
+   418 00,22CB			 org $3000
+   419 00,3000			text
+   420 00,3000-327F> 00 00 00 +	 ins 'Over.scr',6*40,12*40
+   421 00,31E0 00 00 32 33 34 +	 ins 'texts_all.scr',8*40,4*40
+   422
+   423 				;-- ANTIC PROGRAM
+   424 00,3280			 org $3600
+   425 00,3600-3622> 70 70 70 +	ant dta d'pppppp'
+   426 00,3606 44 00 30		 dta $44,a(text)
+   427 00,3609 84 04 84 04 84 +	 dta $84,4,$84,4,$84,$84,4,$84,4,4,$84,4,4,4,$84,4,4,4,4,4,4,4,4
+   428 00,3620 41 00 36		 dta $41,a(ant)
+   429
+   430 				;-- FONTS
+   431 00,3623			 org $3800
+   432 00,3800			fnt
+   433 00,3800-44FF> 00 00 00 +	 ins 'Over.fnt',0,1024
+   434 00,3C00 00 00 00 00 00 +	 ins 'texts_all.fnt'
+   435
+   436 				;--
+   437 00,4000			pmg
+   438 00,4000 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$20,$00,$00,$00
+   439 00,4010 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$20,$00,$00,$00,$10,$00,$00,$00
+   440 00,4020 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$20,$00,$20,$00,$00,$00,$00,$00
+   441 00,4030 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$10,$00,$00,$00
+   442 00,4040 00 20 10 00 00 +	 dta $00,$20,$10,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$40
+   443 00,4050 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   444 00,4060 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$81,$00,$00,$00,$00,$00,$00,$00
+   445 00,4070 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$01,$01,$62,$20,$80,$00,$10,$00,$20,$00,$00
+   446 00,4080 02 10 10 00 00 +	 dta $02,$10,$10,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   447 00,4090 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   448 00,40A0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   449 00,40B0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   450 00,40C0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   451 00,40D0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   452 00,40E0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   453 00,40F0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   454
+   455 00,4100 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   456 00,4110 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   457 00,4120 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   458 00,4130 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   459 00,4140 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   460 00,4150 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   461 00,4160 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$04,$88,$CC,$88,$44,$00,$00,$00
+   462 00,4170 00 00 88 00 00 +	 dta $00,$00,$88,$00,$00,$00,$00,$02,$00,$00,$00,$00,$00,$00,$00,$00
+   463 00,4180 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   464 00,4190 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   465 00,41A0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   466 00,41B0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   467 00,41C0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   468 00,41D0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   469 00,41E0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   470 00,41F0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   471
+   472 00,4200 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   473 00,4210 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   474 00,4220 00 10 08 04 0E +	 dta $00,$10,$08,$04,$0E,$14,$08,$10,$00,$00,$40,$00,$00,$02,$02,$03
+   475 00,4230 0B 09 12 08 24 +	 dta $0B,$09,$12,$08,$24,$22,$42,$01,$13,$33,$62,$22,$00,$00,$00,$00
+   476 00,4240 00 08 08 04 4C +	 dta $00,$08,$08,$04,$4C,$0C,$08,$08,$00,$00,$00,$00,$00,$00,$00,$00
+   477 00,4250 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   478 00,4260 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$44,$88,$CC,$88,$44,$00,$00,$00
+   479 00,4270 00 00 88 00 00 +	 dta $00,$00,$88,$00,$00,$00,$00,$20,$02,$00,$00,$00,$00,$00,$00,$00
+   480 00,4280 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   481 00,4290 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   482 00,42A0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   483 00,42B0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   484 00,42C0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   485 00,42D0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   486 00,42E0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   487 00,42F0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   488
+   489 00,4300 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$04,$04,$04,$04,$04,$04,$04
+   490 00,4310 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$08,$0A,$0A,$0E,$4A,$4A,$4A,$40,$40,$40,$40
+   491 00,4320 00 00 10 10 10 +	 dta $00,$00,$10,$10,$10,$1A,$32,$52,$52,$42,$02,$0A,$00,$20,$28,$28
+   492 00,4330 38 2C 28 2D 0A +	 dta $38,$2C,$28,$2D,$0A,$04,$04,$01,$01,$01,$14,$36,$16,$36,$04,$08
+   493 00,4340 18 39 2D 29 29 +	 dta $18,$39,$2D,$29,$29,$09,$01,$01,$00,$00,$00,$00,$00,$00,$00,$00
+   494 00,4350 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   495 00,4360 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$44,$88,$CC,$88,$44,$00,$00,$00
+   496 00,4370 00 00 88 00 00 +	 dta $00,$00,$88,$00,$00,$00,$00,$00,$02,$02,$00,$00,$20,$00,$00,$00
+   497 00,4380 02 00 00 00 00 +	 dta $02,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   498 00,4390 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   499 00,43A0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   500 00,43B0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   501 00,43C0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   502 00,43D0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   503 00,43E0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   504 00,43F0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   505
+   506 00,4400 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   507 00,4410 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   508 00,4420 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   509 00,4430 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   510 00,4440 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$0A
+   511 00,4450 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   512 00,4460 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$40,$88,$CC,$88,$44,$00,$00,$00
+   513 00,4470 00 00 88 00 01 +	 dta $00,$00,$88,$00,$01,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   514 00,4480 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   515 00,4490 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   516 00,44A0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   517 00,44B0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   518 00,44C0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   519 00,44D0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   520 00,44E0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   521 00,44F0 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   522
+   523 00,02E0-02E1> 00 20	 run main
+   524
+Source: d:\!atari\macro\xasm.mac

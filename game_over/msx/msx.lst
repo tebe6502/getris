@@ -1,0 +1,8 @@
+Mad-Assembler v1.6.?beta by TeBe/Madteam
+Source: D:\!Atari\getris2\game_over\msx\msx.asm
+     1
+     2 					org $4000
+     3 					
+     4 FFFF> 00,4000-4FFF> 52 +		ins 'over_msx.dat'
+     5
+     6 00,02E0-02E1> FD 43		run $4400-3

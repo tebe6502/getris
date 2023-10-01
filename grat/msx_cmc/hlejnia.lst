@@ -1,0 +1,1220 @@
+Mad-Assembler v1.6.9beta by TeBe/Madteam
+Source: D:\!Atari\getris2\msx_cmc\hlejnia.asm
+     1
+     2 = 00,4000		music	equ $4000
+     3
+     4 = 00,0000		DEFSONG	equ 0
+     5
+     6
+     7 					cmc_relocator 'hlejnia.cmc' , music
+Macro: CMC_RELOCATOR [Source: D:\!Atari\getris2\msx_cmc\cmc_relocator.mac]
+     2 					.get 'hlejnia.cmc'					
+     7 = 00,4000		new_add equ MUSIC					
+     9 = 00,8400		old_add	equ .get[2] + .get[3]<<8		
+    11 = 00,0D42			?length	equ .get[4] + .get[5]<<8 - old_add + 1	
+    13  [0002] 00			.put[2] = .lo(new_add)				
+    14  [0003] 40			.put[3] = .hi(new_add)				
+    16  [0004] 41			.put[4] = .lo(new_add + ?length - 1)		
+    17  [0005] 4D			.put[5] = .hi(new_add + ?length - 1)
+    19 = 00,0006		ofs	equ 6
+    24 = 00,8700			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,4300			?hlp = ?tmp - old_add + new_add
+    27  #00 [001A] 00			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #00 [005A] 43			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,890E			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,450E			?hlp = ?tmp - old_add + new_add
+    27  #01 [001B] 0E			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #01 [005B] 45			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8E27			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,4A27			?hlp = ?tmp - old_add + new_add
+    27  #02 [001C] 27			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #02 [005C] 4A			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8E53			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,4A53			?hlp = ?tmp - old_add + new_add
+    27  #03 [001D] 53			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #03 [005D] 4A			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8742			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,4342			?hlp = ?tmp - old_add + new_add
+    27  #04 [001E] 42			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #04 [005E] 43			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8784			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,4384			?hlp = ?tmp - old_add + new_add
+    27  #05 [001F] 84			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #05 [005F] 43			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,87C6			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,43C6			?hlp = ?tmp - old_add + new_add
+    27  #06 [0020] C6			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #06 [0060] 43			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,87E7			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,43E7			?hlp = ?tmp - old_add + new_add
+    27  #07 [0021] E7			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #07 [0061] 43			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8804			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,4404			?hlp = ?tmp - old_add + new_add
+    27  #08 [0022] 04			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #08 [0062] 44			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,88EB			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,44EB			?hlp = ?tmp - old_add + new_add
+    27  #09 [0023] EB			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #09 [0063] 44			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8825			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,4425			?hlp = ?tmp - old_add + new_add
+    27  #0A [0024] 25			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #0A [0064] 44			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8867			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,4467			?hlp = ?tmp - old_add + new_add
+    27  #0B [0025] 67			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #0B [0065] 44			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,88A9			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,44A9			?hlp = ?tmp - old_add + new_add
+    27  #0C [0026] A9			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #0C [0066] 44			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8E81			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,4A81			?hlp = ?tmp - old_add + new_add
+    27  #0D [0027] 81			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #0D [0067] 4A			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8DE5			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,49E5			?hlp = ?tmp - old_add + new_add
+    27  #0E [0028] E5			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #0E [0068] 49			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8FA4			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,4BA4			?hlp = ?tmp - old_add + new_add
+    27  #0F [0029] A4			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #0F [0069] 4B			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8950			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,4550			?hlp = ?tmp - old_add + new_add
+    27  #10 [002A] 50			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #10 [006A] 45			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8992			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,4592			?hlp = ?tmp - old_add + new_add
+    27  #11 [002B] 92			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #11 [006B] 45			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,89D4			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,45D4			?hlp = ?tmp - old_add + new_add
+    27  #12 [002C] D4			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #12 [006C] 45			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8A16			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,4616			?hlp = ?tmp - old_add + new_add
+    27  #13 [002D] 16			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #13 [006D] 46			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8A3B			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,463B			?hlp = ?tmp - old_add + new_add
+    27  #14 [002E] 3B			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #14 [006E] 46			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8ABC			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,46BC			?hlp = ?tmp - old_add + new_add
+    27  #15 [002F] BC			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #15 [006F] 46			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8A71			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,4671			?hlp = ?tmp - old_add + new_add
+    27  #16 [0030] 71			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #16 [0070] 46			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8AE0			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,46E0			?hlp = ?tmp - old_add + new_add
+    27  #17 [0031] E0			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #17 [0071] 46			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8B23			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,4723			?hlp = ?tmp - old_add + new_add
+    27  #18 [0032] 23			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #18 [0072] 47			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8AFC			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,46FC			?hlp = ?tmp - old_add + new_add
+    27  #19 [0033] FC			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #19 [0073] 46			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8F1F			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,4B1F			?hlp = ?tmp - old_add + new_add
+    27  #1A [0034] 1F			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #1A [0074] 4B			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8B43			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,4743			?hlp = ?tmp - old_add + new_add
+    27  #1B [0035] 43			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #1B [0075] 47			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8EDD			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,4ADD			?hlp = ?tmp - old_add + new_add
+    27  #1C [0036] DD			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #1C [0076] 4A			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8B85			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,4785			?hlp = ?tmp - old_add + new_add
+    27  #1D [0037] 85			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #1D [0077] 47			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8BC7			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,47C7			?hlp = ?tmp - old_add + new_add
+    27  #1E [0038] C7			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #1E [0078] 47			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8C09			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,4809			?hlp = ?tmp - old_add + new_add
+    27  #1F [0039] 09			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #1F [0079] 48			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8C4B			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,484B			?hlp = ?tmp - old_add + new_add
+    27  #20 [003A] 4B			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #20 [007A] 48			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8CCF			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,48CF			?hlp = ?tmp - old_add + new_add
+    27  #21 [003B] CF			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #21 [007B] 48			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8C8D			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,488D			?hlp = ?tmp - old_add + new_add
+    27  #22 [003C] 8D			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #22 [007C] 48			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8D11			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,4911			?hlp = ?tmp - old_add + new_add
+    27  #23 [003D] 11			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #23 [007D] 49			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8D53			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,4953			?hlp = ?tmp - old_add + new_add
+    27  #24 [003E] 53			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #24 [007E] 49			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8D70			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,4970			?hlp = ?tmp - old_add + new_add
+    27  #25 [003F] 70			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #25 [007F] 49			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8EB3			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,4AB3			?hlp = ?tmp - old_add + new_add
+    27  #26 [0040] B3			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #26 [0080] 4A			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8DA8			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,49A8			?hlp = ?tmp - old_add + new_add
+    27  #27 [0041] A8			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #27 [0081] 49			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8F8C			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,4B8C			?hlp = ?tmp - old_add + new_add
+    27  #28 [0042] 8C			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #28 [0082] 4B			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8F79			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,4B79			?hlp = ?tmp - old_add + new_add
+    27  #29 [0043] 79			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #29 [0083] 4B			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8F37			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,4B37			?hlp = ?tmp - old_add + new_add
+    27  #2A [0044] 37			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #2A [0084] 4B			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,903B			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,4C3B			?hlp = ?tmp - old_add + new_add
+    27  #2B [0045] 3B			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #2B [0085] 4C			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,8FE6			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,4BE6			?hlp = ?tmp - old_add + new_add
+    27  #2C [0046] E6			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #2C [0086] 4B			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,9094			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,4C94			?hlp = ?tmp - old_add + new_add
+    27  #2D [0047] 94			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #2D [0087] 4C			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,90EA			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    26 = 00,4CEA			?hlp = ?tmp - old_add + new_add
+    27  #2E [0048] EA			.put[ofs+$14+.r] = .lo(?hlp)
+    28  #2E [0088] 4C			.put[ofs+$54+.r] = .hi(?hlp)
+    24 = 00,FFFF			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    24 = 00,FFFF			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    24 = 00,FFFF			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    24 = 00,FFFF			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    24 = 00,FFFF			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    24 = 00,FFFF			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    24 = 00,FFFF			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    24 = 00,FFFF			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    24 = 00,FFFF			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    24 = 00,FFFF			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    24 = 00,FFFF			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    24 = 00,FFFF			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    24 = 00,FFFF			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    24 = 00,FFFF			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    24 = 00,FFFF			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    24 = 00,FFFF			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+    24 = 00,FFFF			?tmp = .get[ofs+$14+.r] + .get[ofs+$54+.r]<<8
+Source: D:\!Atari\getris2\msx_cmc\hlejnia.asm
+     8
+     9 					org music
+    10 FFFF> 00,4000-4D41> A0 +		.sav [6] ?length
+    11
+    12
+    13 00,4D42				org $2000
+    14 00,2000			main
+    15
+    16 00,2000-2762> A9 70	         lda #$70
+    17 00,2002 A2 00		         ldx #<MUSIC
+    18 00,2004 A0 40		         ldy #>MUSIC
+    19 00,2006 20 1F 20		         jsr PLAYERCMC+3
+    20 00,2009 A9 00		         lda #$00
+    21 00,200B A2 00		         ldx #DEFSONG
+    22 00,200D 20 1F 20		         jsr PLAYERCMC+3
+    23
+    24 00,2010			loop
+    25 					lda:cmp:req 20
+    25 00,2010 A5 14		 lda 20
+    25 00,2012 C5 14		 cmp 20
+    25 00,2014 F0 FC		 req$2012 20
+    26
+    27 00,2016 20 22 20			jsr PLAYERCMC+6
+    28
+    29 00,2019 4C 10 20			jmp loop
+    30
+    31 00,201C				icl 'playcmc.asm'
+Source: D:\!Atari\getris2\msx_cmc\playcmc.asm
+     1 				*---------------------------*
+     2 				*     cmc player v 2.1      *
+     3 				*   by Marcin Lewandowski   *
+     4 				* based on cmc player v 2.0 *
+     5 				*      by Janusz Pelc       *
+     6 				*---------------------------*
+     7
+     8 00,201C			.proc playerCMC
+     9
+    10 				*--- tablica basu (chyba)
+    11
+    12 = 00,0001		bass equ 1
+    13
+    14 				*--- strona 0
+    15
+    16 = 00,00FC		addr equ $fc
+    17 = 00,00FE		word equ $fe
+    18
+    19 				*--- skoki
+    20
+    21 00,201C 4C 1C 20		 jmp *		;basic
+    22 00,201F 4C 82 20		 jmp init
+    23 00,2022 4C D5 22		 jmp play
+    24
+    25 				*--- dane
+    26
+    27 00,2025 00 00 00		volume dta d'   '
+    28 00,2028 00 00 00		czest  dta d'   '
+    29 00,202B 00 00 00		numins dta d'   '
+    30
+    31 				; dta c' cmc player v 2.1 '*
+    32
+    33 00,202E 00 00 00 00	frq    dta d'    '
+    34 00,2032 00 00 00 00	znieks dta d'    '
+    35 00,2036 00		audc   dta b(0)
+    36
+    37 00,2037 00 00 00		czest1 dta d'   '
+    38 00,203A 00 00 00		czest2 dta d'   '
+    39 00,203D 00 00 00		czest3 dta d'   '
+    40 00,2040 00 00 00		zniek  dta d'   '
+    41 00,2043 FF FF FF		count1 dta b($ff),b($ff),b($ff)
+    42 00,2046 00 00 00		count2 dta d'   '
+    43 00,2049 00 00 00		lopad  dta d'   '
+    44 00,204C 00 00 00		numptr dta d'   '
+    45 00,204F 00 00 00		poswpt dta d'   '
+    46 00,2052 00 00 00		ilewol dta d'   '
+    47 00,2055 80 80 80		czygrx dta b($80),b($80),b($80)
+    48 00,2058 80		czygrc dta b($80)
+    49
+    50 00,2059 00 00 00		dana0  dta d'   '
+    51 00,205C 00 00 00		dana1  dta d'   '
+    52 00,205F 00 00 00		dana2  dta d'   '
+    53 00,2062 00 00 00		dana3  dta d'   '
+    54 00,2065 00 00 00		dana4  dta d'   '
+    55 00,2068 00 00 00		dana5  dta d'   '
+    56 00,206B 00 00 00		ladr   dta d'   '
+    57 00,206E 00 00 00		hadr   dta d'   '
+    58
+    59 00,2071 00		posptr dta b(0)
+    60 00,2072 00		possng dta b(0)
+    61 00,2073 00		pocrep dta b(0)
+    62 00,2074 00		konrep dta b(0)
+    63 00,2075 00		ilrep  dta b(0)
+    64 00,2076 00		tmpo   dta b(0)
+    65 00,2077 00		ltemp  dta b(0)
+    66 00,2078 00		b1     dta b(0)
+    67 00,2079 00		b2     dta b(0)
+    68 00,207A 00		b3     dta b(0)
+    69 00,207B 00		czygr  dta b(0)
+    70
+    71 00,207C 00 00		adrmus dta a(0)
+    72 00,207E 00 00		adradr dta a(0)
+    73 00,2080 00 00		adrsng dta a(0)
+    74
+    75 				*--- init
+    76
+    77 00,2082 8D 78 20		init sta b1
+    78 00,2085 8E 79 20		 stx b2
+    79 00,2088 8C 7A 20		 sty b3
+    80 00,208B 29 70		 and #$70
+    81 00,208D 4A		 lsr @
+    82 00,208E 4A		 lsr @
+    83 00,208F 4A		 lsr @
+    84 00,2090 AA		 tax
+    85 00,2091 BD 17 26		 lda tab1,x
+    86 00,2094 8D B3 20		 sta zm1+1
+    87 00,2097 BD 18 26		 lda tab1+1,x
+    88 00,209A 8D B4 20		 sta zm1+2
+    89 00,209D A9 03		 lda #3
+    90 00,209F 8D 0F D2		 sta $d20f
+    91 00,20A2 D8		 cld
+    92 00,20A3 A5 FE		 lda word
+    93 00,20A5 48		 pha
+    94 00,20A6 A5 FF		 lda word+1
+    95 00,20A8 48		 pha
+    96 00,20A9 AC 7A 20		 ldy b3
+    97 00,20AC AE 79 20		 ldx b2
+    98 00,20AF AD 78 20		 lda b1
+    99 00,20B2 20 BC 20		zm1 jsr graj
+   100 00,20B5 68		 pla
+   101 00,20B6 85 FF		 sta word+1
+   102 00,20B8 68		 pla
+   103 00,20B9 85 FE		 sta word
+   104 00,20BB 60		 rts
+   105
+   106 00,20BC AD 80 20		graj lda adrsng
+   107 00,20BF 85 FE		 sta word
+   108 00,20C1 AD 81 20		 lda adrsng+1
+   109 00,20C4 85 FF		 sta word+1
+   110 00,20C6 A0 00		 ldy #0
+   111 00,20C8 8A		 txa
+   112 00,20C9 F0 1C		 beq grajx
+   113 00,20CB B1 FE		l1 lda (word),y
+   114 00,20CD C9 8F		 cmp #$8f
+   115 00,20CF F0 04		 beq l2
+   116 00,20D1 C9 EF		 cmp #$ef
+   117 00,20D3 D0 0C		 bne l3
+   118 00,20D5 CA		l2 dex
+   119 00,20D6 D0 09		 bne l3
+   120 00,20D8 C8		 iny
+   121 00,20D9 C0 54		 cpy #$54
+   122 00,20DB B0 09		 bcs l4
+   123 00,20DD 98		 tya
+   124 00,20DE AA		 tax
+   125 00,20DF 10 06		 bpl grajx
+   126 00,20E1 C8		l3 iny
+   127 00,20E2 C0 54		 cpy #$54
+   128 00,20E4 90 E5		 bcc l1
+   129 00,20E6 60		l4 rts
+   130
+   131 00,20E7 8E 72 20		grajx stx possng
+   132 00,20EA 20 85 21		 jsr skoncz
+   133 00,20ED A9 00		 lda #0
+   134 00,20EF A2 09		 ldx #9
+   135 00,20F1 9D 4F 20		l5 sta poswpt,x
+   136 00,20F4 CA		 dex
+   137 00,20F5 10 FA		 bpl l5
+   138 00,20F7 8D 71 20		 sta posptr
+   139 00,20FA A9 01		 lda #1
+   140 00,20FC 8D 7B 20		 sta czygr
+   141 00,20FF A9 FF		 lda #$ff
+   142 00,2101 8D 74 20		 sta konrep
+   143 00,2104 AD 7C 20		 lda adrmus
+   144 00,2107 85 FE		 sta word
+   145 00,2109 AD 7D 20		 lda adrmus+1
+   146 00,210C 85 FF		 sta word+1
+   147 00,210E A0 13		 ldy #$13
+   148 00,2110 B1 FE		 lda (word),y
+   149 00,2112 AA		 tax
+   150 00,2113 AD 80 20		 lda adrsng
+   151 00,2116 85 FE		 sta word
+   152 00,2118 AD 81 20		 lda adrsng+1
+   153 00,211B 85 FF		 sta word+1
+   154 00,211D AC 72 20		 ldy possng
+   155 00,2120 B1 FE		l6 lda (word),y
+   156 00,2122 C9 CF		 cmp #$cf
+   157 00,2124 D0 0D		 bne l7
+   158 00,2126 98		 tya
+   159 00,2127 18		 clc
+   160 00,2128 69 55		 adc #$55
+   161 00,212A A8		 tay
+   162 00,212B B1 FE		 lda (word),y
+   163 00,212D 30 0F		 bmi l8
+   164 00,212F AA		 tax
+   165 00,2130 4C 3E 21		 jmp l8
+   166 00,2133 C9 8F		l7 cmp #$8f
+   167 00,2135 F0 07		 beq l8
+   168 00,2137 C9 EF		 cmp #$ef
+   169 00,2139 F0 03		 beq l8
+   170 00,213B 88		 dey
+   171 00,213C 10 E2		 bpl l6
+   172 00,213E 8E 76 20		l8 stx tmpo
+   173 00,2141 8E 77 20		 stx ltemp
+   174 00,2144 60		 rts
+   175
+   176 00,2145 29 0F		tempo and #$f
+   177 00,2147 F0 F5		 beq l8
+   178 00,2149 8E E2 25		 stx d0+1
+   179 00,214C 8E F8 25		 stx d1+1
+   180 00,214F 8E 07 26		 stx d2+1
+   181 00,2152 8C E3 25		 sty d0+2
+   182 00,2155 8C F9 25		 sty d1+2
+   183 00,2158 8C 08 26		 sty d2+2
+   184 00,215B 60		 rts
+   185
+   186 00,215C 8E 7C 20		inic stx adrmus
+   187 00,215F 86 FE		 stx word
+   188 00,2161 8C 7D 20		 sty adrmus+1
+   189 00,2164 84 FF		 sty word+1
+   190 00,2166 18		 clc
+   191 00,2167 8A		 txa
+   192 00,2168 69 14		 adc #$14
+   193 00,216A 8D 7E 20		 sta adradr
+   194 00,216D 98		 tya
+   195 00,216E 69 00		 adc #0
+   196 00,2170 8D 7F 20		 sta adradr+1
+   197 00,2173 8E 80 20		 stx adrsng
+   198 00,2176 C8		 iny
+   199 00,2177 C8		 iny
+   200 00,2178 8C 81 20		 sty adrsng+1
+   201 00,217B A0 13		 ldy #$13
+   202 00,217D B1 FE		 lda (word),y
+   203 00,217F 8D 76 20		 sta tmpo
+   204 00,2182 8D 77 20		 sta ltemp
+   205
+   206 00,2185 A2 08		skoncz ldx #8
+   207 00,2187 A9 00		l9 lda #0
+   208 00,2189 8D 7B 20		 sta czygr
+   209 00,218C 9D 00 D2		 sta $d200,x
+   210 00,218F E0 03		 cpx #3
+   211 00,2191 B0 08		 bcs l10
+   212 00,2193 9D 25 20		 sta volume,x
+   213 00,2196 A9 FF		 lda #$ff
+   214 00,2198 9D 43 20		 sta count1,x
+   215 00,219B CA		l10 dex
+   216 00,219C 10 E9		 bpl l9
+   217
+   218 00,219E A9 80		przer lda #$80
+   219 00,21A0 A2 03		l11 ldx #3
+   220 00,21A2 9D 55 20		l12 sta czygrx,x
+   221 00,21A5 CA		 dex
+   222 00,21A6 10 FA		 bpl l12
+   223 00,21A8 60		l13 rts
+   224
+   225 00,21A9 A9 01		kont lda #1
+   226 00,21AB 8D 7B 20		 sta czygr
+   227 00,21AE A9 00		 lda #0
+   228 00,21B0 F0 EE		 beq l11
+   229
+   230 00,21B2 29 03		instr and #3
+   231 00,21B4 C9 03		 cmp #3
+   232 00,21B6 F0 F0		 beq l13
+   233 00,21B8 E0 40		 cpx #$40
+   234 00,21BA B0 EC		 bcs l13
+   235 00,21BC C0 1A		 cpy #26
+   236 00,21BE B0 E8		 bcs l13
+   237 00,21C0 AA		 tax
+   238 00,21C1 A9 80		 lda #$80
+   239 00,21C3 9D 55 20		 sta czygrx,x
+   240
+   241 00,21C6 A9 00		inst lda #0
+   242 00,21C8 9D 43 20		 sta count1,x
+   243 00,21CB 9D 46 20		 sta count2,x
+   244 00,21CE 9D 49 20		 sta lopad,x
+   245 00,21D1 AD 79 20		 lda b2
+   246 00,21D4 9D 28 20		 sta czest,x
+   247
+   248 00,21D7 AD 7A 20		 lda b3
+   249 00,21DA 0A		 asl @
+   250 00,21DB 0A		 asl @
+   251 00,21DC 0A		 asl @
+   252 00,21DD 85 FE		 sta word
+   253 00,21DF 18		 clc
+   254 00,21E0 AD 7C 20		 lda adrmus
+   255 00,21E3 69 30		 adc #$30
+   256 00,21E5 48		 pha
+   257 00,21E6 AD 7D 20		 lda adrmus+1
+   258 00,21E9 69 01		 adc #1
+   259 00,21EB A8		 tay
+   260 00,21EC 68		 pla
+   261 00,21ED 18		 clc
+   262 00,21EE 65 FE		 adc word
+   263 00,21F0 9D 6B 20		 sta ladr,x
+   264 00,21F3 98		 tya
+   265 00,21F4 69 00		 adc #0
+   266 00,21F6 9D 6E 20		 sta hadr,x
+   267
+   268 00,21F9 18		 clc
+   269 00,21FA AD 7C 20		 lda adrmus
+   270 00,21FD 69 94		 adc #$94
+   271 00,21FF 85 FE		 sta word
+   272 00,2201 AD 7D 20		 lda adrmus+1
+   273 00,2204 69 00		 adc #0
+   274 00,2206 85 FF		 sta word+1
+   275 00,2208 AD 7A 20		 lda b3
+   276 00,220B 0A		 asl @
+   277 00,220C 6D 7A 20		 adc b3
+   278 00,220F 0A		 asl @
+   279 00,2210 A8		 tay
+   280 00,2211 B1 FE		 lda (word),y
+   281 00,2213 9D 59 20		 sta dana0,x
+   282 00,2216 C8		 iny
+   283 00,2217 B1 FE		 lda (word),y
+   284 00,2219 9D 5C 20		 sta dana1,x
+   285 00,221C 29 07		 and #7
+   286 00,221E 8D 78 20		 sta b1
+   287 00,2221 C8		 iny
+   288 00,2222 B1 FE		 lda (word),y
+   289 00,2224 9D 5F 20		 sta dana2,x
+   290 00,2227 C8		 iny
+   291 00,2228 B1 FE		 lda (word),y
+   292 00,222A 9D 62 20		 sta dana3,x
+   293 00,222D C8		 iny
+   294 00,222E B1 FE		 lda (word),y
+   295 00,2230 9D 65 20		 sta dana4,x
+   296 00,2233 C8		 iny
+   297 00,2234 B1 FE		 lda (word),y
+   298 00,2236 9D 68 20		 sta dana5,x
+   299
+   300 00,2239 A0 00		 ldy #0
+   301 00,223B AD 78 20		 lda b1
+   302 00,223E C9 03		 cmp #3
+   303 00,2240 D0 02		 bne l14
+   304 00,2242 A0 02		 ldy #2
+   305 00,2244 C9 07		l14 cmp #7
+   306 00,2246 D0 02		 bne l15
+   307 00,2248 A0 04		 ldy #4
+   308 00,224A B9 35 26		l15 lda tab3,y
+   309 00,224D 85 FE		 sta word
+   310 00,224F B9 36 26		 lda tab3+1,y
+   311 00,2252 85 FF		 sta word+1
+   312 00,2254 BD 5F 20		 lda dana2,x
+   313 00,2257 4A		 lsr @
+   314 00,2258 4A		 lsr @
+   315 00,2259 4A		 lsr @
+   316 00,225A 4A		 lsr @
+   317 00,225B 18		 clc
+   318 00,225C 6D 79 20		 adc b2
+   319 00,225F 8D 79 20		 sta b2
+   320 00,2262 8D CC 22		 sta zm2+1
+   321 00,2265 A8		 tay
+   322 00,2266 AD 78 20		 lda b1
+   323 00,2269 C9 07		 cmp #7
+   324 00,226B D0 0F		 bne l16
+   325 00,226D 98		 tya
+   326 00,226E 0A		 asl @
+   327 00,226F A8		 tay
+   328 00,2270 B1 FE		 lda (word),y
+   329 00,2272 9D 37 20		 sta czest1,x
+   330 00,2275 C8		 iny
+   331 00,2276 8C 79 20		 sty b2
+   332 00,2279 4C 8D 22		 jmp l17
+   333 00,227C B1 FE		l16 lda (word),y
+   334 00,227E 9D 37 20		 sta czest1,x
+   335 00,2281 BD 5F 20		 lda dana2,x
+   336 00,2284 29 0F		 and #$f
+   337 00,2286 18		 clc
+   338 00,2287 6D 79 20		 adc b2
+   339 00,228A 8D 79 20		 sta b2
+   340 00,228D AC 79 20		l17 ldy b2
+   341 00,2290 AD 78 20		 lda b1
+   342 00,2293 C9 05		 cmp #5
+   343 00,2295 08		 php
+   344 00,2296 B1 FE		 lda (word),y
+   345 00,2298 28		 plp
+   346 00,2299 F0 08		 beq l18
+   347 00,229B DD 37 20		 cmp czest1,x
+   348 00,229E D0 03		 bne l18
+   349 00,22A0 38		 sec
+   350 00,22A1 E9 01		 sbc #1
+   351 00,22A3 9D 3A 20		l18 sta czest2,x
+   352 00,22A6 BD 59 20		 lda dana0,x
+   353 00,22A9 48		 pha
+   354 00,22AA 29 03		 and #3
+   355 00,22AC A8		 tay
+   356 00,22AD B9 3B 26		 lda tab4,y
+   357 00,22B0 9D 40 20		 sta zniek,x
+   358 00,22B3 68		 pla
+   359 00,22B4 4A		 lsr @
+   360 00,22B5 4A		 lsr @
+   361 00,22B6 4A		 lsr @
+   362 00,22B7 4A		 lsr @
+   363 00,22B8 A0 3E		 ldy #$3e
+   364 00,22BA C9 0F		 cmp #$f
+   365 00,22BC F0 10		 beq l19
+   366 00,22BE A0 37		 ldy #$37
+   367 00,22C0 C9 0E		 cmp #$e
+   368 00,22C2 F0 0A		 beq l19
+   369 00,22C4 A0 30		 ldy #$30
+   370 00,22C6 C9 0D		 cmp #$d
+   371 00,22C8 F0 04		 beq l19
+   372 00,22CA 18		 clc
+   373 00,22CB 69 00		zm2 adc #0
+   374 00,22CD A8		 tay
+   375 00,22CE B9 3F 26		l19 lda tab5,y
+   376 00,22D1 9D 3D 20		 sta czest3,x
+   377 00,22D4 60		 rts
+   378
+   379 				*--- play
+   380
+   381 00,22D5 D8		play cld
+   382 00,22D6 A5 FC		 lda addr
+   383 00,22D8 48		 pha
+   384 00,22D9 A5 FD		 lda addr+1
+   385 00,22DB 48		 pha
+   386 00,22DC A5 FE		 lda word
+   387 00,22DE 48		 pha
+   388 00,22DF A5 FF		 lda word+1
+   389 00,22E1 48		 pha
+   390 00,22E2 AD 7B 20		 lda czygr
+   391 00,22E5 D0 03		 bne g1
+   392 00,22E7 4C 0A 26		 jmp end
+   393 00,22EA AD 58 20		g1 lda czygrc
+   394 00,22ED F0 03		 beq g2
+   395 00,22EF 4C 73 24		 jmp dal3
+   396 00,22F2 AD 76 20		g2 lda tmpo
+   397 00,22F5 CD 77 20		 cmp ltemp
+   398 00,22F8 F0 03		 beq g3
+   399 00,22FA 4C 60 24		 jmp dal2
+   400 00,22FD AD 71 20		g3 lda posptr
+   401 00,2300 F0 03		 beq g4
+   402 00,2302 4C E6 23		 jmp dal1
+   403 00,2305 A2 02		g4 ldx #2
+   404 00,2307 BC 55 20		g5 ldy czygrx,x
+   405 00,230A 30 03		 bmi g6
+   406 00,230C 9D 55 20		 sta czygrx,x
+   407 00,230F 9D 4F 20		g6 sta poswpt,x
+   408 00,2312 CA		 dex
+   409 00,2313 10 F2		 bpl g5
+   410
+   411 00,2315 AD 80 20		 lda adrsng
+   412 00,2318 85 FC		 sta addr
+   413 00,231A AD 81 20		 lda adrsng+1
+   414 00,231D 85 FD		 sta addr+1
+   415 00,231F AC 72 20		 ldy possng
+   416 00,2322 84 FE		 sty word
+   417 00,2324 CC 74 20		g7 cpy konrep
+   418 00,2327 D0 19		 bne g8
+   419 00,2329 AD 75 20		 lda ilrep
+   420 00,232C F0 14		 beq g8
+   421 00,232E AD 72 20		 lda possng
+   422 00,2331 AC 73 20		 ldy pocrep
+   423 00,2334 8C 72 20		 sty possng
+   424 00,2337 CE 75 20		 dec ilrep
+   425 00,233A D0 E8		 bne g7
+   426 00,233C 8D 72 20		 sta possng
+   427 00,233F A8		 tay
+   428 00,2340 10 E2		 bpl g7
+   429 00,2342 A2 00		g8 ldx #0
+   430 00,2344 B1 FC		g9 lda (addr),y
+   431 00,2346 C9 FE		 cmp #$fe
+   432 00,2348 D0 0E		 bne g10
+   433 00,234A AC 72 20		 ldy possng
+   434 00,234D C8		 iny
+   435 00,234E C4 FE		 cpy word
+   436 00,2350 F0 43		 beq g11
+   437 00,2352 8C 72 20		 sty possng
+   438 00,2355 4C 24 23		 jmp g7
+   439 00,2358 9D 4C 20		g10 sta numptr,x
+   440 00,235B 18		 clc
+   441 00,235C 98		 tya
+   442 00,235D 69 55		 adc #$55
+   443 00,235F A8		 tay
+   444 00,2360 E8		 inx
+   445 00,2361 E0 03		 cpx #3
+   446 00,2363 90 DF		 bcc g9
+   447 00,2365 AC 72 20		 ldy possng
+   448 00,2368 B1 FC		 lda (addr),y
+   449 00,236A 10 7A		 bpl dal1
+   450 00,236C C9 FF		 cmp #$ff
+   451 00,236E F0 76		 beq dal1
+   452 00,2370 4A		 lsr @
+   453 00,2371 4A		 lsr @
+   454 00,2372 4A		 lsr @
+   455 00,2373 29 0E		 and #$e
+   456 00,2375 AA		 tax
+   457 00,2376 BD 27 26		 lda tab2,x
+   458 00,2379 8D 88 23		 sta zm3+1
+   459 00,237C BD 28 26		 lda tab2+1,x
+   460 00,237F 8D 89 23		 sta zm3+2
+   461 00,2382 AD 4D 20		 lda numptr+1
+   462 00,2385 85 FF		 sta word+1
+   463 00,2387 20 9D 23		zm3 jsr stop
+   464 00,238A 8C 72 20		 sty possng
+   465 00,238D C0 55		 cpy #$55
+   466 00,238F B0 04		 bcs g11
+   467 00,2391 C4 FE		 cpy word
+   468 00,2393 D0 8F		 bne g7
+   469 00,2395 A4 FE		g11 ldy word
+   470 00,2397 8C 72 20		 sty possng
+   471 00,239A 4C 0A 26		 jmp end
+   472
+   473 00,239D 20 9E 21		stop jsr przer
+   474 00,23A0 A0 FF		g12 ldy #$ff
+   475 00,23A2 60		 rts
+   476 00,23A3 30 FB		jump bmi g12
+   477 00,23A5 A8		 tay
+   478 00,23A6 60		 rts
+   479 00,23A7 30 F7		up bmi g12
+   480 00,23A9 38		 sec
+   481 00,23AA 98		 tya
+   482 00,23AB E5 FF		 sbc word+1
+   483 00,23AD A8		 tay
+   484 00,23AE 60		 rts
+   485 00,23AF 30 EF		down bmi g12
+   486 00,23B1 18		 clc
+   487 00,23B2 98		 tya
+   488 00,23B3 65 FF		 adc word+1
+   489 00,23B5 A8		 tay
+   490 00,23B6 60		 rts
+   491 00,23B7 30 E7		temp bmi g12
+   492 00,23B9 8D 76 20		 sta tmpo
+   493 00,23BC 8D 77 20		 sta ltemp
+   494 00,23BF C8		 iny
+   495 00,23C0 60		 rts
+   496 00,23C1 30 DD		rep bmi g12
+   497 00,23C3 AD 4E 20		 lda numptr+2
+   498 00,23C6 30 D8		 bmi g12
+   499 00,23C8 8D 75 20		 sta ilrep
+   500 00,23CB C8		 iny
+   501 00,23CC 8C 73 20		 sty pocrep
+   502 00,23CF 18		 clc
+   503 00,23D0 98		 tya
+   504 00,23D1 65 FF		 adc word+1
+   505 00,23D3 8D 74 20		 sta konrep
+   506 00,23D6 60		 rts
+   507 00,23D7 88		break dey
+   508 00,23D8 30 0A		 bmi g13
+   509 00,23DA B1 FC		 lda (addr),y
+   510 00,23DC C9 8F		 cmp #$8f
+   511 00,23DE F0 04		 beq g13
+   512 00,23E0 C9 EF		 cmp #$ef
+   513 00,23E2 D0 F3		 bne break
+   514 00,23E4 C8		g13 iny
+   515 00,23E5 60		 rts
+   516
+   517 00,23E6 A2 02		dal1 ldx #2
+   518 00,23E8 BD 52 20		v1 lda ilewol,x
+   519 00,23EB F0 05		 beq v2
+   520 00,23ED DE 52 20		 dec ilewol,x
+   521 00,23F0 10 61		 bpl v7
+   522 00,23F2 BD 55 20		v2 lda czygrx,x
+   523 00,23F5 D0 5C		 bne v7
+   524 00,23F7 BC 4C 20		 ldy numptr,x
+   525 00,23FA C0 40		 cpy #$40
+   526 00,23FC B0 55		 bcs v7
+   527 00,23FE AD 7E 20		 lda adradr
+   528 00,2401 85 FC		 sta addr
+   529 00,2403 AD 7F 20		 lda adradr+1
+   530 00,2406 85 FD		 sta addr+1
+   531 00,2408 B1 FC		 lda (addr),y
+   532 00,240A 85 FE		 sta word
+   533 00,240C 18		 clc
+   534 00,240D 98		 tya
+   535 00,240E 69 40		 adc #$40
+   536 00,2410 A8		 tay
+   537 00,2411 B1 FC		 lda (addr),y
+   538 00,2413 85 FF		 sta word+1
+   539 00,2415 C9 FF		 cmp #$ff
+   540 00,2417 F0 3A		 beq v7
+   541 00,2419 BC 4F 20		v3 ldy poswpt,x
+   542 00,241C B1 FE		 lda (word),y
+   543 00,241E 29 C0		 and #$c0
+   544 00,2420 D0 0C		 bne v4
+   545 00,2422 B1 FE		 lda (word),y
+   546 00,2424 29 3F		 and #$3f
+   547 00,2426 9D 2B 20		 sta numins,x
+   548 00,2429 FE 4F 20		 inc poswpt,x
+   549 00,242C 10 EB		 bpl v3
+   550 00,242E C9 40		v4 cmp #$40
+   551 00,2430 D0 13		 bne v5
+   552 00,2432 B1 FE		 lda (word),y
+   553 00,2434 29 3F		 and #$3f
+   554 00,2436 8D 79 20		 sta b2
+   555 00,2439 BD 2B 20		 lda numins,x
+   556 00,243C 8D 7A 20		 sta b3
+   557 00,243F 20 C6 21		 jsr inst
+   558 00,2442 4C 50 24		 jmp v6
+   559 00,2445 C9 80		v5 cmp #$80
+   560 00,2447 D0 0A		 bne v7
+   561 00,2449 B1 FE		 lda (word),y
+   562 00,244B 29 3F		 and #$3f
+   563 00,244D 9D 52 20		 sta ilewol,x
+   564 00,2450 FE 4F 20		v6 inc poswpt,x
+   565 00,2453 CA		v7 dex
+   566 00,2454 10 92		 bpl v1
+   567
+   568 00,2456 AE 71 20		 ldx posptr
+   569 00,2459 E8		 inx
+   570 00,245A 8A		 txa
+   571 00,245B 29 3F		 and #$3f
+   572 00,245D 8D 71 20		 sta posptr
+   573
+   574 00,2460 CE 77 20		dal2 dec ltemp
+   575 00,2463 D0 0E		 bne dal3
+   576 00,2465 AD 76 20		 lda tmpo
+   577 00,2468 8D 77 20		 sta ltemp
+   578 00,246B AD 71 20		 lda posptr
+   579 00,246E D0 03		 bne dal3
+   580 00,2470 EE 72 20		 inc possng
+   581
+   582 00,2473 AC 3A 20		dal3 ldy czest2
+   583 00,2476 AD 5C 20		 lda dana1
+   584 00,2479 29 07		 and #7
+   585 00,247B C9 05		 cmp #5
+   586 00,247D F0 04		 beq a1
+   587 00,247F C9 06		 cmp #6
+   588 00,2481 D0 01		 bne a2
+   589 00,2483 88		a1 dey
+   590 00,2484 8C 31 20		a2 sty frq+3
+   591 00,2487 A0 00		 ldy #0
+   592 00,2489 C9 05		 cmp #5
+   593 00,248B F0 04		 beq a3
+   594 00,248D C9 06		 cmp #6
+   595 00,248F D0 02		 bne a4
+   596 00,2491 A0 02		a3 ldy #2
+   597 00,2493 C9 07		a4 cmp #7
+   598 00,2495 D0 02		 bne a5
+   599 00,2497 A0 28		 ldy #$28
+   600 00,2499 8C 36 20		a5 sty audc
+   601
+   602 00,249C A2 02		 ldx #2
+   603 00,249E BD 5C 20		loop lda dana1,x
+   604 00,24A1 29 E0		 and #$e0
+   605 00,24A3 9D 32 20		 sta znieks,x
+   606 00,24A6 BD 6B 20		 lda ladr,x
+   607 00,24A9 85 FC		 sta addr
+   608 00,24AB BD 6E 20		 lda hadr,x
+   609 00,24AE 85 FD		 sta addr+1
+   610 00,24B0 BD 43 20		 lda count1,x
+   611 00,24B3 C9 FF		 cmp #$ff
+   612 00,24B5 F0 36		 beq y4
+   613 00,24B7 C9 0F		 cmp #$f
+   614 00,24B9 D0 20		 bne y2
+   615 00,24BB BD 49 20		 lda lopad,x
+   616 00,24BE F0 2D		 beq y4
+   617 00,24C0 DE 49 20		 dec lopad,x
+   618 00,24C3 BD 49 20		 lda lopad,x
+   619 00,24C6 D0 25		 bne y4
+   620 00,24C8 BC 25 20		 ldy volume,x
+   621 00,24CB F0 01		 beq y1
+   622 00,24CD 88		 dey
+   623 00,24CE 98		y1 tya
+   624 00,24CF 9D 25 20		 sta volume,x
+   625 00,24D2 BD 62 20		 lda dana3,x
+   626 00,24D5 9D 49 20		 sta lopad,x
+   627 00,24D8 4C ED 24		 jmp y4
+   628 00,24DB BD 43 20		y2 lda count1,x
+   629 00,24DE 4A		 lsr @
+   630 00,24DF A8		 tay
+   631 00,24E0 B1 FC		 lda (addr),y
+   632 00,24E2 90 04		 bcc y3
+   633 00,24E4 4A		 lsr @
+   634 00,24E5 4A		 lsr @
+   635 00,24E6 4A		 lsr @
+   636 00,24E7 4A		 lsr @
+   637 00,24E8 29 0F		y3 and #$f
+   638 00,24EA 9D 25 20		 sta volume,x
+   639 00,24ED BC 37 20		y4 ldy czest1,x
+   640 00,24F0 BD 5C 20		 lda dana1,x
+   641 00,24F3 29 07		 and #7
+   642 00,24F5 C9 01		 cmp #1
+   643 00,24F7 D0 1F		 bne y6
+   644 00,24F9 88		 dey
+   645 00,24FA 98		 tya
+   646 00,24FB C8		 iny
+   647 00,24FC DD 3A 20		 cmp czest2,x
+   648 00,24FF 08		 php
+   649 00,2500 A9 01		 lda #1
+   650 00,2502 28		 plp
+   651 00,2503 D0 02		 bne y5
+   652 00,2505 0A		 asl @
+   653 00,2506 0A		 asl @
+   654 00,2507 3D 46 20		y5 and count2,x
+   655 00,250A F0 0C		 beq y6
+   656 00,250C BC 3A 20		 ldy czest2,x
+   657 00,250F C0 FF		 cpy #$ff
+   658 00,2511 D0 05		 bne y6
+   659 00,2513 A9 00		 lda #0
+   660 00,2515 9D 25 20		 sta volume,x
+   661 00,2518 98		y6 tya
+   662 00,2519 9D 2E 20		 sta frq,x
+   663 00,251C A9 01		 lda #1
+   664 00,251E 8D 78 20		 sta b1
+   665 00,2521 BD 43 20		 lda count1,x
+   666 00,2524 C9 0F		 cmp #$f
+   667 00,2526 F0 38		 beq y9
+   668 00,2528 29 07		 and #7
+   669 00,252A A8		 tay
+   670 00,252B B9 53 27		 lda tab9,y
+   671 00,252E 85 FE		 sta word
+   672 00,2530 BD 43 20		 lda count1,x
+   673 00,2533 29 08		 and #8
+   674 00,2535 08		 php
+   675 00,2536 8A		 txa
+   676 00,2537 28		 plp
+   677 00,2538 18		 clc
+   678 00,2539 F0 02		 beq y7
+   679 00,253B 69 03		 adc #3
+   680 00,253D A8		y7 tay
+   681 00,253E B9 65 20		 lda dana4,y
+   682 00,2541 25 FE		 and word
+   683 00,2543 F0 1B		 beq y9
+   684 00,2545 BD 3D 20		 lda czest3,x
+   685 00,2548 9D 2E 20		 sta frq,x
+   686 00,254B 8E 78 20		 stx b1
+   687 00,254E CA		 dex
+   688 00,254F 10 08		 bpl y8
+   689 00,2551 8D 31 20		 sta frq+3
+   690 00,2554 A9 00		 lda #0
+   691 00,2556 8D 36 20		 sta audc
+   692 00,2559 E8		y8 inx
+   693 00,255A BD 40 20		 lda zniek,x
+   694 00,255D 9D 32 20		 sta znieks,x
+   695 00,2560 BD 43 20		y9 lda count1,x
+   696 00,2563 29 0F		 and #$f
+   697 00,2565 C9 0F		 cmp #$f
+   698 00,2567 F0 10		 beq y10
+   699 00,2569 FE 43 20		 inc count1,x
+   700 00,256C BD 43 20		 lda count1,x
+   701 00,256F C9 0F		 cmp #$f
+   702 00,2571 D0 06		 bne y10
+   703 00,2573 BD 62 20		 lda dana3,x
+   704 00,2576 9D 49 20		 sta lopad,x
+   705 00,2579 BD 55 20		y10 lda czygrx,x
+   706 00,257C 10 0A		 bpl y11
+   707 00,257E BD 25 20		 lda volume,x
+   708 00,2581 D0 05		 bne y11
+   709 00,2583 A9 40		 lda #$40
+   710 00,2585 9D 55 20		 sta czygrx,x
+   711 00,2588 FE 46 20		y11 inc count2,x
+   712 00,258B A0 00		 ldy #0
+   713 00,258D BD 5C 20		 lda dana1,x
+   714 00,2590 4A		 lsr @
+   715 00,2591 4A		 lsr @
+   716 00,2592 4A		 lsr @
+   717 00,2593 4A		 lsr @
+   718 00,2594 90 01		 bcc y12
+   719 00,2596 88		 dey
+   720 00,2597 4A		y12 lsr @
+   721 00,2598 90 01		 bcc y13
+   722 00,259A C8		 iny
+   723 00,259B 18		y13 clc
+   724 00,259C 98		 tya
+   725 00,259D 7D 37 20		 adc czest1,x
+   726 00,25A0 9D 37 20		 sta czest1,x
+   727 00,25A3 BD 3A 20		 lda czest2,x
+   728 00,25A6 C9 FF		 cmp #$ff
+   729 00,25A8 D0 02		 bne y14
+   730 00,25AA A0 00		 ldy #0
+   731 00,25AC 18		y14 clc
+   732 00,25AD 98		 tya
+   733 00,25AE 7D 3A 20		 adc czest2,x
+   734 00,25B1 9D 3A 20		 sta czest2,x
+   735 00,25B4 CA		 dex
+   736 00,25B5 30 03		 bmi x1
+   737 00,25B7 4C 9E 24		 jmp loop
+   738
+   739 00,25BA AD 32 20		x1 lda znieks
+   740 00,25BD 8D 35 20		 sta znieks+3
+   741 00,25C0 AD 5C 20		 lda dana1
+   742 00,25C3 29 07		 and #7
+   743 00,25C5 AA		 tax
+   744 00,25C6 A0 03		 ldy #3
+   745 00,25C8 AD 78 20		 lda b1
+   746 00,25CB F0 03		 beq x2
+   747 00,25CD BC 5B 27		 ldy tab10,x
+   748 00,25D0 98		x2 tya
+   749 00,25D1 48		 pha
+   750 00,25D2 B9 3F 27		 lda tab8,y
+   751 00,25D5 08		 php
+   752 00,25D6 29 7F		 and #$7f
+   753 00,25D8 AA		 tax
+   754 00,25D9 98		 tya
+   755 00,25DA 29 03		 and #3
+   756 00,25DC 0A		 asl @
+   757 00,25DD A8		 tay
+   758 00,25DE BD 2E 20		 lda frq,x
+   759 00,25E1 99 00 D2		d0 sta $d200,y
+   760 00,25E4 C8		 iny
+   761 00,25E5 BD 25 20		 lda volume,x
+   762 00,25E8 E0 03		 cpx #3
+   763 00,25EA D0 03		 bne x3
+   764 00,25EC AD 25 20		 lda volume
+   765 00,25EF 1D 32 20		x3 ora znieks,x
+   766 00,25F2 28		 plp
+   767 00,25F3 10 02		 bpl d1
+   768 00,25F5 A9 00		 lda #0
+   769 00,25F7 99 00 D2		d1 sta $d200,y
+   770 00,25FA 68		 pla
+   771 00,25FB A8		 tay
+   772 00,25FC 88		 dey
+   773 00,25FD 29 03		 and #3
+   774 00,25FF D0 CF		 bne x2
+   775 00,2601 A0 08		 ldy #8
+   776 00,2603 AD 36 20		 lda audc
+   777 00,2606 99 00 D2		d2 sta $d200,y
+   778
+   779 00,2609 18		 clc
+   780 00,260A 68		end pla
+   781 00,260B 85 FF		 sta word+1
+   782 00,260D 68		 pla
+   783 00,260E 85 FE		 sta word
+   784 00,2610 68		 pla
+   785 00,2611 85 FD		 sta addr+1
+   786 00,2613 68		 pla
+   787 00,2614 85 FC		 sta addr
+   788 00,2616 60		 rts
+   789
+   790 				*--- basic
+   791 				/*
+   792 				basic pla
+   793 				 tax
+   794 				 beq p6
+   795 				 cmp #2
+   796 				 beq p2
+   797 				p1 pla
+   798 				 pla
+   799 				 dex
+   800 				 bne p1
+   801 				 rts
+   802
+   803 				p2 lda $14
+   804 				 cmp $14
+   805 				 beq *-2
+   806
+   807 				 lda $224
+   808 				 cmp <p8
+   809 				 bne p3
+   810 				 lda $225
+   811 				 cmp >p8
+   812 				 beq p1
+   813 				p3 lda $224
+   814 				 sta p9+1
+   815 				 lda $225
+   816 				 sta p9+2
+   817 				 lda <p8
+   818 				 sta $224
+   819 				 lda >p8
+   820 				 sta $225
+   821 				 pla
+   822 				 pla
+   823 				 beq p4
+   824 				 sec
+   825 				 sbc #1
+   826 				p4 sta p5+1
+   827 				 pla
+   828 				 tay
+   829 				 pla
+   830 				 tax
+   831 				 lda #$70
+   832 				 jsr init
+   833 				 lda #0
+   834 				p5 ldx #0
+   835 				 jmp init
+   836 				p6 lda $14
+   837 				 cmp $14
+   838 				 beq *-2
+   839 				 lda $224
+   840 				 cmp <p8
+   841 				 bne p2-1
+   842 				 lda $225
+   843 				 cmp >p8
+   844 				 bne p2-1
+   845 				p7 lda p9+1
+   846 				 sta $224
+   847 				 lda p9+2
+   848 				 sta $225
+   849 				 lda #$40
+   850 				 jmp init
+   851 				p8 jsr play
+   852 				 bcc p9
+   853 				 jsr p7
+   854 				p9 jmp $ffff
+   855 				*/
+   856
+   857 				*--- tablice
+   858
+   859 00,2617 BC 20		tab1 dta a(graj)
+   860 00,2619 E7 20		 dta a(grajx)
+   861 00,261B B2 21		 dta a(instr)
+   862 00,261D 45 21		 dta a(tempo)
+   863 00,261F 85 21		 dta a(skoncz)
+   864 00,2621 9E 21		 dta a(przer)
+   865 00,2623 A9 21		 dta a(kont)
+   866 00,2625 5C 21		 dta a(inic)
+   867
+   868 00,2627 9D 23		tab2 dta a(stop)
+   869 00,2629 A3 23		 dta a(jump)
+   870 00,262B A7 23		 dta a(up)
+   871 00,262D AF 23		 dta a(down)
+   872 00,262F B7 23		 dta a(temp)
+   873 00,2631 C1 23		 dta a(rep)
+   874 00,2633 D7 23		 dta a(break)
+   875
+   876 00,2635 3F 26		tab3 dta a(tab5)
+   877 00,2637 80 26		 dta a(tab6)
+   878 00,2639 C1 26		 dta a(tab7)
+   879
+   880 00,263B 80 A0		tab4 dta b($80),b($a0)
+   881 00,263D 20 40		 dta b($20),b($40)
+   882
+   883 00,263F FF F1 E4 D7	tab5 dta b($ff),b($f1),b($e4),b($d7)
+   884 00,2643 CB C0 B5 AA	 dta b($cb),b($c0),b($b5),b($aa)
+   885 00,2647 A1 98 8F 87	 dta b($a1),b($98),b($8f),b($87)
+   886 00,264B 7F 78 72 6B	 dta b($7f),b($78),b($72),b($6b)
+   887 00,264F 65 5F 5A 55	 dta b($65),b($5f),b($5a),b($55)
+   888 00,2653 50 4B 47 43	 dta b($50),b($4b),b($47),b($43)
+   889 00,2657 3F 3C 38 35	 dta b($3f),b($3c),b($38),b($35)
+   890 00,265B 32 2F 2C 2A	 dta b($32),b($2f),b($2c),b($2a)
+   891 00,265F 27 25 23 21	 dta b($27),b($25),b($23),b($21)
+   892 00,2663 1F 1D 1C 1A	 dta b($1f),b($1d),b($1c),b($1a)
+   893 00,2667 18 17 16 14	 dta b($18),b($17),b($16),b($14)
+   894 00,266B 13 12 11 10	 dta b($13),b($12),b($11),b($10)
+   895 00,266F 0F 0E 0D 0C	 dta b($0f),b($0e),b($0d),b($0c)
+   896 00,2673 0B 0A 09 08	 dta b($0b),b($0a),b($09),b($08)
+   897 00,2677 07 06 05 04	 dta b($07),b($06),b($05),b($04)
+   898 00,267B 03 02 01 00	 dta b($03),b($02),b($01),b($00)
+   899 00,267F 00		 dta b($00)
+   900
+   901 00,2680			tab6
+   902
+   903 				 ift bass=0
+   904
+   905 				 dta b($00),b($00),b($00),b($00)
+   906 				 dta b($f2),b($e9),b($da),b($ce)
+   907 				 dta b($bf),b($b6),b($aa),b($a1)
+   908 				 dta b($98),b($8f),b($89),b($80)
+   909 				 dta b($7a),b($71),b($6b),b($65)
+   910 				 dta b($5f),b($00),b($56),b($50)
+   911 				 dta b($67),b($60),b($5a),b($55)
+   912 				 dta b($51),b($4c),b($48),b($43)
+   913 				 dta b($3f),b($3d),b($39),b($34)
+   914 				 dta b($33),b($39),b($2d),b($2a)
+   915 				 dta b($28),b($25),b($24),b($21)
+   916 				 dta b($1f),b($1e),b($00),b($00)
+   917 				 dta b($0f),b($0e),b($0d),b($0c)
+   918 				 dta b($0b),b($0a),b($09),b($08)
+   919 				 dta b($07),b($06),b($05),b($04)
+   920 				 dta b($03),b($02),b($01),b($00)
+   921 				 dta b($00)
+   922
+   923 				 els
+   924
+   925 00,2680 00 00 00 00 F2 +	 dta 0,0,0,0,242,233,218,206,191,182,170,161
+   926 00,268C 98 8F 89 80 7A +	 dta 152,143,137,128,122,113,107,101,95,92,86
+   927 00,2697 50 4D 47 44 41 +	 dta 80,77,71,68,65,62,56,53,136,127,121,115,108
+   928 00,26A4 67 60 5A 55 51 +	 dta 103,96,90,85,81,76,72,67,63,61,57,52,51,48
+   929 00,26B2 2D 2A 28 25 24 +	 dta 45,42,40,37,36,33,31,30,5,4,3,2,1,0,0
+   930
+   931 				 eif
+   932
+   933 00,26C1 38 0B 8C 0A 00 +	tab7 dta a($b38),a($a8c),a($a00),a($96a)
+   934 00,26C9 E8 08 6A 08 EF +	 dta a($8e8),a($86a),a($7ef),a($780)
+   935 00,26D1 08 07 AE 06 46 +	 dta a($708),a($6ae),a($646),a($5e6)
+   936 00,26D9 95 05 41 05 F6 +	 dta a($595),a($541),a($4f6),a($4b0)
+   937 00,26E1 6E 04 30 04 F6 +	 dta a($46e),a($430),a($3f6),a($3bb)
+   938 00,26E9 84 03 52 03 22 +	 dta a($384),a($352),a($322),a($2f4)
+   939 00,26F1 C8 02 A0 02 7A +	 dta a($2c8),a($2a0),a($27a),a($255)
+   940 00,26F9 34 02 14 02 F5 +	 dta a($234),a($214),a($1f5),a($1d8)
+   941 00,2701 BD 01 A4 01 8D +	 dta a($1bd),a($1a4),a($18d),a($177)
+   942 00,2709 60 01 4E 01 38 +	 dta a($160),a($14e),a($138),a($127)
+   943 00,2711 15 01 06 01 F7 +	 dta a($115),a($106),a($0f7),a($0e8)
+   944 00,2719 DB 00 CF 00 C3 +	 dta a($0db),a($0cf),a($0c3),a($0b8)
+   945 00,2721 AC 00 A2 00 9A +	 dta a($0ac),a($0a2),a($09a),a($090)
+   946 00,2729 88 00 7F 00 78 +	 dta a($088),a($07f),a($078),a($070)
+   947 00,2731 6A 00 64 00 5E +	 dta a($06a),a($064),a($05e),a($057)
+   948 00,2739 52 00 32 00 0A +	 dta a($052),a($032),a($00a)
+   949
+   950 00,273F 00 01 02 83	tab8 dta b($00),b($01),b($02),b($83)
+   951 00,2743 00 01 02 03	 dta b($00),b($01),b($02),b($03)
+   952 00,2747 01 00 02 83	 dta b($01),b($00),b($02),b($83)
+   953 00,274B 01 00 02 03	 dta b($01),b($00),b($02),b($03)
+   954 00,274F 01 02 80 03	 dta b($01),b($02),b($80),b($03)
+   955
+   956 00,2753 80 40 20 10	tab9 dta b($80),b($40),b($20),b($10)
+   957 00,2757 08 04 02 01	 dta b($08),b($04),b($02),b($01)
+   958
+   959 00,275B 03 03 03 03	tab10 dta b(3),b(3),b(3),b(3)
+   960 00,275F 07 0B 0F 13	 dta b(7),b($b),b($f),b($13)
+   961
+   962 				*--- koniec
+   963
+   964 				.endp
+    32
+    33 00,02E0-02E1> 00 20		run main
+    34

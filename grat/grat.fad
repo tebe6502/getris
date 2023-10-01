@@ -1,0 +1,302 @@
+color_nr equ 105
+
+;-----------;
+;-  WAIT   -;
+;-----------;
+.proc wait
+ lda:cmp:req cloc
+ dex
+ bne wait
+ rts
+.endp
+
+
+;-----------;
+;-  FADE   -;
+;-----------;
+.proc fade
+ stx adr+1
+ sty adr+2
+
+ ldx #6
+ jsr wait
+ 
+ lda #16
+ sta licz
+fad
+ ldx #2
+ jsr wait
+
+adr jsr $ffff
+
+ dec licz
+ bne fad
+ rts
+
+licz	.BYTE
+.endp
+
+;-----------;
+;- FADE IN -;
+;-----------;
+.proc fade_in
+
+ ldx <fade
+ ldy >fade
+ jmp :fade
+
+fade
+
+ lda <tab.l_tcol
+ sta adr0+1
+ lda <tab.h_tcol
+ sta adr1+1
+ lda <tab.t_satur
+ sta adr2+1
+ lda <tab.t_color
+ sta adr3+1
+
+ lda >tab.l_tcol
+ sta adr0+2
+ lda >tab.h_tcol
+ sta adr1+2
+ lda >tab.t_satur
+ sta adr2+2
+ lda >tab.t_color
+ sta adr3+2
+
+ ldx #0
+ stx count
+
+fade_l
+adr0 lda $ffff,x
+ sta ftmp
+adr1 lda $ffff,x
+ sta ftmp+1
+
+ ldy #1
+ lda (ftmp),y
+ tay
+
+ and #$f0
+adr3 cmp $ffff,x
+ beq skp1
+
+ tya
+ clc
+ adc #$10
+ tay
+
+skp1
+
+ tya
+ and #$0f
+adr2 cmp $ffff,x
+ beq skp0
+
+ iny
+
+skp0
+
+ tya
+ ldy #1
+ sta (ftmp),y
+
+ inx
+ bne skp
+ inc count
+
+ inc adr0+2
+ inc adr1+2
+ inc adr2+2
+ inc adr3+2
+
+skp
+
+ cpx <color_nr
+ bne fade_l
+ lda count
+ cmp >color_nr
+ bne fade_l
+ rts
+
+count	.BYTE
+.endp
+
+;------------;
+;- FADE OUT -;
+;------------;
+.proc fade_out
+
+ ldx <fade
+ ldy >fade
+ jmp :fade
+
+fade
+
+ lda <tab.l_tcol
+ sta adr0+1
+ lda <tab.h_tcol
+ sta adr1+1
+
+ lda >tab.l_tcol
+ sta adr0+2
+ lda >tab.h_tcol
+ sta adr1+2
+
+ ldx #0
+ stx count
+
+fade_l
+adr0 lda tab.l_tcol,x
+ sta ftmp
+adr1 lda tab.h_tcol,x
+ sta ftmp+1
+
+ ldy #1
+ lda (ftmp),y
+ tay
+
+ and #$0f
+ beq skp0
+
+ dey
+
+skp0
+
+ tya
+ and #$f0
+ beq skp1
+
+ tya
+ sec
+ sbc #$10
+ tay
+
+skp1
+ tya
+
+ ldy #1
+ sta (ftmp),y
+
+ inx
+ bne skp
+ inc count
+
+ inc adr0+2
+ inc adr1+2
+
+skp
+
+ cpx <color_nr
+ bne fade_l
+ lda count
+ cmp >color_nr
+ bne fade_l
+
+ ldy #7
+ lda #0
+clr
+ sta $d000,y
+ dey
+ bpl clr
+ rts
+
+count	.BYTE
+.endp
+
+;--------------;
+;- SAVE COLOR -;
+;--------------;
+.proc save_color
+
+ lda <tab.l_tcol
+ sta adr0+1
+ lda <tab.h_tcol
+ sta adr1+1
+ lda <tab.t_satur
+ sta adr2+1
+ lda <tab.t_color
+ sta adr3+1
+
+ lda >tab.l_tcol
+ sta adr0+2
+ lda >tab.h_tcol
+ sta adr1+2
+ lda >tab.t_satur
+ sta adr2+2
+ lda >tab.t_color
+ sta adr3+2
+
+ ldx #0
+ stx count
+
+save_l
+adr0 lda $ffff,x
+ sta ftmp
+adr1 lda $ffff,x
+ sta ftmp+1
+
+ ldy #1
+ lda (ftmp),y
+ pha
+ and #$0f
+adr2 sta $ffff,x
+ pla
+ and #$f0
+adr3 sta $ffff,x
+
+ lda #0        ; black screen (all colors = $00)
+ sta (ftmp),y
+
+ inx
+ bne skp
+ inc count
+
+ inc adr0+2
+ inc adr1+2
+ inc adr2+2
+ inc adr3+2
+
+skp
+
+ cpx <color_nr
+ bne save_l
+ lda count
+ cmp >color_nr
+ bne save_l
+ rts
+
+count	.BYTE
+.endp
+
+.proc tab
+l_tcol
+ dta l(c0,c1,c2,c3,c4,c5,c6,c7,c8,c9)
+ dta l(c10,c11,c12,c13,c14,c15,c16,c17,c18,c19)
+ dta l(c20,c21,c22,c23,c24,c25,c26,c27,c28,c29)
+ dta l(c30,c31,c32,c33,c34,c35,c36,c37,c38,c39)
+ dta l(c40,c41,c42,c43,c44,c45,c46,c47,c48)
+ dta l(c50,c51,c52,c53,c54,c55,c56,c57,c58,c59)
+ dta l(c60,c61,c62,c63,c64,c65,c66,c67,c68,c69)
+ dta l(c70,c71,c72,c73,c74,c75,c76,c77,c78,c79)
+ dta l(c80,c81,c82,c83,c84,c85,c86,c87,c88,c89)
+ dta l(c90,c91,c92,c93,c94,c95,c96,c97,c98,c99)
+ dta l(c100,c101,c102,c103,c104,c105)
+
+h_tcol
+ dta h(c0,c1,c2,c3,c4,c5,c6,c7,c8,c9)
+ dta h(c10,c11,c12,c13,c14,c15,c16,c17,c18,c19)
+ dta h(c20,c21,c22,c23,c24,c25,c26,c27,c28,c29)
+ dta h(c30,c31,c32,c33,c34,c35,c36,c37,c38,c39)
+ dta h(c40,c41,c42,c43,c44,c45,c46,c47,c48)
+ dta h(c50,c51,c52,c53,c54,c55,c56,c57,c58,c59)
+ dta h(c60,c61,c62,c63,c64,c65,c66,c67,c68,c69)
+ dta h(c70,c71,c72,c73,c74,c75,c76,c77,c78,c79)
+ dta h(c80,c81,c82,c83,c84,c85,c86,c87,c88,c89)
+ dta h(c90,c91,c92,c93,c94,c95,c96,c97,c98,c99)
+ dta h(c100,c101,c102,c103,c104,c105)
+
+t_satur :color_nr brk	; kod bedzie pakowany wiec nie moga byc ORG'i
+t_color :color_nr brk
+.endp
