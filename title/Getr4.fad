@@ -1,0 +1,161 @@
+
+color_nr	equ 27
+
+.proc fade
+ stx adr+1
+ sty adr+2
+
+ ldx #16
+ jsr wait
+ 
+ lda #16
+ sta licz
+fad
+ ldx #2
+ jsr wait
+adr jsr fade
+ dec licz
+ bne fad
+
+ rts
+
+licz brk
+
+.endp
+
+
+;-----------;
+;- FADE IN -;
+;-----------;
+.proc fade_in
+
+ ldx #0
+
+fade_l
+ lda l_tcol,x
+ sta tmp
+ lda h_tcol,x
+ sta tmp+1
+
+ ldy #1
+ lda (tmp),y
+ tay
+
+ and #$0f
+ cmp t_satur,x
+ beq skp0
+
+ iny
+
+skp0
+
+ tya
+ and #$f0
+ cmp t_color,x
+ beq skp1
+
+ tya
+ clc
+ adc #$10
+ tay
+
+skp1
+ tya
+
+ ldy #1
+ sta (tmp),y
+
+ inx
+ cpx #color_nr
+ bne fade_l
+ rts
+
+.endp
+
+;------------;
+;- FADE OUT -;
+;------------;
+.proc fade_out
+
+ ldx #0
+
+fade_l
+ltc1 lda l_tcol,x
+ sta tmp
+htc1 lda h_tcol,x
+ sta tmp+1
+
+ ldy #1
+ lda (tmp),y
+ tay
+
+ and #$0f
+ beq skp0
+
+ dey
+
+skp0
+
+ tya
+ and #$f0
+ beq skp1
+
+ tya
+ sec
+ sbc #$10
+ tay
+
+skp1
+ tya
+
+ ldy #1
+ sta (tmp),y
+
+ inx
+col_nr1 cpx #color_nr
+ bne fade_l
+ rts
+.endp
+
+
+;--------------;
+;- SAVE COLOR -;
+;--------------;
+save_color
+ ldx #0
+save_l
+ lda l_tcol,x
+ sta tmp
+ lda h_tcol,x
+ sta tmp+1
+
+ ldy #1
+ lda (tmp),y
+ pha
+ and #$0f
+ sta t_satur,x
+ pla
+ and #$f0
+ sta t_color,x
+
+ lda #0        ; black screen (all colors = $00)
+ sta (tmp),y
+
+ inx
+ cpx #color_nr
+ bne save_l
+ rts
+
+
+l_tcol
+ dta l(nmi.c0,nmi.c1,nmi.c2,nmi.c3,nmi.c4,nmi.c5,nmi.c6,nmi.c7,nmi.c8,c9)
+ dta l(c10,c11,c12,c13,c14,c15,c16,c17,c18,c19)
+ dta l(c20,c21,c2,c3,c6,c7,c30)
+
+h_tcol
+ dta h(nmi.c0,nmi.c1,nmi.c2,nmi.c3,nmi.c4,nmi.c5,nmi.c6,nmi.c7,nmi.c8,c9)
+ dta h(c10,c11,c12,c13,c14,c15,c16,c17,c18,c19)
+ dta h(c20,c21,c2,c3,c6,c7,c30)
+
+t_satur :color_nr brk
+t_color :color_nr brk
