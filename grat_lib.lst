@@ -1,0 +1,3263 @@
+Mad-Assembler v1.6.9beta by TeBe/Madteam
+Source: D:\!Atari\getris2\grat_lib.asm
+     1 				// GETRIS GRATULACJE v1.1
+     2 				// CHANGES: 30.01.2006
+     3
+     4 				// wersja do spakowania deflaterem
+     5 				// z etykietami external
+     6
+     7
+     8 = 00,0000		music		ext .word
+     9 = 00,0000		default_nmi	ext .word
+    10 = 00,0000		reset_pokey	ext .word
+    11
+    12 = 00,0000		pmBase  equ $0000
+    13
+    14 = 00,003F		scr48	equ %00111111	;screen 48b
+    15 = 00,003E		scr40	equ %00111110	;screen 40b
+    16 = 00,003D		scr32	equ %00111101	;screen 32b
+    17
+    18 = 00,0014		cloc	equ $0014	;(1)
+    19 = 00,0000		byt2	equ $0000	;(1) <$0100
+    20 = 00,D01E		byt3	equ $d01e	;(1) >$00FF
+    21
+    22 = 00,0040		regA	equ $40		;(1)
+    23 = 00,0041		regX	equ regA+1	;(1)
+    24 = 00,0042		regY	equ regX+1	;(1)
+    25 = 00,0043		ftmp	equ regY+1	;(2)
+    26 = 00,0045		upd	equ ftmp+2	;(2)
+    27 = 00,0047		zp_free	equ upd+2
+    28
+    29 = 00,D000		hposp0	equ $D000
+    30 = 00,D001		hposp1	equ $D001
+    31 = 00,D002		hposp2	equ $D002
+    32 = 00,D003		hposp3	equ $D003
+    33 = 00,D004		hposm0	equ $D004
+    34 = 00,D005		hposm1	equ $D005
+    35 = 00,D006		hposm2	equ $D006
+    36 = 00,D007		hposm3	equ $D007
+    37 = 00,D008		sizep0	equ $D008
+    38 = 00,D009		sizep1	equ $D009
+    39 = 00,D00A		sizep2	equ $D00A
+    40 = 00,D00B		sizep3	equ $D00B
+    41 = 00,D00C		sizem	equ $D00C
+    42
+    43 = 00,D012		colpm0	equ $D012
+    44 = 00,D013		colpm1	equ $D013
+    45 = 00,D014		colpm2	equ $D014
+    46 = 00,D015		colpm3	equ $D015
+    47 = 00,D016		color0	equ $D016
+    48 = 00,D017		color1	equ $D017
+    49 = 00,D018		color2	equ $D018
+    50 = 00,D019		color3	equ $D019
+    51 = 00,D01A		colbak	equ $D01A
+    52 = 00,D01B		gtictl	equ $D01B
+    53
+    54 = 00,D409		chbase	equ $D409
+    55
+    56 				;-- MAIN PROGRAM
+    57 				 opt h-
+    58 				 org $1000
+    59
+    60 				fnt
+    61 				 .get 'grat\grat.fnt',0,4096+46*8
+    62
+    63  [0000] 4C 9C 3B		 .put = {jmp start} , <start , >start	; JMP START
+    64
+    65 00,1000 4C 9C 3B 00 00 +	 .sav 4096+46*8
+    66
+    67 00,2170			ant
+    68 00,2170 70 70 70 C4 89 +	 dta d'ppp',$c4,a(scr)
+    69 00,2176 04 84 84 84 84 +	 dta 4,$84,$84,$84,$84,4,4,4,4,$84,$84,$f0,2,$82,2,2
+    70 00,2186 41 70 21		 dta $41,a(ant)
+    71
+    72
+    73 00,2189			scr
+    74 00,2189 01 02 03 04 05 +	 ins 'grat\grat.scr',120,12*40
+    75 00,2369 8F AE AF B0 B1 +	 ins 'grat\grat.scr',120+12*40+40,4*40
+    76
+    77 00,2409			pmg
+    78 00,2409 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    79 00,2415 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$20,$00,$00,$00,$20,$00,$00,$00
+    80 00,2425 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$40,$80
+    81 00,2435 80 04 08 28 00 +	 dta $80,$04,$08,$28,$00,$10,$00,$00,$C0,$08,$08,$04,$04,$00,$00,$08
+    82 00,2445 C8 08 08 00 08 +	 dta $C8,$08,$08,$00,$08,$04,$08,$08,$00,$08,$08,$00,$08,$08,$08,$04
+    83 00,2455 00 08 00 00 00 +	 dta $00,$08,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    84 00,2465 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$30,$30,$30,$30,$30,$30,$30,$30
+    85 00,2475 30 30 30 30 30 +	 dta $30,$30,$30,$30,$30,$30,$30,$30,$30,$30,$30,$30,$30,$30,$30,$30
+    86 00,2485 30 30		 dta $30,$30
+    87
+    88 00,2487 00 00 80 80 00 +	 dta $00,$00,$80,$80,$00,$00,$00,$00,$00,$08,$00,$00
+    89 00,2493 00 40 28 20 20 +	 dta $00,$40,$28,$20,$20,$30,$20,$10,$20,$21,$01,$01,$20,$20,$00,$08
+    90 00,24A3 68 20 00 00 20 +	 dta $68,$20,$00,$00,$20,$24,$04,$00,$24,$24,$00,$04,$04,$04,$22,$60
+    91 00,24B3 80 80 00 00 08 +	 dta $80,$80,$00,$00,$08,$08,$10,$10,$18,$10,$10,$90,$88,$00,$08,$00
+    92 00,24C3 40 00 80 00 00 +	 dta $40,$00,$80,$00,$00,$80,$00,$40,$00,$00,$82,$00,$40,$00,$00,$88
+    93 00,24D3 00 40 20 20 20 +	 dta $00,$40,$20,$20,$20,$20,$20,$00,$20,$40,$20,$60,$80,$C0,$80,$C0
+    94 00,24E3 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    95 00,24F3 FF FF FF FF FF +	 dta $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    96 00,2503 FF FF		 dta $FF,$FF
+    97
+    98 00,2505 00 40 20 80 40 +	 dta $00,$40,$20,$80,$40,$00,$00,$40,$04,$08,$44,$00
+    99 00,2511 24 04 08 04 2D +	 dta $24,$04,$08,$04,$2D,$21,$08,$10,$08,$08,$10,$10,$20,$24,$14,$30
+   100 00,2521 00 24 10 10 02 +	 dta $00,$24,$10,$10,$02,$00,$10,$12,$00,$00,$12,$10,$00,$11,$22,$48
+   101 00,2531 0A 10 24 68 10 +	 dta $0A,$10,$24,$68,$10,$A0,$50,$40,$7F,$00,$00,$00,$00,$00,$00,$00
+   102 00,2541 7F 00 00 00 00 +	 dta $7F,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   103 00,2551 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   104 00,2561 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+   105 00,2571 FF FF FF FF FF +	 dta $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+   106 00,2581 FF FF		 dta $FF,$FF
+   107
+   108 00,2583 60 90 00 10 20 +	 dta $60,$90,$00,$10,$20,$80,$20,$8A,$20,$00,$44,$10
+   109 00,258F A4 84 02 80 05 +	 dta $A4,$84,$02,$80,$05,$84,$01,$4A,$48,$42,$00,$08,$00,$10,$01,$14
+   110 00,259F 10 04 14 40 00 +	 dta $10,$04,$14,$40,$00,$00,$48,$42,$08,$42,$0A,$02,$49,$90,$00,$04
+   111 00,25AF 3F FF FF FF FF +	 dta $3F,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+   112 00,25BF FF DF DE A2 62 +	 dta $FF,$DF,$DE,$A2,$62,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   113 00,25CF 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   114 00,25DF 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   115 00,25EF 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   116 00,25FF 00 00		 dta $00,$00
+   117
+   118 00,2601			main
+   119
+   120 				; clr pmg
+   121 00,2601 A0 00		 ldy #0
+   122 00,2603 98		 tya
+   123 00,2604			clr
+   124 				.rept 5
+   125 				 sta pmBase+$300+.r*$100,y
+   126 				.endr
+Source: REPT
+   125 00,2604 99 00 03		 sta pmBase+$300+.r*$100,y
+   125 00,2607 99 00 04		 sta pmBase+$300+.r*$100,y
+   125 00,260A 99 00 05		 sta pmBase+$300+.r*$100,y
+   125 00,260D 99 00 06		 sta pmBase+$300+.r*$100,y
+   125 00,2610 99 00 07		 sta pmBase+$300+.r*$100,y
+Source: D:\!Atari\getris2\grat_lib.asm
+   127 00,2613 C8		 iny
+   128 00,2614 D0 EE		 bne clr
+   129
+   130  [0000] 00 02 03 04	 .put = 0,2,3,4
+   131 = 00,0024		 ?ofs = 36
+   132 = 00,007E		 ?tmp = 126
+   133
+   134 				; copy pmg
+   135 00,2616 A0 00		 ldy #0
+   136 00,2618			copy
+   137 				.rept 4
+   138 				 lda pmg+.r*?tmp,y
+   139 				 sta pmBase+$300+?ofs+.get[.r]*$100,y
+   140 				.endr
+Source: REPT
+   138 00,2618 B9 09 24		 lda pmg+.r*?tmp,y
+   139 00,261B 99 24 03		 sta pmBase+$300+?ofs+.get[.r]*$100,y
+   138 00,261E B9 87 24		 lda pmg+.r*?tmp,y
+   139 00,2621 99 24 05		 sta pmBase+$300+?ofs+.get[.r]*$100,y
+   138 00,2624 B9 05 25		 lda pmg+.r*?tmp,y
+   139 00,2627 99 24 06		 sta pmBase+$300+?ofs+.get[.r]*$100,y
+   138 00,262A B9 83 25		 lda pmg+.r*?tmp,y
+   139 00,262D 99 24 07		 sta pmBase+$300+?ofs+.get[.r]*$100,y
+Source: D:\!Atari\getris2\grat_lib.asm
+   141 00,2630 C8		 iny
+   142 00,2631 C0 7E		 cpy #?tmp
+   143 00,2633 D0 E3		 bne copy
+   144
+   145 00,2635 20 1C 32		 jsr save_color
+   146
+   147
+   148 				 lda:rne $d40b
+   148 00,2638 AD 0B D4		 lda $d40b
+   148 00,263B D0 FB		 rne$2638 $d40b
+   149
+   150 				 mva >pmBase $d407	;missiles and players data address
+Macro: MVA [Source: D:\!Atari\getris2\grat\grat.mac]
+     1 00,263D A9 00		 lda >PMBASE
+     2 00,263F 8D 07 D4		 sta $D407
+Source: D:\!Atari\getris2\grat_lib.asm
+   151 				 mva #3 $d01d		;enable players and missiles
+Macro: MVA [Source: D:\!Atari\getris2\grat\grat.mac]
+     1 00,2642 A9 03		 lda #3
+     2 00,2644 8D 1D D0		 sta $D01D
+Source: D:\!Atari\getris2\grat_lib.asm
+   152
+   153 				 mwa #nmi $fffa
+Macro: MWA [Source: D:\!Atari\getris2\grat\grat.mac]
+     2 00,2647 A9 F7		  lda <NMI
+     3 00,2649 8D FA FF		  sta $FFFA
+     4 00,264C A9 2D		  lda >NMI
+     5 00,264E 8D FB FF		  sta $FFFA+1
+Source: D:\!Atari\getris2\grat_lib.asm
+   154 				 mva #$c0 $d40e
+Macro: MVA [Source: D:\!Atari\getris2\grat\grat.mac]
+     1 00,2651 A9 C0		 lda #$C0
+     2 00,2653 8D 0E D4		 sta $D40E
+Source: D:\!Atari\getris2\grat_lib.asm
+   155
+   156 				;---
+   157
+   158 00,2656 20 3A 31		 jsr fade_in
+   159
+   160 00,2659 20 40 34		 jsr cmc.init
+   161
+   162 00,265C 20 AE 2E		 jsr stars
+   163
+   164 00,265F 20 B6 31		 jsr fade_out
+   165
+   166 				 lda:rne $d40b
+   166 00,2662 AD 0B D4		 lda $d40b
+   166 00,2665 D0 FB		 rne$2662 $d40b
+   167
+   168 00,2667 20 00 00		 jsr default_nmi
+   169 00,266A 60		 rts
+   170
+   171 				;---
+   172
+   173 = 00,266B		 ?old_dli = *
+   174
+   175
+   176 00,266B			dli
+   177 				; line=32
+   178 00,266B A9 00		 lda #$00
+   179 00,266D A2 00		 ldx #$00
+   180 00,266F A0 00		 ldy #$00
+   181 00,2671 8D 0A D4		 sta $d40a
+   182 00,2674 8D 1E D0		 sta $d01e
+   183 00,2677 8E 1E D0		 stx $d01e
+   184 00,267A 8C 1E D0		 sty $d01e
+   185 00,267D EE 1E D0		 inc byt3
+   186
+   187 				; line=33
+   188
+   189 00,2680 20 E6 2D		 jsr wait60cycle
+   190
+   191 				; line=34
+   192
+   193 00,2683 20 E6 2D		 jsr wait60cycle
+   194
+   195 				; line=35
+   196
+   197 00,2686 20 E6 2D		 jsr wait60cycle
+   198
+   199 				; line=36
+   200
+   201 00,2689 20 E6 2D		 jsr wait60cycle
+   202
+   203 				; line=37
+   204
+   205 00,268C 20 E6 2D		 jsr wait60cycle
+   206
+   207 				; line=38
+   208
+   209 00,268F A9 7D		 lda #$7D
+   210 00,2691 A2 00		 ldx #$00
+   211 00,2693 A0 00		 ldy #$00
+   212 00,2695 8D 03 D0		 sta hposp3
+   213 00,2698 8E 1E D0		 stx $d01e
+   214 00,269B 8C 1E D0		 sty $d01e
+   215 00,269E A9 00		 lda #$00
+   216 00,26A0 8D 1E D0		 sta $d01e
+   217 00,26A3 20 F0 2D		 jsr wait36cycle
+   218
+   219 				; line=39
+   220
+   221 00,26A6 20 E6 2D		 jsr wait60cycle
+   222
+   223 				; line=40
+   224
+   225 00,26A9 A9 73		h0 lda #$73
+   226 00,26AB 8D 00 D0		 sta hposp0
+   227
+   228 				 DLINEW dli48
+Macro: DLINEW [Source: D:\!Atari\getris2\grat\grat.mac]
+     1 00,26AE A9 B6		 lda <DLI48
+     2 00,26B0 8D 03 2E		 sta DLIV+1
+Source: D:\!Atari\getris2\grat_lib.asm
+     7 00,26B3 4C A7 2E		 jmp NmiQuit
+     9 = 00,26B6		 ?old_dli = *
+Source: D:\!Atari\getris2\grat_lib.asm
+   229
+   230
+   231
+   232 00,26B6			dli48
+   233 				; line=48
+   234 00,26B6 A9 14		 lda >fnt+$400*$01
+   235 00,26B8 A2 74		h1 ldx #$74
+   236 00,26BA 8D 0A D4		 sta $d40a
+   237 00,26BD 8D 09 D4		 sta chbase
+   238 00,26C0 8E 00 D0		 stx hposp0
+   239
+   240 				 DLINEW dli56
+Macro: DLINEW [Source: D:\!Atari\getris2\grat\grat.mac]
+     1 00,26C3 A9 CB		 lda <DLI56
+     2 00,26C5 8D 03 2E		 sta DLIV+1
+Source: D:\!Atari\getris2\grat_lib.asm
+     7 00,26C8 4C A7 2E		 jmp NmiQuit
+     9 = 00,26CB		 ?old_dli = *
+Source: D:\!Atari\getris2\grat_lib.asm
+   241
+   242
+   243
+   244 00,26CB			dli56
+   245 				; line=56
+   246 00,26CB A9 73		h2 lda #$73
+   247 00,26CD A2 00		 ldx #$00
+   248 00,26CF A0 00		 ldy #$00
+   249 00,26D1 8D 0A D4		 sta $d40a
+   250 00,26D4 8D 00 D0		 sta hposp0
+   251 00,26D7 8E 1E D0		 stx $d01e
+   252 00,26DA 8C 1E D0		 sty $d01e
+   253 00,26DD A9 00		 lda #$00
+   254 00,26DF 8D 1E D0		 sta $d01e
+   255 				; cmp byt2
+   256
+   257 				; line=57
+   258
+   259 00,26E2 20 E6 2D		 jsr wait60cycle
+   260
+   261 				; line=58
+   262
+   263 00,26E5 A9 87		 lda #$87
+   264 00,26E7 8D 06 D0		 sta hposm2
+   265
+   266 				 DLINEW dli64
+Macro: DLINEW [Source: D:\!Atari\getris2\grat\grat.mac]
+     1 00,26EA A9 F2		 lda <DLI64
+     2 00,26EC 8D 03 2E		 sta DLIV+1
+Source: D:\!Atari\getris2\grat_lib.asm
+     7 00,26EF 4C A7 2E		 jmp NmiQuit
+     9 = 00,26F2		 ?old_dli = *
+Source: D:\!Atari\getris2\grat_lib.asm
+   267
+   268
+   269
+   270 00,26F2			dli64
+   271 				; line=64
+   272 00,26F2 A9 74		h3 lda #$74
+   273 00,26F4 A2 00		 ldx #$00
+   274 00,26F6 A0 00		 ldy #$00
+   275 00,26F8 8D 0A D4		 sta $d40a
+   276 00,26FB 8D 00 D0		 sta hposp0
+   277 00,26FE 8E 1E D0		 stx $d01e
+   278 00,2701 8C 1E D0		 sty $d01e
+   279 00,2704 A9 00		 lda #$00
+   280 00,2706 8D 1E D0		 sta $d01e
+   281 				; cmp byt2
+   282
+   283 				; line=65
+   284
+   285 00,2709 20 E6 2D		 jsr wait60cycle
+   286
+   287 				; line=66
+   288
+   289 00,270C 20 E6 2D		 jsr wait60cycle
+   290
+   291 				; line=67
+   292
+   293 00,270F 20 E6 2D		 jsr wait60cycle
+   294
+   295 				; line=68
+   296
+   297 00,2712 20 E6 2D		 jsr wait60cycle
+   298
+   299 				; line=69
+   300
+   301 00,2715 20 E6 2D		 jsr wait60cycle
+   302
+   303 				; line=70
+   304
+   305 00,2718 A9 7F		 lda #$7F
+   306 00,271A 8D 03 D0		 sta hposp3
+   307
+   308 				 DLINEW dli72
+Macro: DLINEW [Source: D:\!Atari\getris2\grat\grat.mac]
+     2 00,271D A9 2A		  lda <DLI72
+     3 00,271F 8D 03 2E		  sta DLIV+1
+     4 00,2722 A9 27		  lda >DLI72
+     5 00,2724 8D 04 2E		  sta DLIV+1+1
+     7 00,2727 4C A7 2E		 jmp NmiQuit
+     9 = 00,272A		 ?old_dli = *
+Source: D:\!Atari\getris2\grat_lib.asm
+   309
+   310
+   311
+   312
+   313 00,272A			dli72
+   314 				; line=72
+   315
+   316 00,272A A9 18		 lda >fnt+$400*$02
+   317 00,272C A2 70		h4 ldx #$70
+   318 00,272E A0 78		 ldy #$78
+   319 00,2730 8D 0A D4		 sta $d40a
+   320 00,2733 8D 09 D4		 sta chbase
+   321 00,2736 8E 00 D0		 stx hposp0
+   322 00,2739 8C 02 D0		 sty hposp2
+   323 00,273C A9 7A		 lda #$7A
+   324 00,273E 8D 07 D0		 sta hposm3
+   325 				; cmp byt2
+   326
+   327 				; line=73
+   328
+   329 00,2741 A9 14		c9 lda #$14
+   330 00,2743 A2 03		 ldx #$03
+   331 00,2745 A0 30		 ldy #$30
+   332 00,2747 8D 17 D0		 sta color1
+   333 00,274A 8E 0B D0		 stx sizep3
+   334 00,274D 8C 03 D0		 sty hposp3
+   335 00,2750 A9 68		c10 lda #$68
+   336 00,2752 8D 15 D0		 sta colpm3
+   337 00,2755 A2 68		c50 ldx #$68
+   338 00,2757 8E 16 D0		 stx $D016
+   339 00,275A A0 18		c51 ldy #$18
+   340 00,275C 8D 1E D0		 sta $D01E
+   341 00,275F A9 00		 lda #$00
+   342 00,2761 8C 16 D0		 sty $D016
+   343 00,2764 A9 00		 lda #$00
+   344 00,2766 8D 1E D0		 sta $D01E
+   345 00,2769 8E 16 D0		 stx $D016
+   346 00,276C EA		 nop
+   347 00,276D A9 00		 lda #$00
+   348 00,276F 8D 1E D0		 sta $D01E
+   349
+   350 				; line=74
+   351
+   352 00,2772 A9 18		c11 lda #$18
+   353 00,2774 A2 00		 ldx #$00
+   354 00,2776 A0 00		 ldy #$00
+   355 00,2778 8D 16 D0		 sta color0
+   356 00,277B 8E 1E D0		 stx $d01e
+   357 00,277E 8C 1E D0		 sty $d01e
+   358 00,2781 A9 00		 lda #$00
+   359 00,2783 8D 1E D0		 sta $d01e
+   360 00,2786 A2 68		c52 ldx #$68
+   361 00,2788 8E 16 D0		 stx $D016
+   362 00,278B A0 18		c53 ldy #$18
+   363 00,278D 8D 1E D0		 sta $D01E
+   364 00,2790 A9 00		 lda #$00
+   365 00,2792 8C 16 D0		 sty $D016
+   366 00,2795 A9 00		 lda #$00
+   367 00,2797 8D 1E D0		 sta $D01E
+   368 00,279A 8E 16 D0		 stx $D016
+   369 00,279D EA		 nop
+   370 00,279E A9 00		 lda #$00
+   371 00,27A0 8D 1E D0		 sta $D01E
+   372
+   373 				; line=75
+   374
+   375 00,27A3 A9 18		c12 lda #$18
+   376 00,27A5 A2 C0		 ldx #$C0
+   377 00,27A7 A0 AE		 ldy #$AE
+   378 00,27A9 8D 16 D0		 sta color0
+   379 00,27AC 8E 0C D0		 stx sizem
+   380 00,27AF 8C 07 D0		 sty hposm3
+   381 00,27B2 A9 00		 lda #$00
+   382 00,27B4 8D 1E D0		 sta $d01e
+   383 00,27B7 A2 68		c54 ldx #$68
+   384 00,27B9 8E 16 D0		 stx $D016
+   385 00,27BC A0 18		c55 ldy #$18
+   386 00,27BE 8D 1E D0		 sta $D01E
+   387 00,27C1 A9 00		 lda #$00
+   388 00,27C3 8C 16 D0		 sty $D016
+   389 00,27C6 A9 00		 lda #$00
+   390 00,27C8 8D 1E D0		 sta $D01E
+   391 00,27CB 8E 16 D0		 stx $D016
+   392 00,27CE EA		 nop
+   393 00,27CF A9 00		 lda #$00
+   394 00,27D1 8D 1E D0		 sta $D01E
+   395
+   396 				; line=76
+   397
+   398 00,27D4 A9 18		c13 lda #$18
+   399 00,27D6 A2 04		 ldx #$04
+   400 00,27D8 A0 75		 ldy #$75
+   401 00,27DA 8D 16 D0		 sta color0
+   402 00,27DD 8E 1B D0		 stx gtictl
+   403 00,27E0 8C 01 D0		 sty hposp1
+   404 00,27E3 A9 00		 lda #$00
+   405 00,27E5 8D 1E D0		 sta $d01e
+   406 00,27E8 A2 68		c56 ldx #$68
+   407 00,27EA 8E 16 D0		 stx $D016
+   408 00,27ED A0 18		c57 ldy #$18
+   409 00,27EF 8D 1E D0		 sta $D01E
+   410 00,27F2 A9 00		 lda #$00
+   411 00,27F4 8C 16 D0		 sty $D016
+   412 00,27F7 A9 00		 lda #$00
+   413 00,27F9 8D 1E D0		 sta $D01E
+   414 00,27FC 8E 16 D0		 stx $D016
+   415 00,27FF EA		 nop
+   416 00,2800 A9 00		 lda #$00
+   417 00,2802 8D 1E D0		 sta $D01E
+   418
+   419 				; line=77
+   420
+   421 00,2805 A9 18		c14 lda #$18
+   422 00,2807 A2 1A		c15 ldx #$1A
+   423 00,2809 A0 00		 ldy #$00
+   424 00,280B 8D 16 D0		 sta color0
+   425 00,280E 8E 18 D0		 stx color2
+   426 00,2811 8C 1E D0		 sty $d01e
+   427 00,2814 A9 00		 lda #$00
+   428 00,2816 8D 1E D0		 sta $d01e
+   429 00,2819 A2 68		c58 ldx #$68
+   430 00,281B 8E 16 D0		 stx $D016
+   431 00,281E A0 18		c59 ldy #$18
+   432 00,2820 8D 1E D0		 sta $D01E
+   433 00,2823 A9 00		 lda #$00
+   434 00,2825 8C 16 D0		 sty $D016
+   435 00,2828 A9 00		 lda #$00
+   436 00,282A 8D 1E D0		 sta $D01E
+   437 00,282D 8E 16 D0		 stx $D016
+   438 00,2830 EA		 nop
+   439 00,2831 A9 00		 lda #$00
+   440 00,2833 8D 1E D0		 sta $D01E
+   441
+   442 				; line=78
+   443
+   444 00,2836 A9 18		c16 lda #$18
+   445 00,2838 A2 02		 ldx #$02
+   446 00,283A A0 00		 ldy #$00
+   447 00,283C 8D 16 D0		 sta color0
+   448 00,283F 8E 1B D0		 stx gtictl
+   449 00,2842 8C 1E D0		 sty $d01e
+   450 00,2845 A9 00		 lda #$00
+   451 00,2847 8D 1E D0		 sta $d01e
+   452 00,284A A2 68		c60 ldx #$68
+   453 00,284C 8E 16 D0		 stx $D016
+   454 00,284F A0 18		c61 ldy #$18
+   455 00,2851 8D 1E D0		 sta $D01E
+   456 00,2854 A9 00		 lda #$00
+   457 00,2856 8C 16 D0		 sty $D016
+   458 00,2859 A9 00		 lda #$00
+   459 00,285B 8D 1E D0		 sta $D01E
+   460 00,285E 8E 16 D0		 stx $D016
+   461 00,2861 EA		 nop
+   462 00,2862 A9 00		 lda #$00
+   463 00,2864 8D 1E D0		 sta $D01E
+   464
+   465 				; line=79
+   466
+   467 00,2867 A9 18		c17 lda #$18
+   468 00,2869 A2 03		 ldx #$03
+   469 00,286B A0 B0		 ldy #$B0
+   470 00,286D 8D 16 D0		 sta color0
+   471 00,2870 8E 0A D0		 stx sizep2
+   472 00,2873 8C 02 D0		 sty hposp2
+   473 00,2876 A9 68		c18 lda #$68
+   474 00,2878 8D 14 D0		 sta colpm2
+   475 00,287B A2 68		c62 ldx #$68
+   476 00,287D 8E 16 D0		 stx $D016
+   477 00,2880 A0 18		c63 ldy #$18
+   478 00,2882 8D 1E D0		 sta $D01E
+   479 00,2885 A9 00		 lda #$00
+   480 00,2887 8C 16 D0		 sty $D016
+   481 00,288A A9 00		 lda #$00
+   482 00,288C 8D 1E D0		 sta $D01E
+   483 00,288F 8E 16 D0		 stx $D016
+   484 00,2892 EA		 nop
+   485 00,2893 A9 00		 lda #$00
+   486 00,2895 8D 1E D0		 sta $D01E
+   487
+   488 				; line=80
+   489
+   490 00,2898 A9 18		c19 lda #$18
+   491 00,289A A2 6C		h5 ldx #$6C
+   492 00,289C A0 00		 ldy #$00
+   493 00,289E 8D 16 D0		 sta color0
+   494 00,28A1 8E 00 D0		 stx hposp0
+   495 00,28A4 8C 1E D0		 sty $d01e
+   496 00,28A7 A9 00		 lda #$00
+   497 00,28A9 8D 1E D0		 sta $d01e
+   498 00,28AC C5 00		 cmp byt2
+   499
+   500 				; line=81
+   501
+   502 00,28AE A9 18		c20 lda #$18
+   503 00,28B0 A2 89		 ldx #$89
+   504 00,28B2 A0 00		 ldy #$00
+   505 00,28B4 8D 16 D0		 sta color0
+   506 00,28B7 8E 05 D0		 stx hposm1
+   507 00,28BA 8C 1E D0		 sty $d01e
+   508 00,28BD A9 00		 lda #$00
+   509 00,28BF 8D 1E D0		 sta $d01e
+   510 00,28C2 A2 68		c64 ldx #$68
+   511 00,28C4 8E 16 D0		 stx $D016
+   512 00,28C7 A0 18		c65 ldy #$18
+   513 00,28C9 8D 1E D0		 sta $D01E
+   514 00,28CC A9 00		 lda #$00
+   515 00,28CE 8C 16 D0		 sty $D016
+   516 00,28D1 A9 00		 lda #$00
+   517 00,28D3 8D 1E D0		 sta $D01E
+   518 00,28D6 8E 16 D0		 stx $D016
+   519 00,28D9 EA		 nop
+   520 00,28DA A9 00		 lda #$00
+   521 00,28DC 8D 1E D0		 sta $D01E
+   522
+   523 				; line=82
+   524
+   525 00,28DF A9 18		c21 lda #$18
+   526 00,28E1 A2 80		 ldx #$80
+   527 00,28E3 A0 00		 ldy #$00
+   528 00,28E5 8D 16 D0		 sta color0
+   529 00,28E8 8E 05 D0		 stx hposm1
+   530 00,28EB 8C 1E D0		 sty $d01e
+   531 00,28EE A9 00		 lda #$00
+   532 00,28F0 8D 1E D0		 sta $d01e
+   533 00,28F3 A2 68		c66 ldx #$68
+   534 00,28F5 8E 16 D0		 stx $D016
+   535 00,28F8 A0 18		c67 ldy #$18
+   536 00,28FA 8D 1E D0		 sta $D01E
+   537 00,28FD A9 00		 lda #$00
+   538 00,28FF 8C 16 D0		 sty $D016
+   539 00,2902 A9 00		 lda #$00
+   540 00,2904 8D 1E D0		 sta $D01E
+   541 00,2907 8E 16 D0		 stx $D016
+   542 00,290A EA		 nop
+   543 00,290B A9 00		 lda #$00
+   544 00,290D 8D 1E D0		 sta $D01E
+   545
+   546 				; line=83
+   547
+   548 00,2910 A9 18		c22 lda #$18
+   549 00,2912 A2 8A		 ldx #$8A
+   550 00,2914 A0 00		 ldy #$00
+   551 00,2916 8D 16 D0		 sta color0
+   552 00,2919 8E 05 D0		 stx hposm1
+   553 00,291C 8C 1E D0		 sty $d01e
+   554 00,291F A9 00		 lda #$00
+   555 00,2921 8D 1E D0		 sta $d01e
+   556 00,2924 A2 68		c68 ldx #$68
+   557 00,2926 8E 16 D0		 stx $D016
+   558 00,2929 A0 18		c69 ldy #$18
+   559 00,292B 8D 1E D0		 sta $D01E
+   560 00,292E A9 00		 lda #$00
+   561 00,2930 8C 16 D0		 sty $D016
+   562 00,2933 A9 00		 lda #$00
+   563 00,2935 8D 1E D0		 sta $D01E
+   564 00,2938 8E 16 D0		 stx $D016
+   565 00,293B EA		 nop
+   566 00,293C A9 00		 lda #$00
+   567 00,293E 8D 1E D0		 sta $D01E
+   568
+   569 				; line=84
+   570
+   571 00,2941 A9 18		c23 lda #$18
+   572 00,2943 A2 AC		 ldx #$AC
+   573 00,2945 A0 00		 ldy #$00
+   574 00,2947 8D 16 D0		 sta color0
+   575 00,294A 8E 07 D0		 stx hposm3
+   576 00,294D 8C 1E D0		 sty $d01e
+   577 00,2950 A9 00		 lda #$00
+   578 00,2952 8D 1E D0		 sta $d01e
+   579 00,2955 A2 68		c70 ldx #$68
+   580 00,2957 8E 16 D0		 stx $D016
+   581 00,295A A0 18		c71 ldy #$18
+   582 00,295C 8D 1E D0		 sta $D01E
+   583 00,295F A9 00		 lda #$00
+   584 00,2961 8C 16 D0		 sty $D016
+   585 00,2964 A9 00		 lda #$00
+   586 00,2966 8D 1E D0		 sta $D01E
+   587 00,2969 8E 16 D0		 stx $D016
+   588 00,296C EA		 nop
+   589 00,296D A9 00		 lda #$00
+   590 00,296F 8D 1E D0		 sta $D01E
+   591
+   592 				; line=85
+   593
+   594 00,2972 A9 18		c24 lda #$18
+   595 00,2974 A2 00		 ldx #$00
+   596 00,2976 A0 00		 ldy #$00
+   597 00,2978 8D 16 D0		 sta color0
+   598 00,297B 8E 1E D0		 stx $d01e
+   599 00,297E 8C 1E D0		 sty $d01e
+   600 00,2981 A9 00		 lda #$00
+   601 00,2983 8D 1E D0		 sta $d01e
+   602 00,2986 A2 68		c72 ldx #$68
+   603 00,2988 8E 16 D0		 stx $D016
+   604 00,298B A0 18		c73 ldy #$18
+   605 00,298D 8D 1E D0		 sta $D01E
+   606 00,2990 A9 00		 lda #$00
+   607 00,2992 8C 16 D0		 sty $D016
+   608 00,2995 A9 00		 lda #$00
+   609 00,2997 8D 1E D0		 sta $D01E
+   610 00,299A 8E 16 D0		 stx $D016
+   611 00,299D EA		 nop
+   612 00,299E A9 00		 lda #$00
+   613 00,29A0 8D 1E D0		 sta $D01E
+   614
+   615 				; line=86
+   616
+   617 00,29A3 A9 18		c25 lda #$18
+   618 00,29A5 A2 00		 ldx #$00
+   619 00,29A7 A0 00		 ldy #$00
+   620 00,29A9 8D 16 D0		 sta color0
+   621 00,29AC 8E 1E D0		 stx $d01e
+   622 00,29AF 8C 1E D0		 sty $d01e
+   623 00,29B2 A9 00		 lda #$00
+   624 00,29B4 8D 1E D0		 sta $d01e
+   625 00,29B7 A2 68		c74 ldx #$68
+   626 00,29B9 8E 16 D0		 stx $D016
+   627 00,29BC A0 18		c75 ldy #$18
+   628 00,29BE 8D 1E D0		 sta $D01E
+   629 00,29C1 A9 00		 lda #$00
+   630 00,29C3 8C 16 D0		 sty $D016
+   631 00,29C6 A9 00		 lda #$00
+   632 00,29C8 8D 1E D0		 sta $D01E
+   633 00,29CB 8E 16 D0		 stx $D016
+   634 00,29CE EA		 nop
+   635 00,29CF A9 00		 lda #$00
+   636 00,29D1 8D 1E D0		 sta $D01E
+   637
+   638 				; line=87
+   639
+   640 00,29D4 A9 18		c26 lda #$18
+   641 00,29D6 A2 01		 ldx #$01
+   642 00,29D8 A0 80		 ldy #$80
+   643 00,29DA 8D 16 D0		 sta color0
+   644 00,29DD 8E 09 D0		 stx sizep1
+   645 00,29E0 8C 05 D0		 sty hposm1
+   646 00,29E3 A9 00		 lda #$00
+   647 00,29E5 8D 1E D0		 sta $d01e
+   648 00,29E8 A2 68		c76 ldx #$68
+   649 00,29EA 8E 16 D0		 stx $D016
+   650 00,29ED A0 18		c77 ldy #$18
+   651 00,29EF 8D 1E D0		 sta $D01E
+   652 00,29F2 A9 00		 lda #$00
+   653 00,29F4 8C 16 D0		 sty $D016
+   654 00,29F7 A9 00		 lda #$00
+   655 00,29F9 8D 1E D0		 sta $D01E
+   656 00,29FC 8E 16 D0		 stx $D016
+   657 00,29FF EA		 nop
+   658 00,2A00 A9 00		 lda #$00
+   659 00,2A02 8D 1E D0		 sta $D01E
+   660
+   661 				; line=88
+   662
+   663 00,2A05 A9 18		c27 lda #$18
+   664 00,2A07 A2 00		 ldx #$00
+   665 00,2A09 A0 6D		h6 ldy #$6D
+   666 00,2A0B 8D 16 D0		 sta color0
+   667 00,2A0E 8E 09 D0		 stx sizep1
+   668 00,2A11 8C 00 D0		 sty hposp0
+   669 00,2A14 A9 8A		 lda #$8A
+   670 00,2A16 8D 05 D0		 sta hposm1
+   671 00,2A19 C5 00		 cmp byt2
+   672
+   673 				; line=89
+   674
+   675 00,2A1B A9 18		c28 lda #$18
+   676 00,2A1D A2 80		 ldx #$80
+   677 00,2A1F A0 00		 ldy #$00
+   678 00,2A21 8D 16 D0		 sta color0
+   679 00,2A24 8E 05 D0		 stx hposm1
+   680 00,2A27 8C 1E D0		 sty $d01e
+   681 00,2A2A A9 00		 lda #$00
+   682 00,2A2C 8D 1E D0		 sta $d01e
+   683 00,2A2F A2 68		c78 ldx #$68
+   684 00,2A31 8E 16 D0		 stx $D016
+   685 00,2A34 A0 18		c79 ldy #$18
+   686 00,2A36 8D 1E D0		 sta $D01E
+   687 00,2A39 A9 00		 lda #$00
+   688 00,2A3B 8C 16 D0		 sty $D016
+   689 00,2A3E A9 00		 lda #$00
+   690 00,2A40 8D 1E D0		 sta $D01E
+   691 00,2A43 8E 16 D0		 stx $D016
+   692 00,2A46 EA		 nop
+   693 00,2A47 A9 00		 lda #$00
+   694 00,2A49 8D 1E D0		 sta $D01E
+   695
+   696 				; line=90
+   697
+   698 00,2A4C A9 18		c29 lda #$18
+   699 00,2A4E A2 77		 ldx #$77
+   700 00,2A50 A0 89		 ldy #$89
+   701 00,2A52 8D 16 D0		 sta color0
+   702 00,2A55 8E 01 D0		 stx hposp1
+   703 00,2A58 8C 05 D0		 sty hposm1
+   704 00,2A5B A9 00		 lda #$00
+   705 00,2A5D 8D 1E D0		 sta $d01e
+   706 00,2A60 A2 68		c80 ldx #$68
+   707 00,2A62 8E 16 D0		 stx $D016
+   708 00,2A65 A0 18		c81 ldy #$18
+   709 00,2A67 8D 1E D0		 sta $D01E
+   710 00,2A6A A9 00		 lda #$00
+   711 00,2A6C 8C 16 D0		 sty $D016
+   712 00,2A6F A9 00		 lda #$00
+   713 00,2A71 8D 1E D0		 sta $D01E
+   714 00,2A74 8E 16 D0		 stx $D016
+   715 00,2A77 EA		 nop
+   716 00,2A78 A9 00		 lda #$00
+   717 00,2A7A 8D 1E D0		 sta $D01E
+   718
+   719 				; line=91
+   720
+   721 00,2A7D A9 18		c30 lda #$18
+   722 00,2A7F A2 00		 ldx #$00
+   723 00,2A81 A0 00		 ldy #$00
+   724 00,2A83 8D 16 D0		 sta color0
+   725 00,2A86 8E 1E D0		 stx $d01e
+   726 00,2A89 8C 1E D0		 sty $d01e
+   727 00,2A8C A9 00		 lda #$00
+   728 00,2A8E 8D 1E D0		 sta $d01e
+   729 00,2A91 A2 68		c82 ldx #$68
+   730 00,2A93 8E 16 D0		 stx $D016
+   731 00,2A96 A0 18		c83 ldy #$18
+   732 00,2A98 8D 1E D0		 sta $D01E
+   733 00,2A9B A9 00		 lda #$00
+   734 00,2A9D 8C 16 D0		 sty $D016
+   735 00,2AA0 A9 00		 lda #$00
+   736 00,2AA2 8D 1E D0		 sta $D01E
+   737 00,2AA5 8E 16 D0		 stx $D016
+   738 00,2AA8 EA		 nop
+   739 00,2AA9 A9 00		 lda #$00
+   740 00,2AAB 8D 1E D0		 sta $D01E
+   741
+   742 				; line=92
+   743
+   744 00,2AAE A9 18		c31 lda #$18
+   745 00,2AB0 A2 80		 ldx #$80
+   746 00,2AB2 A0 00		 ldy #$00
+   747 00,2AB4 8D 16 D0		 sta color0
+   748 00,2AB7 8E 05 D0		 stx hposm1
+   749 00,2ABA 8C 1E D0		 sty $d01e
+   750 00,2ABD A9 00		 lda #$00
+   751 00,2ABF 8D 1E D0		 sta $d01e
+   752 00,2AC2 A2 68		c84 ldx #$68
+   753 00,2AC4 8E 16 D0		 stx $D016
+   754 00,2AC7 A0 18		c85 ldy #$18
+   755 00,2AC9 8D 1E D0		 sta $D01E
+   756 00,2ACC A9 00		 lda #$00
+   757 00,2ACE 8C 16 D0		 sty $D016
+   758 00,2AD1 A9 00		 lda #$00
+   759 00,2AD3 8D 1E D0		 sta $D01E
+   760 00,2AD6 8E 16 D0		 stx $D016
+   761 00,2AD9 EA		 nop
+   762 00,2ADA A9 00		 lda #$00
+   763 00,2ADC 8D 1E D0		 sta $D01E
+   764
+   765 				; line=93
+   766
+   767 00,2ADF A9 18		c32 lda #$18
+   768 00,2AE1 A2 78		 ldx #$78
+   769 00,2AE3 A0 87		 ldy #$87
+   770 00,2AE5 8D 16 D0		 sta color0
+   771 00,2AE8 8E 01 D0		 stx hposp1
+   772 00,2AEB 8C 05 D0		 sty hposm1
+   773 00,2AEE A9 00		 lda #$00
+   774 00,2AF0 8D 1E D0		 sta $d01e
+   775 00,2AF3 A0 18		c86 ldy #$18
+   776 00,2AF5 8C 16 D0		 sty $D016
+   777 00,2AF8 EA EA		 :2 nop
+   778 00,2AFA A2 68		c87 ldx #$68
+   779 00,2AFC A9 00		 lda #$00
+   780 00,2AFE 8D 1E D0		 sta $D01E
+   781 00,2B01 A9 00		 lda #$00
+   782 00,2B03 8D 1E D0		 sta $D01E
+   783 00,2B06 8E 16 D0		 stx $D016
+   784 00,2B09 EA		 nop
+   785 00,2B0A A9 00		 lda #$00
+   786 00,2B0C 8D 1E D0		 sta $D01E
+   787
+   788 				; line=94
+   789
+   790 00,2B0F A9 80		 lda #$80
+   791 00,2B11 A2 00		 ldx #$00
+   792 00,2B13 A0 00		 ldy #$00
+   793 00,2B15 8D 05 D0		 sta hposm1
+   794 00,2B18 8E 1E D0		 stx $d01e
+   795 00,2B1B 8C 1E D0		 sty $d01e
+   796 00,2B1E A9 00		 lda #$00
+   797 00,2B20 8D 1E D0		 sta $d01e
+   798 00,2B23 A0 18		c88 ldy #$18
+   799 00,2B25 8C 16 D0		 sty $D016
+   800 00,2B28 EA EA		 :2 nop
+   801 00,2B2A A2 68		c89 ldx #$68
+   802 00,2B2C A9 00		 lda #$00
+   803 00,2B2E 8D 1E D0		 sta $D01E
+   804 00,2B31 A9 00		 lda #$00
+   805 00,2B33 8D 1E D0		 sta $D01E
+   806 00,2B36 8E 16 D0		 stx $D016
+   807 00,2B39 EA		 nop
+   808 00,2B3A A9 00		 lda #$00
+   809 00,2B3C 8D 1E D0		 sta $D01E
+   810
+   811 				; line=95
+   812
+   813 00,2B3F A9 87		 lda #$87
+   814 00,2B41 A2 00		 ldx #$00
+   815 00,2B43 A0 00		 ldy #$00
+   816 00,2B45 8D 05 D0		 sta hposm1
+   817 00,2B48 8E 1E D0		 stx $d01e
+   818 00,2B4B 8C 1E D0		 sty $d01e
+   819 00,2B4E A9 00		 lda #$00
+   820 00,2B50 8D 1E D0		 sta $d01e
+   821 00,2B53 A0 18		c90 ldy #$18
+   822 00,2B55 8C 16 D0		 sty $D016
+   823 00,2B58 EA EA		 :2 nop
+   824 00,2B5A A2 68		c91 ldx #$68
+   825 00,2B5C A9 00		 lda #$00
+   826 00,2B5E 8D 1E D0		 sta $D01E
+   827 00,2B61 A9 00		 lda #$00
+   828 00,2B63 8D 1E D0		 sta $D01E
+   829 00,2B66 8E 16 D0		 stx $D016
+   830 00,2B69 EA		 nop
+   831 00,2B6A A9 00		 lda #$00
+   832 00,2B6C 8D 1E D0		 sta $D01E
+   833
+   834 				; line=96
+   835
+   836 00,2B6F A9 1C		 lda >fnt+$400*$03
+   837 00,2B71 A2 18		c33 ldx #$18
+   838 00,2B73 A0 70		h7 ldy #$70
+   839 00,2B75 8D 09 D4		 sta chbase
+   840 00,2B78 8E 16 D0		 stx color0
+   841 00,2B7B 8C 00 D0		 sty hposp0
+   842 00,2B7E A9 00		 lda #$00
+   843 00,2B80 8D 1E D0		 sta $d01e
+   844 00,2B83 C5 00		 cmp byt2
+   845
+   846 				; line=97
+   847
+   848 00,2B85 A9 18		c34 lda #$18
+   849 00,2B87 A2 80		 ldx #$80
+   850 00,2B89 A0 00		 ldy #$00
+   851 00,2B8B 8D 16 D0		 sta color0
+   852 00,2B8E 8E 05 D0		 stx hposm1
+   853 00,2B91 8C 1E D0		 sty $d01e
+   854 00,2B94 A9 00		 lda #$00
+   855 00,2B96 8D 1E D0		 sta $d01e
+   856 00,2B99 A0 18		c92 ldy #$18
+   857 00,2B9B 8C 16 D0		 sty $D016
+   858 00,2B9E EA EA		 :2 nop
+   859 00,2BA0 A2 68		c93 ldx #$68
+   860 00,2BA2 A9 00		 lda #$00
+   861 00,2BA4 8D 1E D0		 sta $D01E
+   862 00,2BA7 A9 00		 lda #$00
+   863 00,2BA9 8D 1E D0		 sta $D01E
+   864 00,2BAC 8E 16 D0		 stx $D016
+   865 00,2BAF EA		 nop
+   866 00,2BB0 A9 00		 lda #$00
+   867 00,2BB2 8D 1E D0		 sta $D01E
+   868
+   869 				; line=98
+   870
+   871 00,2BB5 A9 18		c35 lda #$18
+   872 00,2BB7 A2 7A		 ldx #$7A
+   873 00,2BB9 A0 86		 ldy #$86
+   874 00,2BBB 8D 16 D0		 sta color0
+   875 00,2BBE 8E 01 D0		 stx hposp1
+   876 00,2BC1 8C 05 D0		 sty hposm1
+   877 00,2BC4 A9 00		 lda #$00
+   878 00,2BC6 8D 1E D0		 sta $d01e
+   879 00,2BC9 A0 18		c94 ldy #$18
+   880 00,2BCB 8C 16 D0		 sty $D016
+   881 00,2BCE EA EA		 :2 nop
+   882 00,2BD0 A2 68		c95 ldx #$68
+   883 00,2BD2 A9 00		 lda #$00
+   884 00,2BD4 8D 1E D0		 sta $D01E
+   885 00,2BD7 A9 00		 lda #$00
+   886 00,2BD9 8D 1E D0		 sta $D01E
+   887 00,2BDC 8E 16 D0		 stx $D016
+   888 00,2BDF EA		 nop
+   889 00,2BE0 A9 00		 lda #$00
+   890 00,2BE2 8D 1E D0		 sta $D01E
+   891
+   892 				; line=99
+   893
+   894 00,2BE5 A9 18		c36 lda #$18
+   895 00,2BE7 A2 00		 ldx #$00
+   896 00,2BE9 A0 00		 ldy #$00
+   897 00,2BEB 8D 16 D0		 sta color0
+   898 00,2BEE 8E 1E D0		 stx $d01e
+   899 00,2BF1 8C 1E D0		 sty $d01e
+   900 00,2BF4 A9 00		 lda #$00
+   901 00,2BF6 8D 1E D0		 sta $d01e
+   902 00,2BF9 A0 18		c96 ldy #$18
+   903 00,2BFB 8C 16 D0		 sty $D016
+   904 00,2BFE EA EA		 :2 nop
+   905 00,2C00 A2 68		c97 ldx #$68
+   906 00,2C02 A9 00		 lda #$00
+   907 00,2C04 8D 1E D0		 sta $D01E
+   908 00,2C07 A9 00		 lda #$00
+   909 00,2C09 8D 1E D0		 sta $D01E
+   910 00,2C0C 8E 16 D0		 stx $D016
+   911 00,2C0F EA		 nop
+   912 00,2C10 A9 00		 lda #$00
+   913 00,2C12 8D 1E D0		 sta $D01E
+   914
+   915 				; line=100
+   916
+   917 00,2C15 A9 18		c37 lda #$18
+   918 00,2C17 A2 85		 ldx #$85
+   919 00,2C19 A0 00		 ldy #$00
+   920 00,2C1B 8D 16 D0		 sta color0
+   921 00,2C1E 8E 05 D0		 stx hposm1
+   922 00,2C21 8C 1E D0		 sty $d01e
+   923 00,2C24 A9 00		 lda #$00
+   924 00,2C26 8D 1E D0		 sta $d01e
+   925 00,2C29 A0 18		c98 ldy #$18
+   926 00,2C2B 8C 16 D0		 sty $D016
+   927 00,2C2E EA EA		 :2 nop
+   928 00,2C30 A2 68		c99 ldx #$68
+   929 00,2C32 A9 00		 lda #$00
+   930 00,2C34 8D 1E D0		 sta $D01E
+   931 00,2C37 A9 00		 lda #$00
+   932 00,2C39 8D 1E D0		 sta $D01E
+   933 00,2C3C 8E 16 D0		 stx $D016
+   934 00,2C3F EA		 nop
+   935 00,2C40 A9 00		 lda #$00
+   936 00,2C42 8D 1E D0		 sta $D01E
+   937
+   938 				; line=101
+   939
+   940 00,2C45 A9 18		c38 lda #$18
+   941 00,2C47 A2 80		 ldx #$80
+   942 00,2C49 A0 00		 ldy #$00
+   943 00,2C4B 8D 16 D0		 sta color0
+   944 00,2C4E 8E 05 D0		 stx hposm1
+   945 00,2C51 8C 1E D0		 sty $d01e
+   946 00,2C54 A9 00		 lda #$00
+   947 00,2C56 8D 1E D0		 sta $d01e
+   948 00,2C59 A0 18		c100 ldy #$18
+   949 00,2C5B 8C 16 D0		 sty $D016
+   950 00,2C5E EA EA		 :2 nop
+   951 00,2C60 A2 68		c101 ldx #$68
+   952 00,2C62 A9 00		 lda #$00
+   953 00,2C64 8D 1E D0		 sta $D01E
+   954 00,2C67 A9 00		 lda #$00
+   955 00,2C69 8D 1E D0		 sta $D01E
+   956 00,2C6C 8E 16 D0		 stx $D016
+   957 00,2C6F EA		 nop
+   958 00,2C70 A9 00		 lda #$00
+   959 00,2C72 8D 1E D0		 sta $D01E
+   960
+   961 				; line=102
+   962
+   963 00,2C75 A9 18		c39 lda #$18
+   964 00,2C77 A2 00		 ldx #$00
+   965 00,2C79 A0 00		 ldy #$00
+   966 00,2C7B 8D 16 D0		 sta color0
+   967 00,2C7E 8E 1E D0		 stx $d01e
+   968 00,2C81 8C 1E D0		 sty $d01e
+   969 00,2C84 A9 00		 lda #$00
+   970 00,2C86 8D 1E D0		 sta $d01e
+   971 00,2C89 A0 18		c102 ldy #$18
+   972 00,2C8B 8C 16 D0		 sty $D016
+   973 00,2C8E EA EA		 :2 nop
+   974 00,2C90 A2 68		c103 ldx #$68
+   975 00,2C92 A9 00		 lda #$00
+   976 00,2C94 8D 1E D0		 sta $D01E
+   977 00,2C97 A9 00		 lda #$00
+   978 00,2C99 8D 1E D0		 sta $D01E
+   979 00,2C9C 8E 16 D0		 stx $D016
+   980 00,2C9F EA		 nop
+   981 00,2CA0 A9 00		 lda #$00
+   982 00,2CA2 8D 1E D0		 sta $D01E
+   983
+   984 				; line=103
+   985
+   986 00,2CA5 A9 18		c40 lda #$18
+   987 00,2CA7 A2 7C		 ldx #$7C
+   988 00,2CA9 A0 83		 ldy #$83
+   989 00,2CAB 8D 16 D0		 sta color0
+   990 00,2CAE 8E 01 D0		 stx hposp1
+   991 00,2CB1 8C 05 D0		 sty hposm1
+   992 00,2CB4 A9 00		 lda #$00
+   993 00,2CB6 8D 1E D0		 sta $d01e
+   994 00,2CB9 A0 18		c104 ldy #$18
+   995 00,2CBB 8C 16 D0		 sty $D016
+   996 00,2CBE EA EA		 :2 nop
+   997 00,2CC0 A2 68		c105 ldx #$68
+   998 00,2CC2 A9 00		 lda #$00
+   999 00,2CC4 8D 1E D0		 sta $D01E
+  1000 00,2CC7 A9 00		 lda #$00
+  1001 00,2CC9 8D 1E D0		 sta $D01E
+  1002 00,2CCC 8E 16 D0		 stx $D016
+  1003 00,2CCF EA		 nop
+  1004 00,2CD0 A9 00		 lda #$00
+  1005 00,2CD2 8D 1E D0		 sta $D01E
+  1006
+  1007 				; line=104
+  1008
+  1009 00,2CD5 A9 18		c41 lda #$18
+  1010 00,2CD7 A2 74		h8 ldx #$74
+  1011 00,2CD9 A0 00		 ldy #$00
+  1012 00,2CDB 8D 16 D0		 sta color0
+  1013 00,2CDE 8E 00 D0		 stx hposp0
+  1014 00,2CE1 8C 1E D0		 sty $d01e
+  1015 00,2CE4 A9 00		 lda #$00
+  1016 00,2CE6 8D 1E D0		 sta $d01e
+  1017 00,2CE9 C5 00		 cmp byt2
+  1018
+  1019 				; line=105
+  1020
+  1021 00,2CEB A9 18		c42 lda #$18
+  1022 00,2CED A2 00		 ldx #$00
+  1023 00,2CEF A0 00		 ldy #$00
+  1024 00,2CF1 8D 16 D0		 sta color0
+  1025 00,2CF4 8E 1E D0		 stx $d01e
+  1026 00,2CF7 8C 1E D0		 sty $d01e
+  1027 00,2CFA A9 00		 lda #$00
+  1028 00,2CFC 8D 1E D0		 sta $d01e
+  1029 00,2CFF 20 F0 2D		 jsr wait36cycle
+  1030
+  1031 				; line=106
+  1032
+  1033 00,2D02 A9 18		c43 lda #$18
+  1034 00,2D04 A2 7E		 ldx #$7E
+  1035 00,2D06 A0 0C		c44 ldy #$0C
+  1036 00,2D08 8D 16 D0		 sta color0
+  1037 00,2D0B 8E 01 D0		 stx hposp1
+  1038 00,2D0E 8C 15 D0		 sty colpm3
+  1039 00,2D11 A9 00		 lda #$00
+  1040 00,2D13 8D 1E D0		 sta $d01e
+  1041 00,2D16 20 F0 2D		 jsr wait36cycle
+  1042
+  1043 				; line=107
+  1044
+  1045 00,2D19 A9 0C		c45 lda #$0C
+  1046 00,2D1B 8D 14 D0		 sta colpm2
+  1047
+  1048 				 DLINEW dli112
+Macro: DLINEW [Source: D:\!Atari\getris2\grat\grat.mac]
+     2 00,2D1E A9 2B		  lda <DLI112
+     3 00,2D20 8D 03 2E		  sta DLIV+1
+     4 00,2D23 A9 2D		  lda >DLI112
+     5 00,2D25 8D 04 2E		  sta DLIV+1+1
+     7 00,2D28 4C A7 2E		 jmp NmiQuit
+     9 = 00,2D2B		 ?old_dli = *
+Source: D:\!Atari\getris2\grat_lib.asm
+  1049
+  1050
+  1051
+  1052
+  1053 00,2D2B			dli112
+  1054 				; line=112
+  1055 00,2D2B A9 72		h9 lda #$72
+  1056 00,2D2D A2 00		 ldx #$00
+  1057 00,2D2F A0 00		 ldy #$00
+  1058 00,2D31 8D 0A D4		 sta $d40a
+  1059 00,2D34 8D 00 D0		 sta hposp0
+  1060 00,2D37 8E 1E D0		 stx $d01e
+  1061 00,2D3A 8C 1E D0		 sty $d01e
+  1062 00,2D3D A9 00		 lda #$00
+  1063 00,2D3F 8D 1E D0		 sta $d01e
+  1064 				; cmp byt2
+  1065
+  1066 				; line=113
+  1067
+  1068 00,2D42 20 E6 2D		 jsr wait60cycle
+  1069
+  1070 				; line=114
+  1071
+  1072 00,2D45 20 E6 2D		 jsr wait60cycle
+  1073
+  1074 				; line=115
+  1075
+  1076 00,2D48 A9 7C		 lda #$7C
+  1077 00,2D4A A2 00		 ldx #$00
+  1078 00,2D4C A0 00		 ldy #$00
+  1079 00,2D4E 8D 01 D0		 sta hposp1
+  1080 00,2D51 8E 1E D0		 stx $d01e
+  1081 00,2D54 8C 1E D0		 sty $d01e
+  1082 00,2D57 A9 00		 lda #$00
+  1083 00,2D59 8D 1E D0		 sta $d01e
+  1084 00,2D5C 20 F0 2D		 jsr wait36cycle
+  1085
+  1086 				; line=116
+  1087
+  1088 00,2D5F 20 E6 2D		 jsr wait60cycle
+  1089
+  1090 				; line=117
+  1091
+  1092 00,2D62 A9 7B		 lda #$7B
+  1093 00,2D64 A2 00		 ldx #$00
+  1094 00,2D66 A0 00		 ldy #$00
+  1095 00,2D68 8D 01 D0		 sta hposp1
+  1096 00,2D6B 8E 1E D0		 stx $d01e
+  1097 00,2D6E 8C 1E D0		 sty $d01e
+  1098 00,2D71 A9 00		 lda #$00
+  1099 00,2D73 8D 1E D0		 sta $d01e
+  1100 00,2D76 20 F0 2D		 jsr wait36cycle
+  1101
+  1102 				; line=118
+  1103
+  1104 00,2D79 20 E6 2D		 jsr wait60cycle
+  1105
+  1106 				; line=119
+  1107
+  1108 00,2D7C A9 7A		 lda #$7A
+  1109 00,2D7E 8D 01 D0		 sta hposp1
+  1110
+  1111 				 DLINEW dli120
+Macro: DLINEW [Source: D:\!Atari\getris2\grat\grat.mac]
+     1 00,2D81 A9 89		 lda <DLI120
+     2 00,2D83 8D 03 2E		 sta DLIV+1
+Source: D:\!Atari\getris2\grat_lib.asm
+     7 00,2D86 4C A7 2E		 jmp NmiQuit
+     9 = 00,2D89		 ?old_dli = *
+Source: D:\!Atari\getris2\grat_lib.asm
+  1112
+  1113
+  1114
+  1115
+  1116 00,2D89			dli120
+  1117 				; line=120
+  1118 00,2D89 A9 10		 lda >fnt+$400*$00
+  1119 00,2D8B 8D 0A D4		 sta $d40a
+  1120 00,2D8E 8D 09 D4		 sta chbase
+  1121
+  1122 				; line=124
+  1123 00,2D91 A9 F0		 lda #$F0
+  1124 00,2D93 A2 68		 ldx #$68
+  1125 00,2D95 8D 0C D0		 sta sizem
+  1126 00,2D98 8E 06 D0		 stx hposm2
+  1127
+  1128 				; line=125
+  1129 00,2D9B A9 01		 lda #$01
+  1130 00,2D9D A2 00		 ldx #$00
+  1131 00,2D9F A0 90		 ldy #$90
+  1132 00,2DA1 8D 1B D0		 sta gtictl
+  1133 00,2DA4 8E 0A D0		 stx sizep2
+  1134 00,2DA7 8C 02 D0		 sty hposp2
+  1135 00,2DAA A9 0A		c46 lda #$0A
+  1136 00,2DAC 8D 14 D0		 sta colpm2
+  1137
+  1138 				; line=127
+  1139 00,2DAF A9 00		c47 lda #$00
+  1140 00,2DB1 A2 08		c48 ldx #$08
+  1141 00,2DB3 8D 17 D0		 sta color1
+  1142 00,2DB6 8E 18 D0		 stx color2
+  1143
+  1144 				 DLINEW dli128
+Macro: DLINEW [Source: D:\!Atari\getris2\grat\grat.mac]
+     1 00,2DB9 A9 C1		 lda <DLI128
+     2 00,2DBB 8D 03 2E		 sta DLIV+1
+Source: D:\!Atari\getris2\grat_lib.asm
+     7 00,2DBE 4C A7 2E		 jmp NmiQuit
+     9 = 00,2DC1		 ?old_dli = *
+Source: D:\!Atari\getris2\grat_lib.asm
+  1145
+  1146
+  1147
+  1148 00,2DC1			dli128
+  1149 				; line=128
+  1150 00,2DC1 A9 1C		 lda >fnt+$400*$03
+  1151 00,2DC3 A2 03		 ldx #$03
+  1152 00,2DC5 A0 70		 ldy #$70
+  1153 00,2DC7 8D 0A D4		 sta $d40a
+  1154 00,2DCA 8D 09 D4		 sta chbase
+  1155 00,2DCD 8E 09 D0		 stx sizep1
+  1156 00,2DD0 8C 01 D0		 sty hposp1
+  1157
+  1158 				 DLINEW dli144
+Macro: DLINEW [Source: D:\!Atari\getris2\grat\grat.mac]
+     1 00,2DD3 A9 DB		 lda <DLI144
+     2 00,2DD5 8D 03 2E		 sta DLIV+1
+Source: D:\!Atari\getris2\grat_lib.asm
+     7 00,2DD8 4C A7 2E		 jmp NmiQuit
+     9 = 00,2DDB		 ?old_dli = *
+Source: D:\!Atari\getris2\grat_lib.asm
+  1159
+  1160
+  1161
+  1162 00,2DDB			dli144
+  1163 				; line=144
+  1164 00,2DDB A9 20		 lda >fnt+$400*$04
+  1165 00,2DDD 8D 0A D4		 sta $d40a
+  1166 00,2DE0 8D 09 D4		 sta chbase
+  1167
+  1168 00,2DE3 4C A7 2E		 jmp nmiQuit
+  1169
+  1170
+  1171 				;--
+  1172
+  1173 00,2DE6			wait60cycle
+  1174 00,2DE6 20 F6 2D		 jsr _rts
+  1175 00,2DE9 CD 1E D0		 cmp byt3
+  1176 00,2DEC			wait44cycle
+  1177 00,2DEC EE 1E D0		 inc byt3
+  1178 00,2DEF EA		 nop
+  1179 00,2DF0			wait36cycle
+  1180 00,2DF0 20 F6 2D		 jsr _rts
+  1181 00,2DF3			wait24cycle
+  1182 00,2DF3 20 F6 2D		 jsr _rts
+  1183 00,2DF6 60		_rts rts
+  1184
+  1185
+  1186 00,2DF7			nmi
+  1187 00,2DF7 85 40		 sta regA
+  1188 00,2DF9 86 41		 stx regX
+  1189 00,2DFB 84 42		 sty regY
+  1190
+  1191 00,2DFD 2C 0F D4		 bit $d40f
+  1192 00,2E00 10 03		 bpl vbl
+  1193
+  1194 00,2E02 4C 6B 26		dliv jmp dli
+  1195
+  1196 00,2E05			vbl
+  1197 00,2E05 8D 0F D4		 sta $d40f
+  1198
+  1199 00,2E08 E6 14		 inc cloc
+  1200
+  1201 				 mwa #ant $d402
+Macro: MWA [Source: D:\!Atari\getris2\grat\grat.mac]
+     2 00,2E0A A9 70		  lda <ANT
+     3 00,2E0C 8D 02 D4		  sta $D402
+     4 00,2E0F A9 21		  lda >ANT
+     5 00,2E11 8D 03 D4		  sta $D402+1
+Source: D:\!Atari\getris2\grat_lib.asm
+  1202 				 mva #scr40 $d400
+Macro: MVA [Source: D:\!Atari\getris2\grat\grat.mac]
+     1 00,2E14 A9 3E		 lda #SCR40
+     2 00,2E16 8D 00 D4		 sta $D400
+Source: D:\!Atari\getris2\grat_lib.asm
+  1203
+  1204 00,2E19 A9 10		 lda >fnt+$400*$00
+  1205 00,2E1B 8D 09 D4		 sta chbase
+  1206 00,2E1E A9 00		c0 lda #$00
+  1207 00,2E20 8D 1A D0		 sta colbak
+  1208 00,2E23 A9 18		c1 lda #$18
+  1209 00,2E25 8D 16 D0		 sta color0
+  1210 00,2E28 A9 68		c2 lda #$68
+  1211 00,2E2A 8D 17 D0		 sta color1
+  1212 00,2E2D A9 4A		c3 lda #$4A
+  1213 00,2E2F 8D 18 D0		 sta color2
+  1214 00,2E32 A9 74		c4 lda #$74
+  1215 00,2E34 8D 19 D0		 sta color3
+  1216 00,2E37 A9 02		 lda #$02
+  1217 00,2E39 8D 1B D0		 sta gtictl
+  1218 00,2E3C A9 00		 lda #$00
+  1219 00,2E3E 8D 09 D0		 sta sizep1
+  1220 00,2E41 8D 0A D0		 sta sizep2
+  1221 00,2E44 8D 0B D0		 sta sizep3
+  1222 00,2E47 8D 0C D0		 sta sizem
+  1223 00,2E4A 8D 08 D0		 sta sizep0 
+  1224 00,2E4D A9 7D		 lda #$7D
+  1225 00,2E4F 8D 01 D0		 sta hposp1
+  1226 00,2E52 A9 7C		 lda #$7C
+  1227 00,2E54 8D 02 D0		 sta hposp2
+  1228 				; lda #$7C
+  1229 00,2E57 8D 03 D0		 sta hposp3
+  1230 00,2E5A A9 7B		 lda #$7B
+  1231 00,2E5C 8D 05 D0		 sta hposm1
+  1232 00,2E5F A9 84		 lda #$84
+  1233 00,2E61 8D 06 D0		 sta hposm2
+  1234 00,2E64 A9 7B		 lda #$7B
+  1235 00,2E66 8D 07 D0		 sta hposm3
+  1236 00,2E69 A9 0C		c5 lda #$0C
+  1237 00,2E6B 8D 13 D0		 sta colpm1
+  1238 00,2E6E A9 1A		c6 lda #$1A
+  1239 00,2E70 8D 14 D0		 sta colpm2
+  1240 00,2E73 A9 14		c7 lda #$14
+  1241 00,2E75 8D 15 D0		 sta colpm3
+  1242 00,2E78 A9 74		h0_ lda #$74
+  1243 00,2E7A 8D 00 D0		 sta hposp0
+  1244 00,2E7D A9 FF		c8 lda #$ff
+  1245 00,2E7F 8D 12 D0		 sta colpm0
+  1246
+  1247 				 mwa #dli dliv+1
+Macro: MWA [Source: D:\!Atari\getris2\grat\grat.mac]
+     2 00,2E82 A9 6B		  lda <DLI
+     3 00,2E84 8D 03 2E		  sta DLIV+1
+     4 00,2E87 A9 26		  lda >DLI
+     5 00,2E89 8D 04 2E		  sta DLIV+1+1
+Source: D:\!Atari\getris2\grat_lib.asm
+  1248
+  1249 00,2E8C 20 59 34		play_stop jsr cmc.PLAYERCMC+6
+  1250
+  1251 00,2E8F AD 10 D0		 lda $d010
+  1252 00,2E92 D0 13		 bne nmiQuit
+  1253
+  1254 00,2E94 A9 60		 lda #{rts}
+  1255 00,2E96 8D C2 2E		 sta return
+  1256
+  1257 00,2E99 A9 EA		 lda #{nop}
+  1258 00,2E9B 8D 8C 2E		 sta play_stop
+  1259 00,2E9E 8D 8D 2E		 sta play_stop+1
+  1260 00,2EA1 8D 8E 2E		 sta play_stop+2
+  1261
+  1262 00,2EA4 20 00 00		 jsr reset_pokey
+  1263
+  1264 00,2EA7			nmiQuit
+  1265 00,2EA7 A5 40		 lda regA
+  1266 00,2EA9 A6 41		 ldx regX
+  1267 00,2EAB A4 42		 ldy regY
+  1268 00,2EAD 40		 rti
+  1269
+  1270 00,2EAE			 icl 'grat\stars_add.asm'
+Source: D:\!Atari\getris2\grat\stars_add.asm
+     1 				; !!! licznik COUNT musi zliczac od 0... a nie od tylu !!!
+     2
+     3 = 00,0000		pmg_stars	equ pmBase
+     4
+     5
+     6 = 00,000B		sile    equ 11
+     7
+     8 = 00,0047		tmp	equ zp_free
+     9
+    10
+    11 00,2EAE			stars
+    12
+    13 00,2EAE 20 C5 2E		 jsr stars_init
+    14
+    15 00,2EB1			loop
+    16
+    17 00,2EB1 20 F0 2E		 jsr stars_losuj
+    18
+    19 00,2EB4 A2 06		 ldx #6
+    20 				wai lda:cmp:req 20
+    20 00,2EB6 A5 14		 lda 20
+    20 00,2EB8 C5 14		 cmp 20
+    20 00,2EBA F0 FC		 req$2EB8 20
+    21 00,2EBC CA		 dex
+    22 00,2EBD D0 F7		 bne wai
+    23
+    24 00,2EBF 20 7C 2F		 jsr stars_animuj
+    25
+    26 00,2EC2 4C B1 2E		return jmp loop
+    27
+    28
+    29 				;---
+    30
+    31
+    32 00,2EC5			.proc STARS_INIT
+    33
+    34 				 mwa #tstars tmp
+Macro: MWA [Source: D:\!Atari\getris2\grat\grat.mac]
+     2 00,2EC5 A9 79		  lda <TSTARS
+     3 00,2EC7 85 47		  sta TMP
+     4 00,2EC9 A9 30		  lda >TSTARS
+     5 00,2ECB 85 48		  sta TMP+1
+Source: D:\!Atari\getris2\grat\stars_add.asm
+    35
+    36 				 mva #sile-1 count
+Macro: MVA [Source: D:\!Atari\getris2\grat\grat.mac]
+     1 00,2ECD A9 0A		 lda #SILE-1
+     2 00,2ECF 8D EF 2E		 sta COUNT
+Source: D:\!Atari\getris2\grat\stars_add.asm
+    37
+    38 00,2ED2			loop
+    39 00,2ED2 A0 02		 ldy #tstars_dta.faza
+    40 00,2ED4 AD 0A D2		 lda $d20a
+    41 00,2ED7 29 07		 and #7				; dzieki temu gwiazdki pojawiaja sie w roznym tempie
+    42 00,2ED9 91 47		 sta (tmp),y
+    43
+    44 00,2EDB A0 00		 ldy #tstars_dta.addr		; zerujemy gwiazdke na tej pozycji Y
+    45 00,2EDD A9 01		 lda <stars_0
+    46 00,2EDF 91 47		 sta (tmp),y
+    47 00,2EE1 C8		 iny
+    48 00,2EE2 A9 30		 lda >stars_0
+    49 00,2EE4 91 47		 sta (tmp),y 
+    50
+    51 00,2EE6 20 DC 2F		 jsr add_tmp
+    52
+    53 00,2EE9 CE EF 2E		 dec count
+    54 00,2EEC 10 E4		 bpl loop
+    55 00,2EEE 60		 rts
+    56
+    57 00,2EEF 00		count	brk
+    58 				.endp
+    59
+    60
+    61
+    62 00,2EF0			.proc STARS_LOSUJ
+    63
+    64 = 00,0049		msk equ tmp+2
+    65 = 00,004B		hps equ msk+2
+    66
+    67 				 mwa #maska msk
+Macro: MWA [Source: D:\!Atari\getris2\grat\grat.mac]
+     2 00,2EF0 A9 B9		  lda <MASKA
+     3 00,2EF2 85 49		  sta MSK
+     4 00,2EF4 A9 30		  lda >MASKA
+     5 00,2EF6 85 4A		  sta MSK+1
+Source: D:\!Atari\getris2\grat\stars_add.asm
+    68
+    69 				 mwa #tstars tmp
+Macro: MWA [Source: D:\!Atari\getris2\grat\grat.mac]
+     2 00,2EF8 A9 79		  lda <TSTARS
+     3 00,2EFA 85 47		  sta TMP
+     4 00,2EFC A9 30		  lda >TSTARS
+     5 00,2EFE 85 48		  sta TMP+1
+Source: D:\!Atari\getris2\grat\stars_add.asm
+    70
+    71 				 mva #0 count
+Macro: MVA [Source: D:\!Atari\getris2\grat\grat.mac]
+     1 00,2F00 A9 00		 lda #0
+     2 00,2F02 8D 7B 2F		 sta COUNT
+Source: D:\!Atari\getris2\grat\stars_add.asm
+    72
+    73 00,2F05			loop
+    74 00,2F05 A0 02		 ldy #tstars_dta.faza
+    75 00,2F07 B1 47		 lda (tmp),y
+    76 00,2F09 F0 07		 beq _ok
+    77 00,2F0B C9 08		 cmp #8
+    78 00,2F0D B0 03		 bcs _ok
+    79 00,2F0F 4C 62 2F		 jmp _skip
+    80
+    81 00,2F12			_ok
+    82 00,2F12 A0 00		 ldy #tstars_dta.addr		; zerujemy gwiazdke na tej pozycji Y
+    83 00,2F14 A9 01		 lda <stars_0
+    84 00,2F16 91 47		 sta (tmp),y
+    85 00,2F18 C8		 iny
+    86 00,2F19 A9 30		 lda >stars_0
+    87 00,2F1B 91 47		 sta (tmp),y
+    88
+    89 00,2F1D A0 02		 ldy #tstars_dta.faza
+    90 00,2F1F AD 0A D2		 lda $d20a
+    91 00,2F22 29 07		 and #7				; dzieki temu gwiazdki pojawiaja sie w roznym tempie
+    92 00,2F24 91 47		 sta (tmp),y
+    93
+    94 				; lda $d20a
+    95 				; bpl _skip
+    96
+    97 00,2F26 AD 0A D2		 lda $d20a
+    98 00,2F29 29 07		 and #7
+    99 00,2F2B A8		 tay
+   100
+   101 00,2F2C B1 49		 lda (msk),y		; wylosowalismy nowa pozycje
+   102 00,2F2E F0 32		 beq _skip
+   103
+   104 00,2F30 98		 tya
+   105 00,2F31 0A 0A		 :2 asl @
+   106 00,2F33 18		 clc
+   107 00,2F34 69 6C		 adc #108
+   108 00,2F36 AA		 tax
+   109
+   110 00,2F37 AC 7B 2F		 ldy count
+   111 00,2F3A B9 2A 34		 lda lhpos,y
+   112 00,2F3D 85 4B		 sta hps
+   113 00,2F3F B9 35 34		 lda hhpos,y
+   114 00,2F42 85 4C		 sta hps+1
+   115
+   116 00,2F44 A0 01		 ldy #1
+   117 00,2F46 8A		 txa
+   118 00,2F47 91 4B		 sta (hps),y
+   119
+   120 				; ldy #tstars_dta.posx
+   121 				; sta (tmp),y
+   122
+   123 00,2F49 AD 0A D2		 lda $d20a
+   124 00,2F4C 29 03		 and #3
+   125 00,2F4E AA		 tax
+   126
+   127 00,2F4F A0 00		 ldy #tstars_dta.addr
+   128 00,2F51 BD A6 30		 lda l_stars,x
+   129 00,2F54 91 47		 sta (tmp),y
+   130 00,2F56 C8		 iny
+   131 00,2F57 BD AA 30		 lda h_stars,x
+   132 00,2F5A 91 47		 sta (tmp),y
+   133
+   134 00,2F5C A0 02		 ldy #tstars_dta.faza
+   135 00,2F5E A9 00		 lda #0
+   136 00,2F60 91 47		 sta (tmp),y
+   137
+   138 00,2F62			_skip
+   139
+   140 00,2F62 20 DC 2F		 jsr add_tmp
+   141
+   142 00,2F65 A5 49		 lda msk
+   143 00,2F67 18		 clc
+   144 00,2F68 69 08		 adc #8
+   145 00,2F6A 85 49		 sta msk
+   146 00,2F6C 90 02		 scc$2F70
+   147 00,2F6E E6 4A		 inc msk+1
+   148
+   149 00,2F70 EE 7B 2F		 inc count
+   150 00,2F73 AD 7B 2F		 lda count
+   151 00,2F76 C9 0B		 cmp #sile
+   152 00,2F78 D0 8B		 bne loop
+   153 00,2F7A 60		 rts
+   154
+   155 00,2F7B 00		count	brk
+   156 				.endp
+   157
+   158
+   159
+   160 00,2F7C			.proc STARS_ANIMUJ
+   161
+   162 				// zero page declaractions
+   163 = 00,0049		s_addr	equ tmp+2
+   164 				;s_faza	equ s_addr+1
+   165 				;s_posx	equ s_faza+1
+   166
+   167 				// program
+   168 				 mwa #tstars tmp
+Macro: MWA [Source: D:\!Atari\getris2\grat\grat.mac]
+     2 00,2F7C A9 79		  lda <TSTARS
+     3 00,2F7E 85 47		  sta TMP
+     4 00,2F80 A9 30		  lda >TSTARS
+     5 00,2F82 85 48		  sta TMP+1
+Source: D:\!Atari\getris2\grat\stars_add.asm
+   169
+   170 				 mva #0 count
+Macro: MVA [Source: D:\!Atari\getris2\grat\grat.mac]
+     1 00,2F84 A9 00		 lda #0
+     2 00,2F86 8D DB 2F		 sta COUNT
+Source: D:\!Atari\getris2\grat\stars_add.asm
+   171
+   172 00,2F89			loop
+   173 00,2F89 A0 02		 ldy #tstars_dta.faza
+   174 00,2F8B B1 47		 lda (tmp),y
+   175 00,2F8D C9 08		 cmp #8
+   176 00,2F8F B0 3C		 bcs _skip
+   177
+   178 00,2F91 A0 00		 ldy #tstars_dta.addr
+   179 00,2F93 B1 47		 lda (tmp),y
+   180 00,2F95 85 49		 sta s_addr
+   181 00,2F97 C8		 iny
+   182 00,2F98 B1 47		 lda (tmp),y
+   183 00,2F9A 85 4A		 sta s_addr+1
+   184
+   185 00,2F9C A0 02		 ldy #tstars_dta.faza
+   186 00,2F9E B1 47		 lda (tmp),y
+   187 00,2FA0 AA		 tax
+   188 00,2FA1 18		 clc
+   189 00,2FA2 69 01		 adc #1
+   190 00,2FA4 91 47		 sta (tmp),y
+   191
+   192 00,2FA6 BC 9D 30		 ldy tmul5,x
+   193
+   194 00,2FA9 AE DB 2F		 ldx count
+   195 00,2FAC BD AE 30		 lda posy,x
+   196 00,2FAF AA		 tax
+   197
+   198 00,2FB0 B1 49		 lda (s_addr),y
+   199 00,2FB2 9D 00 04		 sta pmg_stars+$400,x
+   200 00,2FB5 C8		 iny
+   201 00,2FB6 B1 49		 lda (s_addr),y
+   202 00,2FB8 9D 01 04		 sta pmg_stars+$401,x
+   203 00,2FBB C8		 iny
+   204 00,2FBC B1 49		 lda (s_addr),y
+   205 00,2FBE 9D 02 04		 sta pmg_stars+$402,x
+   206 00,2FC1 C8		 iny
+   207 00,2FC2 B1 49		 lda (s_addr),y
+   208 00,2FC4 9D 03 04		 sta pmg_stars+$403,x
+   209 00,2FC7 C8		 iny
+   210 00,2FC8 B1 49		 lda (s_addr),y
+   211 00,2FCA 9D 04 04		 sta pmg_stars+$404,x
+   212
+   213 00,2FCD			_skip
+   214
+   215 00,2FCD 20 DC 2F		 jsr add_tmp
+   216
+   217 00,2FD0 EE DB 2F		 inc count
+   218 00,2FD3 AD DB 2F		 lda count
+   219 00,2FD6 C9 0B		 cmp #sile
+   220 00,2FD8 D0 AF		 bne loop
+   221 00,2FDA 60		 rts 
+   222
+   223 00,2FDB 00		count	brk
+   224 				.endp
+   225
+   226
+   227 00,2FDC			.proc ADD_TMP
+   228
+   229 00,2FDC A5 47		 lda tmp
+   230 00,2FDE 18		 clc
+   231 00,2FDF 69 03		 adc #tstars_dta	 ; structure TSTARS_DTA length
+   232 00,2FE1 85 47		 sta tmp
+   233 00,2FE3 90 02		 scc$2FE7
+   234 00,2FE5 E6 48		 inc tmp+1
+   235 00,2FE7 60		 rts
+   236
+   237 				.endp
+   238
+   239 				;---
+   240
+   241 				// animacje gwiazdek STARS1, STARS2, STARS3
+   242 				// 8 klatek po 5 bajtow kazda
+   243 00,2FE8			stars1
+   244 00,2FE8 00		 dta %00000000
+   245 00,2FE9 00		 dta %00000000
+   246 00,2FEA 04		 dta %00000100
+   247 00,2FEB 00		 dta %00000000
+   248 00,2FEC 00		 dta %00000000
+   249
+   250 00,2FED 00		 dta %00000000
+   251 00,2FEE 04		 dta %00000100
+   252 00,2FEF 0E		 dta %00001110
+   253 00,2FF0 04		 dta %00000100
+   254 00,2FF1 00		 dta %00000000
+   255
+   256 00,2FF2 04		 dta %00000100
+   257 00,2FF3 04		 dta %00000100
+   258 00,2FF4 1F		 dta %00011111
+   259 00,2FF5 04		 dta %00000100
+   260 00,2FF6 04		 dta %00000100
+   261
+   262 00,2FF7 00		 dta %00000000
+   263 00,2FF8 04		 dta %00000100
+   264 00,2FF9 0E		 dta %00001110
+   265 00,2FFA 04		 dta %00000100
+   266 00,2FFB 00		 dta %00000000
+   267
+   268 00,2FFC 00		 dta %00000000
+   269 00,2FFD 00		 dta %00000000
+   270 00,2FFE 04		 dta %00000100
+   271 00,2FFF 00		 dta %00000000
+   272 00,3000 00		 dta %00000000
+   273
+   274 00,3001			stars_0
+   275 00,3001 00 00 00 00 00 +	 :40 brk
+   276
+   277
+   278 00,3029			stars2
+   279 00,3029 00		 dta %00000000
+   280 00,302A 00		 dta %00000000
+   281 00,302B 04		 dta %00000100
+   282 00,302C 00		 dta %00000000
+   283 00,302D 00		 dta %00000000
+   284
+   285 00,302E 00		 dta %00000000
+   286 00,302F 04		 dta %00000100
+   287 00,3030 0E		 dta %00001110
+   288 00,3031 04		 dta %00000100
+   289 00,3032 00		 dta %00000000
+   290
+   291 00,3033 04		 dta %00000100
+   292 00,3034 04		 dta %00000100
+   293 00,3035 0E		 dta %00001110
+   294 00,3036 04		 dta %00000100
+   295 00,3037 04		 dta %00000100
+   296
+   297 00,3038 00		 dta %00000000
+   298 00,3039 04		 dta %00000100
+   299 00,303A 1F		 dta %00011111
+   300 00,303B 04		 dta %00000100
+   301 00,303C 00		 dta %00000000
+   302
+   303 00,303D 00		 dta %00000000
+   304 00,303E 04		 dta %00000100
+   305 00,303F 0E		 dta %00001110
+   306 00,3040 04		 dta %00000100
+   307 00,3041 00		 dta %00000000
+   308
+   309 00,3042 00		 dta %00000000
+   310 00,3043 00		 dta %00000000
+   311 00,3044 04		 dta %00000100
+   312 00,3045 00		 dta %00000000
+   313 00,3046 00		 dta %00000000
+   314
+   315 00,3047 00 00 00 00 00 +	 :10 brk
+   316
+   317
+   318 00,3051			stars3
+   319 00,3051 00		 dta %00000000
+   320 00,3052 00		 dta %00000000
+   321 00,3053 04		 dta %00000100
+   322 00,3054 00		 dta %00000000
+   323 00,3055 00		 dta %00000000
+   324
+   325 00,3056 00		 dta %00000000
+   326 00,3057 0A		 dta %00001010
+   327 00,3058 04		 dta %00000100
+   328 00,3059 0A		 dta %00001010
+   329 00,305A 00		 dta %00000000
+   330
+   331 00,305B 10		 dta %00010000
+   332 00,305C 0A		 dta %00001010
+   333 00,305D 04		 dta %00000100
+   334 00,305E 0A		 dta %00001010
+   335 00,305F 01		 dta %00000001
+   336
+   337 00,3060 11		 dta %00010001
+   338 00,3061 0A		 dta %00001010
+   339 00,3062 04		 dta %00000100
+   340 00,3063 0A		 dta %00001010
+   341 00,3064 11		 dta %00010001
+   342
+   343 00,3065 01		 dta %00000001
+   344 00,3066 0A		 dta %00001010
+   345 00,3067 04		 dta %00000100
+   346 00,3068 0A		 dta %00001010
+   347 00,3069 10		 dta %00010000
+   348
+   349 00,306A 00		 dta %00000000
+   350 00,306B 0A		 dta %00001010
+   351 00,306C 04		 dta %00000100
+   352 00,306D 0A		 dta %00001010
+   353 00,306E 00		 dta %00000000
+   354
+   355 00,306F 00		 dta %00000000
+   356 00,3070 00		 dta %00000000
+   357 00,3071 04		 dta %00000100
+   358 00,3072 00		 dta %00000000
+   359 00,3073 00		 dta %00000000
+   360
+   361 00,3074 00 00 00 00 00	 :5 brk
+   362
+   363
+   364
+   365 				;---
+   366
+   367 				// tablica z opisem 11 pozycji gwiazdek
+   368
+   369 00,3079			.struct tstars_dta
+   370 = 00,0000		addr .word
+   371 = 00,0002		faza .byte
+   372 				.ends
+   373
+   374 00,3079 01 30 00 01 30 +	tstars dta tstars_dta [sile] (stars_0,0)
+   375
+   376 00,309D 00 05 0A 0F 14 +	tmul5  dta 0,5,10,15,20,25,30,35,40
+   377
+   378 00,30A6 E8 29 51 29	l_stars dta l( stars1, stars2 , stars3 , stars2 )
+   379 00,30AA 2F 30 30 30	h_stars dta h( stars1, stars2 , stars3 , stars2 )
+   380
+   381 				// pozycja pionowa ducha (11 pozycji co 8 linii)
+   382 00,30AE			posy
+   383 				.rept sile
+   384 				 dta 40+.r*8
+   385 				.endr
+Source: REPT
+   384 00,30AE #00 28		 dta 40+.r*8
+   384 00,30AF #01 30		 dta 40+.r*8
+   384 00,30B0 #02 38		 dta 40+.r*8
+   384 00,30B1 #03 40		 dta 40+.r*8
+   384 00,30B2 #04 48		 dta 40+.r*8
+   384 00,30B3 #05 50		 dta 40+.r*8
+   384 00,30B4 #06 58		 dta 40+.r*8
+   384 00,30B5 #07 60		 dta 40+.r*8
+   384 00,30B6 #08 68		 dta 40+.r*8
+   384 00,30B7 #09 70		 dta 40+.r*8
+   384 00,30B8 #0A 78		 dta 40+.r*8
+Source: D:\!Atari\getris2\grat\stars_add.asm
+   386
+   387
+   388 				// maska wczytana od tylu, bo licznik COUNT zliczamy od tylu
+   389 00,30B9			maska
+   390 				.rept 11
+   391 				 ins 'grat\grat_logos_maska_ok.scr',12+.r*32,8
+   392 				.endr
+Source: REPT
+   391 00,30B9 00 00 00 01 01 +	 ins 'grat\grat_logos_maska_ok.scr',12+.r*32,8
+   391 00,30C1 00 00 00 01 01 +	 ins 'grat\grat_logos_maska_ok.scr',12+.r*32,8
+   391 00,30C9 00 00 00 01 01 +	 ins 'grat\grat_logos_maska_ok.scr',12+.r*32,8
+   391 00,30D1 00 00 00 01 01 +	 ins 'grat\grat_logos_maska_ok.scr',12+.r*32,8
+   391 00,30D9 00 00 00 01 01 +	 ins 'grat\grat_logos_maska_ok.scr',12+.r*32,8
+   391 00,30E1 00 00 01 01 01 +	 ins 'grat\grat_logos_maska_ok.scr',12+.r*32,8
+   391 00,30E9 00 01 01 01 01 +	 ins 'grat\grat_logos_maska_ok.scr',12+.r*32,8
+   391 00,30F1 00 00 01 01 01 +	 ins 'grat\grat_logos_maska_ok.scr',12+.r*32,8
+   391 00,30F9 00 00 00 00 01 +	 ins 'grat\grat_logos_maska_ok.scr',12+.r*32,8
+   391 00,3101 00 00 00 01 01 +	 ins 'grat\grat_logos_maska_ok.scr',12+.r*32,8
+   391 00,3109 00 00 00 01 01 +	 ins 'grat\grat_logos_maska_ok.scr',12+.r*32,8
+Source: D:\!Atari\getris2\grat\stars_add.asm
+  1271
+  1272 00,3111			 icl 'grat\grat.fad'
+Source: D:\!Atari\getris2\grat\grat.fad
+     1 = 00,0069		color_nr equ 105
+     2
+     3 				;-----------;
+     4 				;-  WAIT   -;
+     5 				;-----------;
+     6 00,3111			.proc wait
+     7 				 lda:cmp:req cloc
+     7 00,3111 A5 14		 lda cloc
+     7 00,3113 C5 14		 cmp cloc
+     7 00,3115 F0 FC		 req$3113 cloc
+     8 00,3117 CA		 dex
+     9 00,3118 D0 F7		 bne wait
+    10 00,311A 60		 rts
+    11 				.endp
+    12
+    13
+    14 				;-----------;
+    15 				;-  FADE   -;
+    16 				;-----------;
+    17 00,311B			.proc fade
+    18 00,311B 8E 31 31		 stx adr+1
+    19 00,311E 8C 32 31		 sty adr+2
+    20
+    21 00,3121 A2 06		 ldx #6
+    22 00,3123 20 11 31		 jsr wait
+    23
+    24 00,3126 A9 10		 lda #16
+    25 00,3128 8D 39 31		 sta licz
+    26 00,312B			fad
+    27 00,312B A2 02		 ldx #2
+    28 00,312D 20 11 31		 jsr wait
+    29
+    30 00,3130 20 FF FF		adr jsr $ffff
+    31
+    32 00,3133 CE 39 31		 dec licz
+    33 00,3136 D0 F3		 bne fad
+    34 00,3138 60		 rts
+    35
+    36 00,3139 00		licz	.BYTE
+    37 				.endp
+    38
+    39 				;-----------;
+    40 				;- FADE IN -;
+    41 				;-----------;
+    42 00,313A			.proc fade_in
+    43
+    44 00,313A A2 41		 ldx <fade
+    45 00,313C A0 31		 ldy >fade
+    46 00,313E 4C 1B 31		 jmp :fade
+    47
+    48 00,3141			fade
+    49
+    50 00,3141 A9 86		 lda <tab.l_tcol
+    51 00,3143 8D 6F 31		 sta adr0+1
+    52 00,3146 A9 EF		 lda <tab.h_tcol
+    53 00,3148 8D 74 31		 sta adr1+1
+    54 00,314B A9 58		 lda <tab.t_satur
+    55 00,314D 8D 8D 31		 sta adr2+1
+    56 00,3150 A9 C1		 lda <tab.t_color
+    57 00,3152 8D 80 31		 sta adr3+1
+    58
+    59 00,3155 A9 32		 lda >tab.l_tcol
+    60 00,3157 8D 70 31		 sta adr0+2
+    61 00,315A A9 32		 lda >tab.h_tcol
+    62 00,315C 8D 75 31		 sta adr1+2
+    63 00,315F A9 33		 lda >tab.t_satur
+    64 00,3161 8D 8E 31		 sta adr2+2
+    65 00,3164 A9 33		 lda >tab.t_color
+    66 00,3166 8D 81 31		 sta adr3+2
+    67
+    68 00,3169 A2 00		 ldx #0
+    69 00,316B 8E B5 31		 stx count
+    70
+    71 00,316E			fade_l
+    72 00,316E BD FF FF		adr0 lda $ffff,x
+    73 00,3171 85 43		 sta ftmp
+    74 00,3173 BD FF FF		adr1 lda $ffff,x
+    75 00,3176 85 44		 sta ftmp+1
+    76
+    77 00,3178 A0 01		 ldy #1
+    78 00,317A B1 43		 lda (ftmp),y
+    79 00,317C A8		 tay
+    80
+    81 00,317D 29 F0		 and #$f0
+    82 00,317F DD FF FF		adr3 cmp $ffff,x
+    83 00,3182 F0 05		 beq skp1
+    84
+    85 00,3184 98		 tya
+    86 00,3185 18		 clc
+    87 00,3186 69 10		 adc #$10
+    88 00,3188 A8		 tay
+    89
+    90 00,3189			skp1
+    91
+    92 00,3189 98		 tya
+    93 00,318A 29 0F		 and #$0f
+    94 00,318C DD FF FF		adr2 cmp $ffff,x
+    95 00,318F F0 01		 beq skp0
+    96
+    97 00,3191 C8		 iny
+    98
+    99 00,3192			skp0
+   100
+   101 00,3192 98		 tya
+   102 00,3193 A0 01		 ldy #1
+   103 00,3195 91 43		 sta (ftmp),y
+   104
+   105 00,3197 E8		 inx
+   106 00,3198 D0 0F		 bne skp
+   107 00,319A EE B5 31		 inc count
+   108
+   109 00,319D EE 70 31		 inc adr0+2
+   110 00,31A0 EE 75 31		 inc adr1+2
+   111 00,31A3 EE 8E 31		 inc adr2+2
+   112 00,31A6 EE 81 31		 inc adr3+2
+   113
+   114 00,31A9			skp
+   115
+   116 00,31A9 E0 69		 cpx <color_nr
+   117 00,31AB D0 C1		 bne fade_l
+   118 00,31AD AD B5 31		 lda count
+   119 00,31B0 C9 00		 cmp >color_nr
+   120 00,31B2 D0 BA		 bne fade_l
+   121 00,31B4 60		 rts
+   122
+   123 00,31B5 00		count	.BYTE
+   124 				.endp
+   125
+   126 				;------------;
+   127 				;- FADE OUT -;
+   128 				;------------;
+   129 00,31B6			.proc fade_out
+   130
+   131 00,31B6 A2 BD		 ldx <fade
+   132 00,31B8 A0 31		 ldy >fade
+   133 00,31BA 4C 1B 31		 jmp :fade
+   134
+   135 00,31BD			fade
+   136
+   137 00,31BD A9 86		 lda <tab.l_tcol
+   138 00,31BF 8D D7 31		 sta adr0+1
+   139 00,31C2 A9 EF		 lda <tab.h_tcol
+   140 00,31C4 8D DC 31		 sta adr1+1
+   141
+   142 00,31C7 A9 32		 lda >tab.l_tcol
+   143 00,31C9 8D D8 31		 sta adr0+2
+   144 00,31CC A9 32		 lda >tab.h_tcol
+   145 00,31CE 8D DD 31		 sta adr1+2
+   146
+   147 00,31D1 A2 00		 ldx #0
+   148 00,31D3 8E 1B 32		 stx count
+   149
+   150 00,31D6			fade_l
+   151 00,31D6 BD 86 32		adr0 lda tab.l_tcol,x
+   152 00,31D9 85 43		 sta ftmp
+   153 00,31DB BD EF 32		adr1 lda tab.h_tcol,x
+   154 00,31DE 85 44		 sta ftmp+1
+   155
+   156 00,31E0 A0 01		 ldy #1
+   157 00,31E2 B1 43		 lda (ftmp),y
+   158 00,31E4 A8		 tay
+   159
+   160 00,31E5 29 0F		 and #$0f
+   161 00,31E7 F0 01		 beq skp0
+   162
+   163 00,31E9 88		 dey
+   164
+   165 00,31EA			skp0
+   166
+   167 00,31EA 98		 tya
+   168 00,31EB 29 F0		 and #$f0
+   169 00,31ED F0 05		 beq skp1
+   170
+   171 00,31EF 98		 tya
+   172 00,31F0 38		 sec
+   173 00,31F1 E9 10		 sbc #$10
+   174 00,31F3 A8		 tay
+   175
+   176 00,31F4			skp1
+   177 00,31F4 98		 tya
+   178
+   179 00,31F5 A0 01		 ldy #1
+   180 00,31F7 91 43		 sta (ftmp),y
+   181
+   182 00,31F9 E8		 inx
+   183 00,31FA D0 09		 bne skp
+   184 00,31FC EE 1B 32		 inc count
+   185
+   186 00,31FF EE D8 31		 inc adr0+2
+   187 00,3202 EE DD 31		 inc adr1+2
+   188
+   189 00,3205			skp
+   190
+   191 00,3205 E0 69		 cpx <color_nr
+   192 00,3207 D0 CD		 bne fade_l
+   193 00,3209 AD 1B 32		 lda count
+   194 00,320C C9 00		 cmp >color_nr
+   195 00,320E D0 C6		 bne fade_l
+   196
+   197 00,3210 A0 07		 ldy #7
+   198 00,3212 A9 00		 lda #0
+   199 00,3214			clr
+   200 00,3214 99 00 D0		 sta $d000,y
+   201 00,3217 88		 dey
+   202 00,3218 10 FA		 bpl clr
+   203 00,321A 60		 rts
+   204
+   205 00,321B 00		count	.BYTE
+   206 				.endp
+   207
+   208 				;--------------;
+   209 				;- SAVE COLOR -;
+   210 				;--------------;
+   211 00,321C			.proc save_color
+   212
+   213 00,321C A9 86		 lda <tab.l_tcol
+   214 00,321E 8D 4A 32		 sta adr0+1
+   215 00,3221 A9 EF		 lda <tab.h_tcol
+   216 00,3223 8D 4F 32		 sta adr1+1
+   217 00,3226 A9 58		 lda <tab.t_satur
+   218 00,3228 8D 5B 32		 sta adr2+1
+   219 00,322B A9 C1		 lda <tab.t_color
+   220 00,322D 8D 61 32		 sta adr3+1
+   221
+   222 00,3230 A9 32		 lda >tab.l_tcol
+   223 00,3232 8D 4B 32		 sta adr0+2
+   224 00,3235 A9 32		 lda >tab.h_tcol
+   225 00,3237 8D 50 32		 sta adr1+2
+   226 00,323A A9 33		 lda >tab.t_satur
+   227 00,323C 8D 5C 32		 sta adr2+2
+   228 00,323F A9 33		 lda >tab.t_color
+   229 00,3241 8D 62 32		 sta adr3+2
+   230
+   231 00,3244 A2 00		 ldx #0
+   232 00,3246 8E 85 32		 stx count
+   233
+   234 00,3249			save_l
+   235 00,3249 BD FF FF		adr0 lda $ffff,x
+   236 00,324C 85 43		 sta ftmp
+   237 00,324E BD FF FF		adr1 lda $ffff,x
+   238 00,3251 85 44		 sta ftmp+1
+   239
+   240 00,3253 A0 01		 ldy #1
+   241 00,3255 B1 43		 lda (ftmp),y
+   242 00,3257 48		 pha
+   243 00,3258 29 0F		 and #$0f
+   244 00,325A 9D FF FF		adr2 sta $ffff,x
+   245 00,325D 68		 pla
+   246 00,325E 29 F0		 and #$f0
+   247 00,3260 9D FF FF		adr3 sta $ffff,x
+   248
+   249 00,3263 A9 00		 lda #0        ; black screen (all colors = $00)
+   250 00,3265 91 43		 sta (ftmp),y
+   251
+   252 00,3267 E8		 inx
+   253 00,3268 D0 0F		 bne skp
+   254 00,326A EE 85 32		 inc count
+   255
+   256 00,326D EE 4B 32		 inc adr0+2
+   257 00,3270 EE 50 32		 inc adr1+2
+   258 00,3273 EE 5C 32		 inc adr2+2
+   259 00,3276 EE 62 32		 inc adr3+2
+   260
+   261 00,3279			skp
+   262
+   263 00,3279 E0 69		 cpx <color_nr
+   264 00,327B D0 CC		 bne save_l
+   265 00,327D AD 85 32		 lda count
+   266 00,3280 C9 00		 cmp >color_nr
+   267 00,3282 D0 C5		 bne save_l
+   268 00,3284 60		 rts
+   269
+   270 00,3285 00		count	.BYTE
+   271 				.endp
+   272
+   273 00,3286			.proc tab
+   274 00,3286			l_tcol
+   275 00,3286 1E 23 28 2D 32 +	 dta l(c0,c1,c2,c3,c4,c5,c6,c7,c8,c9)
+   276 00,3290 50 72 A3 D4 05 +	 dta l(c10,c11,c12,c13,c14,c15,c16,c17,c18,c19)
+   277 00,329A AE DF 10 41 72 +	 dta l(c20,c21,c22,c23,c24,c25,c26,c27,c28,c29)
+   278 00,32A4 7D AE DF 71 85 +	 dta l(c30,c31,c32,c33,c34,c35,c36,c37,c38,c39)
+   279 00,32AE A5 D5 EB 02 06 +	 dta l(c40,c41,c42,c43,c44,c45,c46,c47,c48)
+   280 00,32B7 55 5A 86 8B B7 +	 dta l(c50,c51,c52,c53,c54,c55,c56,c57,c58,c59)
+   281 00,32C1 4A 4F 7B 80 C2 +	 dta l(c60,c61,c62,c63,c64,c65,c66,c67,c68,c69)
+   282 00,32CB 55 5A 86 8B B7 +	 dta l(c70,c71,c72,c73,c74,c75,c76,c77,c78,c79)
+   283 00,32D5 60 65 91 96 C2 +	 dta l(c80,c81,c82,c83,c84,c85,c86,c87,c88,c89)
+   284 00,32DF 53 5A 99 A0 C9 +	 dta l(c90,c91,c92,c93,c94,c95,c96,c97,c98,c99)
+   285 00,32E9 59 60 89 90 B9 +	 dta l(c100,c101,c102,c103,c104,c105)
+   286
+   287 00,32EF			h_tcol
+   288 00,32EF 2E 2E 2E 2E 2E +	 dta h(c0,c1,c2,c3,c4,c5,c6,c7,c8,c9)
+   289 00,32F9 27 27 27 27 28 +	 dta h(c10,c11,c12,c13,c14,c15,c16,c17,c18,c19)
+   290 00,3303 28 28 29 29 29 +	 dta h(c20,c21,c22,c23,c24,c25,c26,c27,c28,c29)
+   291 00,330D 2A 2A 2A 2B 2B +	 dta h(c30,c31,c32,c33,c34,c35,c36,c37,c38,c39)
+   292 00,3317 2C 2C 2C 2D 2D +	 dta h(c40,c41,c42,c43,c44,c45,c46,c47,c48)
+   293 00,3320 27 27 27 27 27 +	 dta h(c50,c51,c52,c53,c54,c55,c56,c57,c58,c59)
+   294 00,332A 28 28 28 28 28 +	 dta h(c60,c61,c62,c63,c64,c65,c66,c67,c68,c69)
+   295 00,3334 29 29 29 29 29 +	 dta h(c70,c71,c72,c73,c74,c75,c76,c77,c78,c79)
+   296 00,333E 2A 2A 2A 2A 2A +	 dta h(c80,c81,c82,c83,c84,c85,c86,c87,c88,c89)
+   297 00,3348 2B 2B 2B 2B 2B +	 dta h(c90,c91,c92,c93,c94,c95,c96,c97,c98,c99)
+   298 00,3352 2C 2C 2C 2C 2C +	 dta h(c100,c101,c102,c103,c104,c105)
+   299
+   300 00,3358 00 00 00 00 00 +	t_satur :color_nr brk	; kod bedzie pakowany wiec nie moga byc ORG'i
+   301 00,33C1 00 00 00 00 00 +	t_color :color_nr brk
+   302 				.endp
+  1273
+  1274 00,342A 78 A9 B8 CB F2 +	lhpos dta l(h0_,h0,h1,h2,h3,h4,h5,h6,h7,h8,h9)
+  1275 00,3435 2E 26 26 26 26 +	hhpos dta h(h0_,h0,h1,h2,h3,h4,h5,h6,h7,h8,h9)
+  1276
+  1277 				*--- CMC module
+  1278
+  1279 00,3440			.local cmc
+  1280
+  1281 = 00,0000		DEFSONG	equ 0
+  1282
+  1283 00,3440			init
+  1284 00,3440 A9 70			lda #$70
+  1285 00,3442 AE 9A 3B			ldx msx_address
+  1286 00,3445 AC 9B 3B			ldy msx_address+1
+  1287 00,3448 20 56 34			jsr PLAYERCMC+3
+  1288 00,344B A9 00			lda #$00
+  1289 00,344D A2 00			ldx #DEFSONG
+  1290 00,344F 20 56 34			jsr PLAYERCMC+3
+  1291 00,3452 60			rts
+  1292
+  1293 00,3453				icl 'grat\msx_cmc\playcmc.asm'
+Source: D:\!Atari\getris2\grat\msx_cmc\playcmc.asm
+     1 				*---------------------------*
+     2 				*     cmc player v 2.1      *
+     3 				*   by Marcin Lewandowski   *
+     4 				* based on cmc player v 2.0 *
+     5 				*      by Janusz Pelc       *
+     6 				*---------------------------*
+     7
+     8 00,3453			.proc playerCMC
+     9
+    10 				*--- tablica basu (chyba)
+    11
+    12 = 00,0001		bass equ 1
+    13
+    14 				*--- strona 0
+    15
+    16 = 00,00FC		addr equ $fc
+    17 = 00,00FE		word equ $fe
+    18
+    19 				*--- skoki
+    20
+    21 00,3453 4C 53 34		 jmp *		;basic
+    22 00,3456 4C B9 34		 jmp init
+    23 00,3459 4C 0C 37		 jmp play
+    24
+    25 				*--- dane
+    26
+    27 00,345C 00 00 00		volume dta d'   '
+    28 00,345F 00 00 00		czest  dta d'   '
+    29 00,3462 00 00 00		numins dta d'   '
+    30
+    31 				; dta c' cmc player v 2.1 '*
+    32
+    33 00,3465 00 00 00 00	frq    dta d'    '
+    34 00,3469 00 00 00 00	znieks dta d'    '
+    35 00,346D 00		audc   dta b(0)
+    36
+    37 00,346E 00 00 00		czest1 dta d'   '
+    38 00,3471 00 00 00		czest2 dta d'   '
+    39 00,3474 00 00 00		czest3 dta d'   '
+    40 00,3477 00 00 00		zniek  dta d'   '
+    41 00,347A FF FF FF		count1 dta b($ff),b($ff),b($ff)
+    42 00,347D 00 00 00		count2 dta d'   '
+    43 00,3480 00 00 00		lopad  dta d'   '
+    44 00,3483 00 00 00		numptr dta d'   '
+    45 00,3486 00 00 00		poswpt dta d'   '
+    46 00,3489 00 00 00		ilewol dta d'   '
+    47 00,348C 80 80 80		czygrx dta b($80),b($80),b($80)
+    48 00,348F 80		czygrc dta b($80)
+    49
+    50 00,3490 00 00 00		dana0  dta d'   '
+    51 00,3493 00 00 00		dana1  dta d'   '
+    52 00,3496 00 00 00		dana2  dta d'   '
+    53 00,3499 00 00 00		dana3  dta d'   '
+    54 00,349C 00 00 00		dana4  dta d'   '
+    55 00,349F 00 00 00		dana5  dta d'   '
+    56 00,34A2 00 00 00		ladr   dta d'   '
+    57 00,34A5 00 00 00		hadr   dta d'   '
+    58
+    59 00,34A8 00		posptr dta b(0)
+    60 00,34A9 00		possng dta b(0)
+    61 00,34AA 00		pocrep dta b(0)
+    62 00,34AB 00		konrep dta b(0)
+    63 00,34AC 00		ilrep  dta b(0)
+    64 00,34AD 00		tmpo   dta b(0)
+    65 00,34AE 00		ltemp  dta b(0)
+    66 00,34AF 00		b1     dta b(0)
+    67 00,34B0 00		b2     dta b(0)
+    68 00,34B1 00		b3     dta b(0)
+    69 00,34B2 00		czygr  dta b(0)
+    70
+    71 00,34B3 00 00		adrmus dta a(0)
+    72 00,34B5 00 00		adradr dta a(0)
+    73 00,34B7 00 00		adrsng dta a(0)
+    74
+    75 				*--- init
+    76
+    77 00,34B9 8D AF 34		init sta b1
+    78 00,34BC 8E B0 34		 stx b2
+    79 00,34BF 8C B1 34		 sty b3
+    80 00,34C2 29 70		 and #$70
+    81 00,34C4 4A		 lsr @
+    82 00,34C5 4A		 lsr @
+    83 00,34C6 4A		 lsr @
+    84 00,34C7 AA		 tax
+    85 00,34C8 BD 4E 3A		 lda tab1,x
+    86 00,34CB 8D EA 34		 sta zm1+1
+    87 00,34CE BD 4F 3A		 lda tab1+1,x
+    88 00,34D1 8D EB 34		 sta zm1+2
+    89 00,34D4 A9 03		 lda #3
+    90 00,34D6 8D 0F D2		 sta $d20f
+    91 00,34D9 D8		 cld
+    92 00,34DA A5 FE		 lda word
+    93 00,34DC 48		 pha
+    94 00,34DD A5 FF		 lda word+1
+    95 00,34DF 48		 pha
+    96 00,34E0 AC B1 34		 ldy b3
+    97 00,34E3 AE B0 34		 ldx b2
+    98 00,34E6 AD AF 34		 lda b1
+    99 00,34E9 20 F3 34		zm1 jsr graj
+   100 00,34EC 68		 pla
+   101 00,34ED 85 FF		 sta word+1
+   102 00,34EF 68		 pla
+   103 00,34F0 85 FE		 sta word
+   104 00,34F2 60		 rts
+   105
+   106 00,34F3 AD B7 34		graj lda adrsng
+   107 00,34F6 85 FE		 sta word
+   108 00,34F8 AD B8 34		 lda adrsng+1
+   109 00,34FB 85 FF		 sta word+1
+   110 00,34FD A0 00		 ldy #0
+   111 00,34FF 8A		 txa
+   112 00,3500 F0 1C		 beq grajx
+   113 00,3502 B1 FE		l1 lda (word),y
+   114 00,3504 C9 8F		 cmp #$8f
+   115 00,3506 F0 04		 beq l2
+   116 00,3508 C9 EF		 cmp #$ef
+   117 00,350A D0 0C		 bne l3
+   118 00,350C CA		l2 dex
+   119 00,350D D0 09		 bne l3
+   120 00,350F C8		 iny
+   121 00,3510 C0 54		 cpy #$54
+   122 00,3512 B0 09		 bcs l4
+   123 00,3514 98		 tya
+   124 00,3515 AA		 tax
+   125 00,3516 10 06		 bpl grajx
+   126 00,3518 C8		l3 iny
+   127 00,3519 C0 54		 cpy #$54
+   128 00,351B 90 E5		 bcc l1
+   129 00,351D 60		l4 rts
+   130
+   131 00,351E 8E A9 34		grajx stx possng
+   132 00,3521 20 BC 35		 jsr skoncz
+   133 00,3524 A9 00		 lda #0
+   134 00,3526 A2 09		 ldx #9
+   135 00,3528 9D 86 34		l5 sta poswpt,x
+   136 00,352B CA		 dex
+   137 00,352C 10 FA		 bpl l5
+   138 00,352E 8D A8 34		 sta posptr
+   139 00,3531 A9 01		 lda #1
+   140 00,3533 8D B2 34		 sta czygr
+   141 00,3536 A9 FF		 lda #$ff
+   142 00,3538 8D AB 34		 sta konrep
+   143 00,353B AD B3 34		 lda adrmus
+   144 00,353E 85 FE		 sta word
+   145 00,3540 AD B4 34		 lda adrmus+1
+   146 00,3543 85 FF		 sta word+1
+   147 00,3545 A0 13		 ldy #$13
+   148 00,3547 B1 FE		 lda (word),y
+   149 00,3549 AA		 tax
+   150 00,354A AD B7 34		 lda adrsng
+   151 00,354D 85 FE		 sta word
+   152 00,354F AD B8 34		 lda adrsng+1
+   153 00,3552 85 FF		 sta word+1
+   154 00,3554 AC A9 34		 ldy possng
+   155 00,3557 B1 FE		l6 lda (word),y
+   156 00,3559 C9 CF		 cmp #$cf
+   157 00,355B D0 0D		 bne l7
+   158 00,355D 98		 tya
+   159 00,355E 18		 clc
+   160 00,355F 69 55		 adc #$55
+   161 00,3561 A8		 tay
+   162 00,3562 B1 FE		 lda (word),y
+   163 00,3564 30 0F		 bmi l8
+   164 00,3566 AA		 tax
+   165 00,3567 4C 75 35		 jmp l8
+   166 00,356A C9 8F		l7 cmp #$8f
+   167 00,356C F0 07		 beq l8
+   168 00,356E C9 EF		 cmp #$ef
+   169 00,3570 F0 03		 beq l8
+   170 00,3572 88		 dey
+   171 00,3573 10 E2		 bpl l6
+   172 00,3575 8E AD 34		l8 stx tmpo
+   173 00,3578 8E AE 34		 stx ltemp
+   174 00,357B 60		 rts
+   175
+   176 00,357C 29 0F		tempo and #$f
+   177 00,357E F0 F5		 beq l8
+   178 00,3580 8E 19 3A		 stx d0+1
+   179 00,3583 8E 2F 3A		 stx d1+1
+   180 00,3586 8E 3E 3A		 stx d2+1
+   181 00,3589 8C 1A 3A		 sty d0+2
+   182 00,358C 8C 30 3A		 sty d1+2
+   183 00,358F 8C 3F 3A		 sty d2+2
+   184 00,3592 60		 rts
+   185
+   186 00,3593 8E B3 34		inic stx adrmus
+   187 00,3596 86 FE		 stx word
+   188 00,3598 8C B4 34		 sty adrmus+1
+   189 00,359B 84 FF		 sty word+1
+   190 00,359D 18		 clc
+   191 00,359E 8A		 txa
+   192 00,359F 69 14		 adc #$14
+   193 00,35A1 8D B5 34		 sta adradr
+   194 00,35A4 98		 tya
+   195 00,35A5 69 00		 adc #0
+   196 00,35A7 8D B6 34		 sta adradr+1
+   197 00,35AA 8E B7 34		 stx adrsng
+   198 00,35AD C8		 iny
+   199 00,35AE C8		 iny
+   200 00,35AF 8C B8 34		 sty adrsng+1
+   201 00,35B2 A0 13		 ldy #$13
+   202 00,35B4 B1 FE		 lda (word),y
+   203 00,35B6 8D AD 34		 sta tmpo
+   204 00,35B9 8D AE 34		 sta ltemp
+   205
+   206 00,35BC A2 08		skoncz ldx #8
+   207 00,35BE A9 00		l9 lda #0
+   208 00,35C0 8D B2 34		 sta czygr
+   209 00,35C3 9D 00 D2		 sta $d200,x
+   210 00,35C6 E0 03		 cpx #3
+   211 00,35C8 B0 08		 bcs l10
+   212 00,35CA 9D 5C 34		 sta volume,x
+   213 00,35CD A9 FF		 lda #$ff
+   214 00,35CF 9D 7A 34		 sta count1,x
+   215 00,35D2 CA		l10 dex
+   216 00,35D3 10 E9		 bpl l9
+   217
+   218 00,35D5 A9 80		przer lda #$80
+   219 00,35D7 A2 03		l11 ldx #3
+   220 00,35D9 9D 8C 34		l12 sta czygrx,x
+   221 00,35DC CA		 dex
+   222 00,35DD 10 FA		 bpl l12
+   223 00,35DF 60		l13 rts
+   224
+   225 00,35E0 A9 01		kont lda #1
+   226 00,35E2 8D B2 34		 sta czygr
+   227 00,35E5 A9 00		 lda #0
+   228 00,35E7 F0 EE		 beq l11
+   229
+   230 00,35E9 29 03		instr and #3
+   231 00,35EB C9 03		 cmp #3
+   232 00,35ED F0 F0		 beq l13
+   233 00,35EF E0 40		 cpx #$40
+   234 00,35F1 B0 EC		 bcs l13
+   235 00,35F3 C0 1A		 cpy #26
+   236 00,35F5 B0 E8		 bcs l13
+   237 00,35F7 AA		 tax
+   238 00,35F8 A9 80		 lda #$80
+   239 00,35FA 9D 8C 34		 sta czygrx,x
+   240
+   241 00,35FD A9 00		inst lda #0
+   242 00,35FF 9D 7A 34		 sta count1,x
+   243 00,3602 9D 7D 34		 sta count2,x
+   244 00,3605 9D 80 34		 sta lopad,x
+   245 00,3608 AD B0 34		 lda b2
+   246 00,360B 9D 5F 34		 sta czest,x
+   247
+   248 00,360E AD B1 34		 lda b3
+   249 00,3611 0A		 asl @
+   250 00,3612 0A		 asl @
+   251 00,3613 0A		 asl @
+   252 00,3614 85 FE		 sta word
+   253 00,3616 18		 clc
+   254 00,3617 AD B3 34		 lda adrmus
+   255 00,361A 69 30		 adc #$30
+   256 00,361C 48		 pha
+   257 00,361D AD B4 34		 lda adrmus+1
+   258 00,3620 69 01		 adc #1
+   259 00,3622 A8		 tay
+   260 00,3623 68		 pla
+   261 00,3624 18		 clc
+   262 00,3625 65 FE		 adc word
+   263 00,3627 9D A2 34		 sta ladr,x
+   264 00,362A 98		 tya
+   265 00,362B 69 00		 adc #0
+   266 00,362D 9D A5 34		 sta hadr,x
+   267
+   268 00,3630 18		 clc
+   269 00,3631 AD B3 34		 lda adrmus
+   270 00,3634 69 94		 adc #$94
+   271 00,3636 85 FE		 sta word
+   272 00,3638 AD B4 34		 lda adrmus+1
+   273 00,363B 69 00		 adc #0
+   274 00,363D 85 FF		 sta word+1
+   275 00,363F AD B1 34		 lda b3
+   276 00,3642 0A		 asl @
+   277 00,3643 6D B1 34		 adc b3
+   278 00,3646 0A		 asl @
+   279 00,3647 A8		 tay
+   280 00,3648 B1 FE		 lda (word),y
+   281 00,364A 9D 90 34		 sta dana0,x
+   282 00,364D C8		 iny
+   283 00,364E B1 FE		 lda (word),y
+   284 00,3650 9D 93 34		 sta dana1,x
+   285 00,3653 29 07		 and #7
+   286 00,3655 8D AF 34		 sta b1
+   287 00,3658 C8		 iny
+   288 00,3659 B1 FE		 lda (word),y
+   289 00,365B 9D 96 34		 sta dana2,x
+   290 00,365E C8		 iny
+   291 00,365F B1 FE		 lda (word),y
+   292 00,3661 9D 99 34		 sta dana3,x
+   293 00,3664 C8		 iny
+   294 00,3665 B1 FE		 lda (word),y
+   295 00,3667 9D 9C 34		 sta dana4,x
+   296 00,366A C8		 iny
+   297 00,366B B1 FE		 lda (word),y
+   298 00,366D 9D 9F 34		 sta dana5,x
+   299
+   300 00,3670 A0 00		 ldy #0
+   301 00,3672 AD AF 34		 lda b1
+   302 00,3675 C9 03		 cmp #3
+   303 00,3677 D0 02		 bne l14
+   304 00,3679 A0 02		 ldy #2
+   305 00,367B C9 07		l14 cmp #7
+   306 00,367D D0 02		 bne l15
+   307 00,367F A0 04		 ldy #4
+   308 00,3681 B9 6C 3A		l15 lda tab3,y
+   309 00,3684 85 FE		 sta word
+   310 00,3686 B9 6D 3A		 lda tab3+1,y
+   311 00,3689 85 FF		 sta word+1
+   312 00,368B BD 96 34		 lda dana2,x
+   313 00,368E 4A		 lsr @
+   314 00,368F 4A		 lsr @
+   315 00,3690 4A		 lsr @
+   316 00,3691 4A		 lsr @
+   317 00,3692 18		 clc
+   318 00,3693 6D B0 34		 adc b2
+   319 00,3696 8D B0 34		 sta b2
+   320 00,3699 8D 03 37		 sta zm2+1
+   321 00,369C A8		 tay
+   322 00,369D AD AF 34		 lda b1
+   323 00,36A0 C9 07		 cmp #7
+   324 00,36A2 D0 0F		 bne l16
+   325 00,36A4 98		 tya
+   326 00,36A5 0A		 asl @
+   327 00,36A6 A8		 tay
+   328 00,36A7 B1 FE		 lda (word),y
+   329 00,36A9 9D 6E 34		 sta czest1,x
+   330 00,36AC C8		 iny
+   331 00,36AD 8C B0 34		 sty b2
+   332 00,36B0 4C C4 36		 jmp l17
+   333 00,36B3 B1 FE		l16 lda (word),y
+   334 00,36B5 9D 6E 34		 sta czest1,x
+   335 00,36B8 BD 96 34		 lda dana2,x
+   336 00,36BB 29 0F		 and #$f
+   337 00,36BD 18		 clc
+   338 00,36BE 6D B0 34		 adc b2
+   339 00,36C1 8D B0 34		 sta b2
+   340 00,36C4 AC B0 34		l17 ldy b2
+   341 00,36C7 AD AF 34		 lda b1
+   342 00,36CA C9 05		 cmp #5
+   343 00,36CC 08		 php
+   344 00,36CD B1 FE		 lda (word),y
+   345 00,36CF 28		 plp
+   346 00,36D0 F0 08		 beq l18
+   347 00,36D2 DD 6E 34		 cmp czest1,x
+   348 00,36D5 D0 03		 bne l18
+   349 00,36D7 38		 sec
+   350 00,36D8 E9 01		 sbc #1
+   351 00,36DA 9D 71 34		l18 sta czest2,x
+   352 00,36DD BD 90 34		 lda dana0,x
+   353 00,36E0 48		 pha
+   354 00,36E1 29 03		 and #3
+   355 00,36E3 A8		 tay
+   356 00,36E4 B9 72 3A		 lda tab4,y
+   357 00,36E7 9D 77 34		 sta zniek,x
+   358 00,36EA 68		 pla
+   359 00,36EB 4A		 lsr @
+   360 00,36EC 4A		 lsr @
+   361 00,36ED 4A		 lsr @
+   362 00,36EE 4A		 lsr @
+   363 00,36EF A0 3E		 ldy #$3e
+   364 00,36F1 C9 0F		 cmp #$f
+   365 00,36F3 F0 10		 beq l19
+   366 00,36F5 A0 37		 ldy #$37
+   367 00,36F7 C9 0E		 cmp #$e
+   368 00,36F9 F0 0A		 beq l19
+   369 00,36FB A0 30		 ldy #$30
+   370 00,36FD C9 0D		 cmp #$d
+   371 00,36FF F0 04		 beq l19
+   372 00,3701 18		 clc
+   373 00,3702 69 00		zm2 adc #0
+   374 00,3704 A8		 tay
+   375 00,3705 B9 76 3A		l19 lda tab5,y
+   376 00,3708 9D 74 34		 sta czest3,x
+   377 00,370B 60		 rts
+   378
+   379 				*--- play
+   380
+   381 00,370C D8		play cld
+   382 00,370D A5 FC		 lda addr
+   383 00,370F 48		 pha
+   384 00,3710 A5 FD		 lda addr+1
+   385 00,3712 48		 pha
+   386 00,3713 A5 FE		 lda word
+   387 00,3715 48		 pha
+   388 00,3716 A5 FF		 lda word+1
+   389 00,3718 48		 pha
+   390 00,3719 AD B2 34		 lda czygr
+   391 00,371C D0 03		 bne g1
+   392 00,371E 4C 41 3A		 jmp end
+   393 00,3721 AD 8F 34		g1 lda czygrc
+   394 00,3724 F0 03		 beq g2
+   395 00,3726 4C AA 38		 jmp dal3
+   396 00,3729 AD AD 34		g2 lda tmpo
+   397 00,372C CD AE 34		 cmp ltemp
+   398 00,372F F0 03		 beq g3
+   399 00,3731 4C 97 38		 jmp dal2
+   400 00,3734 AD A8 34		g3 lda posptr
+   401 00,3737 F0 03		 beq g4
+   402 00,3739 4C 1D 38		 jmp dal1
+   403 00,373C A2 02		g4 ldx #2
+   404 00,373E BC 8C 34		g5 ldy czygrx,x
+   405 00,3741 30 03		 bmi g6
+   406 00,3743 9D 8C 34		 sta czygrx,x
+   407 00,3746 9D 86 34		g6 sta poswpt,x
+   408 00,3749 CA		 dex
+   409 00,374A 10 F2		 bpl g5
+   410
+   411 00,374C AD B7 34		 lda adrsng
+   412 00,374F 85 FC		 sta addr
+   413 00,3751 AD B8 34		 lda adrsng+1
+   414 00,3754 85 FD		 sta addr+1
+   415 00,3756 AC A9 34		 ldy possng
+   416 00,3759 84 FE		 sty word
+   417 00,375B CC AB 34		g7 cpy konrep
+   418 00,375E D0 19		 bne g8
+   419 00,3760 AD AC 34		 lda ilrep
+   420 00,3763 F0 14		 beq g8
+   421 00,3765 AD A9 34		 lda possng
+   422 00,3768 AC AA 34		 ldy pocrep
+   423 00,376B 8C A9 34		 sty possng
+   424 00,376E CE AC 34		 dec ilrep
+   425 00,3771 D0 E8		 bne g7
+   426 00,3773 8D A9 34		 sta possng
+   427 00,3776 A8		 tay
+   428 00,3777 10 E2		 bpl g7
+   429 00,3779 A2 00		g8 ldx #0
+   430 00,377B B1 FC		g9 lda (addr),y
+   431 00,377D C9 FE		 cmp #$fe
+   432 00,377F D0 0E		 bne g10
+   433 00,3781 AC A9 34		 ldy possng
+   434 00,3784 C8		 iny
+   435 00,3785 C4 FE		 cpy word
+   436 00,3787 F0 43		 beq g11
+   437 00,3789 8C A9 34		 sty possng
+   438 00,378C 4C 5B 37		 jmp g7
+   439 00,378F 9D 83 34		g10 sta numptr,x
+   440 00,3792 18		 clc
+   441 00,3793 98		 tya
+   442 00,3794 69 55		 adc #$55
+   443 00,3796 A8		 tay
+   444 00,3797 E8		 inx
+   445 00,3798 E0 03		 cpx #3
+   446 00,379A 90 DF		 bcc g9
+   447 00,379C AC A9 34		 ldy possng
+   448 00,379F B1 FC		 lda (addr),y
+   449 00,37A1 10 7A		 bpl dal1
+   450 00,37A3 C9 FF		 cmp #$ff
+   451 00,37A5 F0 76		 beq dal1
+   452 00,37A7 4A		 lsr @
+   453 00,37A8 4A		 lsr @
+   454 00,37A9 4A		 lsr @
+   455 00,37AA 29 0E		 and #$e
+   456 00,37AC AA		 tax
+   457 00,37AD BD 5E 3A		 lda tab2,x
+   458 00,37B0 8D BF 37		 sta zm3+1
+   459 00,37B3 BD 5F 3A		 lda tab2+1,x
+   460 00,37B6 8D C0 37		 sta zm3+2
+   461 00,37B9 AD 84 34		 lda numptr+1
+   462 00,37BC 85 FF		 sta word+1
+   463 00,37BE 20 D4 37		zm3 jsr stop
+   464 00,37C1 8C A9 34		 sty possng
+   465 00,37C4 C0 55		 cpy #$55
+   466 00,37C6 B0 04		 bcs g11
+   467 00,37C8 C4 FE		 cpy word
+   468 00,37CA D0 8F		 bne g7
+   469 00,37CC A4 FE		g11 ldy word
+   470 00,37CE 8C A9 34		 sty possng
+   471 00,37D1 4C 41 3A		 jmp end
+   472
+   473 00,37D4 20 D5 35		stop jsr przer
+   474 00,37D7 A0 FF		g12 ldy #$ff
+   475 00,37D9 60		 rts
+   476 00,37DA 30 FB		jump bmi g12
+   477 00,37DC A8		 tay
+   478 00,37DD 60		 rts
+   479 00,37DE 30 F7		up bmi g12
+   480 00,37E0 38		 sec
+   481 00,37E1 98		 tya
+   482 00,37E2 E5 FF		 sbc word+1
+   483 00,37E4 A8		 tay
+   484 00,37E5 60		 rts
+   485 00,37E6 30 EF		down bmi g12
+   486 00,37E8 18		 clc
+   487 00,37E9 98		 tya
+   488 00,37EA 65 FF		 adc word+1
+   489 00,37EC A8		 tay
+   490 00,37ED 60		 rts
+   491 00,37EE 30 E7		temp bmi g12
+   492 00,37F0 8D AD 34		 sta tmpo
+   493 00,37F3 8D AE 34		 sta ltemp
+   494 00,37F6 C8		 iny
+   495 00,37F7 60		 rts
+   496 00,37F8 30 DD		rep bmi g12
+   497 00,37FA AD 85 34		 lda numptr+2
+   498 00,37FD 30 D8		 bmi g12
+   499 00,37FF 8D AC 34		 sta ilrep
+   500 00,3802 C8		 iny
+   501 00,3803 8C AA 34		 sty pocrep
+   502 00,3806 18		 clc
+   503 00,3807 98		 tya
+   504 00,3808 65 FF		 adc word+1
+   505 00,380A 8D AB 34		 sta konrep
+   506 00,380D 60		 rts
+   507 00,380E 88		break dey
+   508 00,380F 30 0A		 bmi g13
+   509 00,3811 B1 FC		 lda (addr),y
+   510 00,3813 C9 8F		 cmp #$8f
+   511 00,3815 F0 04		 beq g13
+   512 00,3817 C9 EF		 cmp #$ef
+   513 00,3819 D0 F3		 bne break
+   514 00,381B C8		g13 iny
+   515 00,381C 60		 rts
+   516
+   517 00,381D A2 02		dal1 ldx #2
+   518 00,381F BD 89 34		v1 lda ilewol,x
+   519 00,3822 F0 05		 beq v2
+   520 00,3824 DE 89 34		 dec ilewol,x
+   521 00,3827 10 61		 bpl v7
+   522 00,3829 BD 8C 34		v2 lda czygrx,x
+   523 00,382C D0 5C		 bne v7
+   524 00,382E BC 83 34		 ldy numptr,x
+   525 00,3831 C0 40		 cpy #$40
+   526 00,3833 B0 55		 bcs v7
+   527 00,3835 AD B5 34		 lda adradr
+   528 00,3838 85 FC		 sta addr
+   529 00,383A AD B6 34		 lda adradr+1
+   530 00,383D 85 FD		 sta addr+1
+   531 00,383F B1 FC		 lda (addr),y
+   532 00,3841 85 FE		 sta word
+   533 00,3843 18		 clc
+   534 00,3844 98		 tya
+   535 00,3845 69 40		 adc #$40
+   536 00,3847 A8		 tay
+   537 00,3848 B1 FC		 lda (addr),y
+   538 00,384A 85 FF		 sta word+1
+   539 00,384C C9 FF		 cmp #$ff
+   540 00,384E F0 3A		 beq v7
+   541 00,3850 BC 86 34		v3 ldy poswpt,x
+   542 00,3853 B1 FE		 lda (word),y
+   543 00,3855 29 C0		 and #$c0
+   544 00,3857 D0 0C		 bne v4
+   545 00,3859 B1 FE		 lda (word),y
+   546 00,385B 29 3F		 and #$3f
+   547 00,385D 9D 62 34		 sta numins,x
+   548 00,3860 FE 86 34		 inc poswpt,x
+   549 00,3863 10 EB		 bpl v3
+   550 00,3865 C9 40		v4 cmp #$40
+   551 00,3867 D0 13		 bne v5
+   552 00,3869 B1 FE		 lda (word),y
+   553 00,386B 29 3F		 and #$3f
+   554 00,386D 8D B0 34		 sta b2
+   555 00,3870 BD 62 34		 lda numins,x
+   556 00,3873 8D B1 34		 sta b3
+   557 00,3876 20 FD 35		 jsr inst
+   558 00,3879 4C 87 38		 jmp v6
+   559 00,387C C9 80		v5 cmp #$80
+   560 00,387E D0 0A		 bne v7
+   561 00,3880 B1 FE		 lda (word),y
+   562 00,3882 29 3F		 and #$3f
+   563 00,3884 9D 89 34		 sta ilewol,x
+   564 00,3887 FE 86 34		v6 inc poswpt,x
+   565 00,388A CA		v7 dex
+   566 00,388B 10 92		 bpl v1
+   567
+   568 00,388D AE A8 34		 ldx posptr
+   569 00,3890 E8		 inx
+   570 00,3891 8A		 txa
+   571 00,3892 29 3F		 and #$3f
+   572 00,3894 8D A8 34		 sta posptr
+   573
+   574 00,3897 CE AE 34		dal2 dec ltemp
+   575 00,389A D0 0E		 bne dal3
+   576 00,389C AD AD 34		 lda tmpo
+   577 00,389F 8D AE 34		 sta ltemp
+   578 00,38A2 AD A8 34		 lda posptr
+   579 00,38A5 D0 03		 bne dal3
+   580 00,38A7 EE A9 34		 inc possng
+   581
+   582 00,38AA AC 71 34		dal3 ldy czest2
+   583 00,38AD AD 93 34		 lda dana1
+   584 00,38B0 29 07		 and #7
+   585 00,38B2 C9 05		 cmp #5
+   586 00,38B4 F0 04		 beq a1
+   587 00,38B6 C9 06		 cmp #6
+   588 00,38B8 D0 01		 bne a2
+   589 00,38BA 88		a1 dey
+   590 00,38BB 8C 68 34		a2 sty frq+3
+   591 00,38BE A0 00		 ldy #0
+   592 00,38C0 C9 05		 cmp #5
+   593 00,38C2 F0 04		 beq a3
+   594 00,38C4 C9 06		 cmp #6
+   595 00,38C6 D0 02		 bne a4
+   596 00,38C8 A0 02		a3 ldy #2
+   597 00,38CA C9 07		a4 cmp #7
+   598 00,38CC D0 02		 bne a5
+   599 00,38CE A0 28		 ldy #$28
+   600 00,38D0 8C 6D 34		a5 sty audc
+   601
+   602 00,38D3 A2 02		 ldx #2
+   603 00,38D5 BD 93 34		loop lda dana1,x
+   604 00,38D8 29 E0		 and #$e0
+   605 00,38DA 9D 69 34		 sta znieks,x
+   606 00,38DD BD A2 34		 lda ladr,x
+   607 00,38E0 85 FC		 sta addr
+   608 00,38E2 BD A5 34		 lda hadr,x
+   609 00,38E5 85 FD		 sta addr+1
+   610 00,38E7 BD 7A 34		 lda count1,x
+   611 00,38EA C9 FF		 cmp #$ff
+   612 00,38EC F0 36		 beq y4
+   613 00,38EE C9 0F		 cmp #$f
+   614 00,38F0 D0 20		 bne y2
+   615 00,38F2 BD 80 34		 lda lopad,x
+   616 00,38F5 F0 2D		 beq y4
+   617 00,38F7 DE 80 34		 dec lopad,x
+   618 00,38FA BD 80 34		 lda lopad,x
+   619 00,38FD D0 25		 bne y4
+   620 00,38FF BC 5C 34		 ldy volume,x
+   621 00,3902 F0 01		 beq y1
+   622 00,3904 88		 dey
+   623 00,3905 98		y1 tya
+   624 00,3906 9D 5C 34		 sta volume,x
+   625 00,3909 BD 99 34		 lda dana3,x
+   626 00,390C 9D 80 34		 sta lopad,x
+   627 00,390F 4C 24 39		 jmp y4
+   628 00,3912 BD 7A 34		y2 lda count1,x
+   629 00,3915 4A		 lsr @
+   630 00,3916 A8		 tay
+   631 00,3917 B1 FC		 lda (addr),y
+   632 00,3919 90 04		 bcc y3
+   633 00,391B 4A		 lsr @
+   634 00,391C 4A		 lsr @
+   635 00,391D 4A		 lsr @
+   636 00,391E 4A		 lsr @
+   637 00,391F 29 0F		y3 and #$f
+   638 00,3921 9D 5C 34		 sta volume,x
+   639 00,3924 BC 6E 34		y4 ldy czest1,x
+   640 00,3927 BD 93 34		 lda dana1,x
+   641 00,392A 29 07		 and #7
+   642 00,392C C9 01		 cmp #1
+   643 00,392E D0 1F		 bne y6
+   644 00,3930 88		 dey
+   645 00,3931 98		 tya
+   646 00,3932 C8		 iny
+   647 00,3933 DD 71 34		 cmp czest2,x
+   648 00,3936 08		 php
+   649 00,3937 A9 01		 lda #1
+   650 00,3939 28		 plp
+   651 00,393A D0 02		 bne y5
+   652 00,393C 0A		 asl @
+   653 00,393D 0A		 asl @
+   654 00,393E 3D 7D 34		y5 and count2,x
+   655 00,3941 F0 0C		 beq y6
+   656 00,3943 BC 71 34		 ldy czest2,x
+   657 00,3946 C0 FF		 cpy #$ff
+   658 00,3948 D0 05		 bne y6
+   659 00,394A A9 00		 lda #0
+   660 00,394C 9D 5C 34		 sta volume,x
+   661 00,394F 98		y6 tya
+   662 00,3950 9D 65 34		 sta frq,x
+   663 00,3953 A9 01		 lda #1
+   664 00,3955 8D AF 34		 sta b1
+   665 00,3958 BD 7A 34		 lda count1,x
+   666 00,395B C9 0F		 cmp #$f
+   667 00,395D F0 38		 beq y9
+   668 00,395F 29 07		 and #7
+   669 00,3961 A8		 tay
+   670 00,3962 B9 8A 3B		 lda tab9,y
+   671 00,3965 85 FE		 sta word
+   672 00,3967 BD 7A 34		 lda count1,x
+   673 00,396A 29 08		 and #8
+   674 00,396C 08		 php
+   675 00,396D 8A		 txa
+   676 00,396E 28		 plp
+   677 00,396F 18		 clc
+   678 00,3970 F0 02		 beq y7
+   679 00,3972 69 03		 adc #3
+   680 00,3974 A8		y7 tay
+   681 00,3975 B9 9C 34		 lda dana4,y
+   682 00,3978 25 FE		 and word
+   683 00,397A F0 1B		 beq y9
+   684 00,397C BD 74 34		 lda czest3,x
+   685 00,397F 9D 65 34		 sta frq,x
+   686 00,3982 8E AF 34		 stx b1
+   687 00,3985 CA		 dex
+   688 00,3986 10 08		 bpl y8
+   689 00,3988 8D 68 34		 sta frq+3
+   690 00,398B A9 00		 lda #0
+   691 00,398D 8D 6D 34		 sta audc
+   692 00,3990 E8		y8 inx
+   693 00,3991 BD 77 34		 lda zniek,x
+   694 00,3994 9D 69 34		 sta znieks,x
+   695 00,3997 BD 7A 34		y9 lda count1,x
+   696 00,399A 29 0F		 and #$f
+   697 00,399C C9 0F		 cmp #$f
+   698 00,399E F0 10		 beq y10
+   699 00,39A0 FE 7A 34		 inc count1,x
+   700 00,39A3 BD 7A 34		 lda count1,x
+   701 00,39A6 C9 0F		 cmp #$f
+   702 00,39A8 D0 06		 bne y10
+   703 00,39AA BD 99 34		 lda dana3,x
+   704 00,39AD 9D 80 34		 sta lopad,x
+   705 00,39B0 BD 8C 34		y10 lda czygrx,x
+   706 00,39B3 10 0A		 bpl y11
+   707 00,39B5 BD 5C 34		 lda volume,x
+   708 00,39B8 D0 05		 bne y11
+   709 00,39BA A9 40		 lda #$40
+   710 00,39BC 9D 8C 34		 sta czygrx,x
+   711 00,39BF FE 7D 34		y11 inc count2,x
+   712 00,39C2 A0 00		 ldy #0
+   713 00,39C4 BD 93 34		 lda dana1,x
+   714 00,39C7 4A		 lsr @
+   715 00,39C8 4A		 lsr @
+   716 00,39C9 4A		 lsr @
+   717 00,39CA 4A		 lsr @
+   718 00,39CB 90 01		 bcc y12
+   719 00,39CD 88		 dey
+   720 00,39CE 4A		y12 lsr @
+   721 00,39CF 90 01		 bcc y13
+   722 00,39D1 C8		 iny
+   723 00,39D2 18		y13 clc
+   724 00,39D3 98		 tya
+   725 00,39D4 7D 6E 34		 adc czest1,x
+   726 00,39D7 9D 6E 34		 sta czest1,x
+   727 00,39DA BD 71 34		 lda czest2,x
+   728 00,39DD C9 FF		 cmp #$ff
+   729 00,39DF D0 02		 bne y14
+   730 00,39E1 A0 00		 ldy #0
+   731 00,39E3 18		y14 clc
+   732 00,39E4 98		 tya
+   733 00,39E5 7D 71 34		 adc czest2,x
+   734 00,39E8 9D 71 34		 sta czest2,x
+   735 00,39EB CA		 dex
+   736 00,39EC 30 03		 bmi x1
+   737 00,39EE 4C D5 38		 jmp loop
+   738
+   739 00,39F1 AD 69 34		x1 lda znieks
+   740 00,39F4 8D 6C 34		 sta znieks+3
+   741 00,39F7 AD 93 34		 lda dana1
+   742 00,39FA 29 07		 and #7
+   743 00,39FC AA		 tax
+   744 00,39FD A0 03		 ldy #3
+   745 00,39FF AD AF 34		 lda b1
+   746 00,3A02 F0 03		 beq x2
+   747 00,3A04 BC 92 3B		 ldy tab10,x
+   748 00,3A07 98		x2 tya
+   749 00,3A08 48		 pha
+   750 00,3A09 B9 76 3B		 lda tab8,y
+   751 00,3A0C 08		 php
+   752 00,3A0D 29 7F		 and #$7f
+   753 00,3A0F AA		 tax
+   754 00,3A10 98		 tya
+   755 00,3A11 29 03		 and #3
+   756 00,3A13 0A		 asl @
+   757 00,3A14 A8		 tay
+   758 00,3A15 BD 65 34		 lda frq,x
+   759 00,3A18 99 00 D2		d0 sta $d200,y
+   760 00,3A1B C8		 iny
+   761 00,3A1C BD 5C 34		 lda volume,x
+   762 00,3A1F E0 03		 cpx #3
+   763 00,3A21 D0 03		 bne x3
+   764 00,3A23 AD 5C 34		 lda volume
+   765 00,3A26 1D 69 34		x3 ora znieks,x
+   766 00,3A29 28		 plp
+   767 00,3A2A 10 02		 bpl d1
+   768 00,3A2C A9 00		 lda #0
+   769 00,3A2E 99 00 D2		d1 sta $d200,y
+   770 00,3A31 68		 pla
+   771 00,3A32 A8		 tay
+   772 00,3A33 88		 dey
+   773 00,3A34 29 03		 and #3
+   774 00,3A36 D0 CF		 bne x2
+   775 00,3A38 A0 08		 ldy #8
+   776 00,3A3A AD 6D 34		 lda audc
+   777 00,3A3D 99 00 D2		d2 sta $d200,y
+   778
+   779 00,3A40 18		 clc
+   780 00,3A41 68		end pla
+   781 00,3A42 85 FF		 sta word+1
+   782 00,3A44 68		 pla
+   783 00,3A45 85 FE		 sta word
+   784 00,3A47 68		 pla
+   785 00,3A48 85 FD		 sta addr+1
+   786 00,3A4A 68		 pla
+   787 00,3A4B 85 FC		 sta addr
+   788 00,3A4D 60		 rts
+   789
+   790 				*--- basic
+   791 				/*
+   792 				basic pla
+   793 				 tax
+   794 				 beq p6
+   795 				 cmp #2
+   796 				 beq p2
+   797 				p1 pla
+   798 				 pla
+   799 				 dex
+   800 				 bne p1
+   801 				 rts
+   802
+   803 				p2 lda $14
+   804 				 cmp $14
+   805 				 beq *-2
+   806
+   807 				 lda $224
+   808 				 cmp <p8
+   809 				 bne p3
+   810 				 lda $225
+   811 				 cmp >p8
+   812 				 beq p1
+   813 				p3 lda $224
+   814 				 sta p9+1
+   815 				 lda $225
+   816 				 sta p9+2
+   817 				 lda <p8
+   818 				 sta $224
+   819 				 lda >p8
+   820 				 sta $225
+   821 				 pla
+   822 				 pla
+   823 				 beq p4
+   824 				 sec
+   825 				 sbc #1
+   826 				p4 sta p5+1
+   827 				 pla
+   828 				 tay
+   829 				 pla
+   830 				 tax
+   831 				 lda #$70
+   832 				 jsr init
+   833 				 lda #0
+   834 				p5 ldx #0
+   835 				 jmp init
+   836 				p6 lda $14
+   837 				 cmp $14
+   838 				 beq *-2
+   839 				 lda $224
+   840 				 cmp <p8
+   841 				 bne p2-1
+   842 				 lda $225
+   843 				 cmp >p8
+   844 				 bne p2-1
+   845 				p7 lda p9+1
+   846 				 sta $224
+   847 				 lda p9+2
+   848 				 sta $225
+   849 				 lda #$40
+   850 				 jmp init
+   851 				p8 jsr play
+   852 				 bcc p9
+   853 				 jsr p7
+   854 				p9 jmp $ffff
+   855 				*/
+   856
+   857 				*--- tablice
+   858
+   859 00,3A4E F3 34		tab1 dta a(graj)
+   860 00,3A50 1E 35		 dta a(grajx)
+   861 00,3A52 E9 35		 dta a(instr)
+   862 00,3A54 7C 35		 dta a(tempo)
+   863 00,3A56 BC 35		 dta a(skoncz)
+   864 00,3A58 D5 35		 dta a(przer)
+   865 00,3A5A E0 35		 dta a(kont)
+   866 00,3A5C 93 35		 dta a(inic)
+   867
+   868 00,3A5E D4 37		tab2 dta a(stop)
+   869 00,3A60 DA 37		 dta a(jump)
+   870 00,3A62 DE 37		 dta a(up)
+   871 00,3A64 E6 37		 dta a(down)
+   872 00,3A66 EE 37		 dta a(temp)
+   873 00,3A68 F8 37		 dta a(rep)
+   874 00,3A6A 0E 38		 dta a(break)
+   875
+   876 00,3A6C 76 3A		tab3 dta a(tab5)
+   877 00,3A6E B7 3A		 dta a(tab6)
+   878 00,3A70 F8 3A		 dta a(tab7)
+   879
+   880 00,3A72 80 A0		tab4 dta b($80),b($a0)
+   881 00,3A74 20 40		 dta b($20),b($40)
+   882
+   883 00,3A76 FF F1 E4 D7	tab5 dta b($ff),b($f1),b($e4),b($d7)
+   884 00,3A7A CB C0 B5 AA	 dta b($cb),b($c0),b($b5),b($aa)
+   885 00,3A7E A1 98 8F 87	 dta b($a1),b($98),b($8f),b($87)
+   886 00,3A82 7F 78 72 6B	 dta b($7f),b($78),b($72),b($6b)
+   887 00,3A86 65 5F 5A 55	 dta b($65),b($5f),b($5a),b($55)
+   888 00,3A8A 50 4B 47 43	 dta b($50),b($4b),b($47),b($43)
+   889 00,3A8E 3F 3C 38 35	 dta b($3f),b($3c),b($38),b($35)
+   890 00,3A92 32 2F 2C 2A	 dta b($32),b($2f),b($2c),b($2a)
+   891 00,3A96 27 25 23 21	 dta b($27),b($25),b($23),b($21)
+   892 00,3A9A 1F 1D 1C 1A	 dta b($1f),b($1d),b($1c),b($1a)
+   893 00,3A9E 18 17 16 14	 dta b($18),b($17),b($16),b($14)
+   894 00,3AA2 13 12 11 10	 dta b($13),b($12),b($11),b($10)
+   895 00,3AA6 0F 0E 0D 0C	 dta b($0f),b($0e),b($0d),b($0c)
+   896 00,3AAA 0B 0A 09 08	 dta b($0b),b($0a),b($09),b($08)
+   897 00,3AAE 07 06 05 04	 dta b($07),b($06),b($05),b($04)
+   898 00,3AB2 03 02 01 00	 dta b($03),b($02),b($01),b($00)
+   899 00,3AB6 00		 dta b($00)
+   900
+   901 00,3AB7			tab6
+   902
+   903 				 ift bass=0
+   904
+   905 				 dta b($00),b($00),b($00),b($00)
+   906 				 dta b($f2),b($e9),b($da),b($ce)
+   907 				 dta b($bf),b($b6),b($aa),b($a1)
+   908 				 dta b($98),b($8f),b($89),b($80)
+   909 				 dta b($7a),b($71),b($6b),b($65)
+   910 				 dta b($5f),b($00),b($56),b($50)
+   911 				 dta b($67),b($60),b($5a),b($55)
+   912 				 dta b($51),b($4c),b($48),b($43)
+   913 				 dta b($3f),b($3d),b($39),b($34)
+   914 				 dta b($33),b($39),b($2d),b($2a)
+   915 				 dta b($28),b($25),b($24),b($21)
+   916 				 dta b($1f),b($1e),b($00),b($00)
+   917 				 dta b($0f),b($0e),b($0d),b($0c)
+   918 				 dta b($0b),b($0a),b($09),b($08)
+   919 				 dta b($07),b($06),b($05),b($04)
+   920 				 dta b($03),b($02),b($01),b($00)
+   921 				 dta b($00)
+   922
+   923 				 els
+   924
+   925 00,3AB7 00 00 00 00 F2 +	 dta 0,0,0,0,242,233,218,206,191,182,170,161
+   926 00,3AC3 98 8F 89 80 7A +	 dta 152,143,137,128,122,113,107,101,95,92,86
+   927 00,3ACE 50 4D 47 44 41 +	 dta 80,77,71,68,65,62,56,53,136,127,121,115,108
+   928 00,3ADB 67 60 5A 55 51 +	 dta 103,96,90,85,81,76,72,67,63,61,57,52,51,48
+   929 00,3AE9 2D 2A 28 25 24 +	 dta 45,42,40,37,36,33,31,30,5,4,3,2,1,0,0
+   930
+   931 				 eif
+   932
+   933 00,3AF8 38 0B 8C 0A 00 +	tab7 dta a($b38),a($a8c),a($a00),a($96a)
+   934 00,3B00 E8 08 6A 08 EF +	 dta a($8e8),a($86a),a($7ef),a($780)
+   935 00,3B08 08 07 AE 06 46 +	 dta a($708),a($6ae),a($646),a($5e6)
+   936 00,3B10 95 05 41 05 F6 +	 dta a($595),a($541),a($4f6),a($4b0)
+   937 00,3B18 6E 04 30 04 F6 +	 dta a($46e),a($430),a($3f6),a($3bb)
+   938 00,3B20 84 03 52 03 22 +	 dta a($384),a($352),a($322),a($2f4)
+   939 00,3B28 C8 02 A0 02 7A +	 dta a($2c8),a($2a0),a($27a),a($255)
+   940 00,3B30 34 02 14 02 F5 +	 dta a($234),a($214),a($1f5),a($1d8)
+   941 00,3B38 BD 01 A4 01 8D +	 dta a($1bd),a($1a4),a($18d),a($177)
+   942 00,3B40 60 01 4E 01 38 +	 dta a($160),a($14e),a($138),a($127)
+   943 00,3B48 15 01 06 01 F7 +	 dta a($115),a($106),a($0f7),a($0e8)
+   944 00,3B50 DB 00 CF 00 C3 +	 dta a($0db),a($0cf),a($0c3),a($0b8)
+   945 00,3B58 AC 00 A2 00 9A +	 dta a($0ac),a($0a2),a($09a),a($090)
+   946 00,3B60 88 00 7F 00 78 +	 dta a($088),a($07f),a($078),a($070)
+   947 00,3B68 6A 00 64 00 5E +	 dta a($06a),a($064),a($05e),a($057)
+   948 00,3B70 52 00 32 00 0A +	 dta a($052),a($032),a($00a)
+   949
+   950 00,3B76 00 01 02 83	tab8 dta b($00),b($01),b($02),b($83)
+   951 00,3B7A 00 01 02 03	 dta b($00),b($01),b($02),b($03)
+   952 00,3B7E 01 00 02 83	 dta b($01),b($00),b($02),b($83)
+   953 00,3B82 01 00 02 03	 dta b($01),b($00),b($02),b($03)
+   954 00,3B86 01 02 80 03	 dta b($01),b($02),b($80),b($03)
+   955
+   956 00,3B8A 80 40 20 10	tab9 dta b($80),b($40),b($20),b($10)
+   957 00,3B8E 08 04 02 01	 dta b($08),b($04),b($02),b($01)
+   958
+   959 00,3B92 03 03 03 03	tab10 dta b(3),b(3),b(3),b(3)
+   960 00,3B96 07 0B 0F 13	 dta b(7),b($b),b($f),b($13)
+   961
+   962 				*--- koniec
+   963
+   964 				.endp
+  1294
+  1295 				.endl
+  1296
+  1297 00,3B9A 00 00		msx_address		dta a(music)
+  1298
+  1299 				/*
+  1300 				  Aktualizacja adresow, wg kolejnosci deklaracji
+  1301
+  1302 				  music			ext .word
+  1303 				  default_nmi		ext .word
+  1304 				  reset_pokey		ext .word
+  1305 				  bank			ext .word (=bank)
+  1306 				  switch_bank		ext .word	
+  1307
+  1308 				  $FFEE,type(byte),count(word),length_label(word),label(text),address...
+  1309 				*/
+  1310 00,3B9C			start
+  1311 00,3B9C 8E 07 3C		 stx _word+1
+  1312 00,3B9F 8C 08 3C		 sty _word+2
+  1313
+  1314 				 mwa #update upd
+Macro: MWA [Source: D:\!Atari\getris2\grat\grat.mac]
+     2 00,3BA2 A9 1D		  lda <UPDATE
+     3 00,3BA4 85 45		  sta UPD
+     4 00,3BA6 A9 3C		  lda >UPDATE
+     5 00,3BA8 85 46		  sta UPD+1
+Source: D:\!Atari\getris2\grat_lib.asm
+  1315
+  1316 00,3BAA 20 B6 3B		 jsr _upd	; music
+  1317 00,3BAD 20 B6 3B		 jsr _upd	; default_nmi
+  1318 00,3BB0 20 B6 3B		 jsr _upd	; reset_pokey
+  1319
+  1320 00,3BB3 4C 01 26		 jmp main
+  1321
+  1322
+  1323 00,3BB6			_upd
+  1324 00,3BB6 A0 06		 ldy #6
+  1325 00,3BB8			_cp
+  1326 00,3BB8 B1 45		 lda (upd),y
+  1327 00,3BBA 99 16 3C		 sta __tmp,y
+  1328 00,3BBD 88		 dey
+  1329 00,3BBE 10 F8		 bpl _cp
+  1330
+  1331 00,3BC0 A9 07		 lda #7		; omijamy 7 bajtow naglowka + dlugosc etykiety
+  1332 00,3BC2 18		 clc
+  1333 00,3BC3 6D 1B 3C		 adc __tmp+5
+  1334 00,3BC6 20 0A 3C		 jsr add_upd
+  1335
+  1336 00,3BC9 AE 19 3C		 ldx __tmp+3
+  1337
+  1338 00,3BCC			_rep
+  1339 00,3BCC A0 02		 ldy #3-1
+  1340 00,3BCE			__cp
+  1341 00,3BCE B1 45		 lda (upd),y
+  1342 00,3BD0 99 16 3C		 sta __tmp,y
+  1343 00,3BD3 88		 dey
+  1344 00,3BD4 10 F8		 bpl __cp
+  1345
+  1346 00,3BD6 A9 03		 lda #3
+  1347 00,3BD8 20 0A 3C		 jsr add_upd
+  1348
+  1349 				 mwa __tmp+1 tmp
+Macro: MWA [Source: D:\!Atari\getris2\grat\grat.mac]
+     7 00,3BDB AD 17 3C		  lda __TMP+1
+     8 00,3BDE 85 47		  sta TMP
+     9 00,3BE0 AD 18 3C		  lda __TMP+1+1
+    10 00,3BE3 85 48		  sta TMP+1
+Source: D:\!Atari\getris2\grat_lib.asm
+  1350
+  1351 00,3BE5 A0 00		 ldy #0
+  1352 00,3BE7 20 06 3C		 jsr _word
+  1353 00,3BEA 91 47		 sta (tmp),y
+  1354
+  1355 00,3BEC C8		 iny
+  1356 00,3BED 20 06 3C		 jsr _word
+  1357 00,3BF0 91 47		 sta (tmp),y
+  1358
+  1359 00,3BF2 CA		 dex
+  1360 00,3BF3 D0 D7		 bne _rep
+  1361
+  1362 				 inw _word+1
+Macro: INW [Source: D:\!Atari\getris2\grat\grat.mac]
+     1 00,3BF5 EE 07 3C		 inc _WORD+1
+     2 00,3BF8 D0 03		 bne skip
+     3 00,3BFA EE 08 3C		 inc _WORD+1+1
+     4 00,3BFD			skip
+Source: D:\!Atari\getris2\grat_lib.asm
+  1363 				 inw _word+1
+Macro: INW [Source: D:\!Atari\getris2\grat\grat.mac]
+     1 00,3BFD EE 07 3C		 inc _WORD+1
+     2 00,3C00 D0 03		 bne skip
+     3 00,3C02 EE 08 3C		 inc _WORD+1+1
+     4 00,3C05			skip
+Source: D:\!Atari\getris2\grat_lib.asm
+  1364 00,3C05 60		 rts
+  1365
+  1366 00,3C06 B9 FF FF		_word lda $ffff,y
+  1367 00,3C09 60		 rts
+  1368
+  1369
+  1370 00,3C0A			add_upd
+  1371 00,3C0A 18		 clc
+  1372 00,3C0B 65 45		 adc upd
+  1373 00,3C0D 85 45		 sta upd
+  1374 00,3C0F 90 02		 scc$3C13
+  1375 00,3C11 E6 46		 inc upd+1
+  1376
+  1377 00,3C13 A0 00		 ldy #0
+  1378 00,3C15 60		 rts
+  1379
+  1380
+  1381 00,3C16 00 00 00 00 00 +	__tmp :7 brk
+  1382
+  1383 00,3C1D			update
+  1384
+  1385 				;--
+  1386
+  1387 00,3C1D				blk update external
+  1387 00,3C1D EE FF 02		
+  1387 00,3C1D 01 00 05 00 4D +	MUSIC
+  1387 00,3C1D EE FF 02		
+  1387 00,3C1D 01 00 0B 00 44 +	DEFAULT_NMI
+  1387 00,3C1D EE FF 02		
+  1387 00,3C1D 01 00 0B 00 52 +	RESET_POKEY
+  1388
+Source: D:\!Atari\getris2\grat\grat.mac

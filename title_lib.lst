@@ -1,0 +1,1206 @@
+Mad-Assembler v1.6.9beta by TeBe/Madteam
+Source: D:\!Atari\getris2\title_lib.asm
+     1 				// wersja do spakowania deflaterem
+     2
+     3 				// adres uruchomienia pod $2400-3
+     4
+     5 				// external declaration (.WORD)
+     6 = 00,0000		reset_pokey			ext .word
+     7 = 00,0000		tmc_player.initialization	ext .word
+     8 = 00,0000		tmc_player.sound		ext .word
+     9 = 00,0000		tmc_player.play			ext .word
+    10 = 00,0000		default_nmi			ext .word
+    11
+    12
+    13 				// zero page variables
+    14 = 00,0040		rejA	equ $40
+    15 = 00,0041		rejX	equ rejA+1
+    16 = 00,0042		rejY	equ rejX+1
+    17 = 00,0043		tmp	equ rejY+1
+    18 = 00,0045		upd	equ tmp+2
+    19
+    20
+    21 				// constans
+    22 = 00,0007		ksywki	equ 7			; liczba ksywek do wyswietlenia
+    23
+    24 = 00,003E		scr40	equ %00111110	        ; obraz normalny *-screen 40b
+    25
+    26 = 00,0000		pmBase	equ $0000
+    27
+    28 = 00,D000		hposp0	equ $D000
+    29 = 00,D001		hposp1	equ $D001
+    30 = 00,D002		hposp2	equ $D002
+    31 = 00,D003		hposp3	equ $D003
+    32 = 00,D004		hposm0	equ $D004
+    33 = 00,D005		hposm1	equ $D005
+    34 = 00,D006		hposm2	equ $D006
+    35 = 00,D007		hposm3	equ $D007
+    36 = 00,D008		sizep0	equ $D008
+    37 = 00,D009		sizep1	equ $D009
+    38 = 00,D00A		sizep2	equ $D00A
+    39 = 00,D00B		sizep3	equ $D00B
+    40 = 00,D00C		sizem	equ $D00C
+    41
+    42 = 00,D012		colpm0	equ $D012
+    43 = 00,D013		colpm1	equ $D013
+    44 = 00,D014		colpm2	equ $D014
+    45 = 00,D015		colpm3	equ $D015
+    46 = 00,D016		color0	equ $D016
+    47 = 00,D017		color1	equ $D017
+    48 = 00,D018		color2	equ $D018
+    49 = 00,D019		color3	equ $D019
+    50 = 00,D01A		colbak	equ $D01A
+    51 = 00,D01B		gtictl	equ $D01B
+    52
+    53 = 00,D000		Player0_PositionX equ $d000
+    54 = 00,D001		Player1_PositionX equ $d001
+    55 = 00,D002		Player2_PositionX equ $d002
+    56 = 00,D003		Player3_PositionX equ $d003
+    57
+    58 = 00,D004		Missile0_PositionX equ $d004
+    59 = 00,D005		Missile1_PositionX equ $d005
+    60 = 00,D006		Missile2_PositionX equ $d006
+    61 = 00,D007		Missile3_PositionX equ $d007
+    62
+    63 = 00,D008		Player0_Size equ $d008
+    64 = 00,D009		Player1_Size equ $d009
+    65 = 00,D00A		Player2_Size equ $d00a
+    66 = 00,D00B		Player3_Size equ $d00b
+    67
+    68 = 00,D00C		Missiles_Size equ $d00c
+    69
+    70 = 00,D012		Player0_Missile0_Color0_PM0 equ $d012
+    71 = 00,D013		Player1_Missile1_Color1_PM1 equ $d013
+    72 = 00,D014		Player2_Missile2_Color2_PM2 equ $d014
+    73 = 00,D015		Player3_Missile3_Color3_PM3 equ $d015
+    74
+    75 = 00,D016		Playfield_Color0_PF0 equ $d016
+    76 = 00,D017		Playfield_Color1_PF1 equ $d017
+    77 = 00,D018		Playfield_Color2_PF2 equ $d018
+    78 = 00,D019		Playfield_Color3_PF3 equ $d019
+    79 = 00,D01A		Background_BAK       equ $d01a
+    80
+    81 = 00,D01B		PRIOR_GTIACTL        equ $d01b
+    82 = 00,D409		CHARBASE             equ $d409
+    83
+    84
+    85 				;-- MAIN PROGRAM
+    86 				 opt h-
+    87 				 org $1000
+    88
+    89 				fnt
+    90 00,1000 00 44 11 54 55 +	 ins 'title\Getr4_OK.fnt',0,4096	// 5*1024 bytes
+    91
+    92 00,2000			 .get 'title\Getr4_logosy.fnt'
+    93
+    94  [03FD] 4C 6E 33		 .put [1024-3] = {jmp start} , <start , >start	; JMP START
+    95
+    96 00,2000 01 04 01 00 00 +	 .sav 1024
+    97
+    98 00,2400			fnt_press
+    99 00,2400 00 00 00 FF 00 +	 ins 'title\press.fnt',0,28*8
+   100
+   101 00,24E0			text
+   102 00,24E0 00 01 02 03 04 +	 ins 'title\Getr4_OK.scr',0,13*40
+   103
+   104 00,26E8			text_credits
+   105 00,26E8 26 26 26 26 26 +	 ins 'title\Getr4_logosy.scr',0,7*40
+   106
+   107 00,2800			logosy
+   108 00,2800 26 26 26 26 26 +	 ins 'title\Getr4_logosy.scr',7*40,14*40
+   109
+   110 00,2A30			press
+   111 00,2A30 00 00 00 00 00 +	 ins 'title\press.scr'
+   112
+   113 00,2AF8			ant
+   114 00,2AF8 C4 E0 24		 dta $44+$80,a(text)
+   115 00,2AFB 84 04 84 04 04 +	 dta $84,4,$84,4,4,4,4,$84,4,4,$84,4,$f0,$20,$42,a(text_credits),2,2,2,2,2,2+$80,$42
+   116 00,2B13 00 28 02 F0 42 +	log_adr dta a(logosy),2,$f0,$42,a(press),2,2,2,2
+   117 00,2B1E 41 F8 2A		 dta $41,a(ant)
+   118
+   119
+   120 00,2B21			pmg_credits
+   121 00,2B21 C0 C0 C0 C0 C0 +	 dta $C0,$C0,$C0,$C0,$C0,$C0,$C0,$C0    ;pm0
+   122 00,2B29 C0 C0 C0 C0 C0 +	 dta $C0,$C0,$C0,$C0,$C0,$C0,$C0,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   123 00,2B39 C0 C0 C0 C0 C0 +	 dta $C0,$C0,$C0,$C0,$C0,$C0,$C0,$C0,$C0,$C0,$C0,$C0,$C0,$C0,$C0,$00
+   124 00,2B49 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$F8,$F8,$F8,$F8,$F8,$F8,$F8,$F8
+   125 00,2B59 F8 F8 F8 F8 F8 +	 dta $F8,$F8,$F8,$F8,$F8,$F8,$F8
+   126
+   127 00,2B60 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00    ;pm3
+   128 00,2B68 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   129 00,2B78 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   130 00,2B88 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+   131 00,2B98 FF FF FF FF FF +	 dta $FF,$FF,$FF,$FF,$FF,$FF,$FF
+   132
+   133 00,2B9F 3F 3F 3F 3F 3F +	 dta $3F,$3F,$3F,$3F,$3F,$3F,$3F,$3F    ;pm4
+   134 00,2BA7 3F 3F 3F 3F 3F +	 dta $3F,$3F,$3F,$3F,$3F,$3F,$3F,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   135 00,2BB7 FF FF FF FF FF +	 dta $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00
+   136 00,2BC7 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+   137 00,2BD7 FF FF FF FF FF +	 dta $FF,$FF,$FF,$FF,$FF,$FF,$FF
+   138
+   139 00,2BDE			pmg_logo
+   140 00,2BDE 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   141 00,2BEE 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$08,$08,$04,$8C,$0C,$0C,$0C,$4D
+   142 00,2BFE 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$40,$70,$70,$D0,$C0,$C0,$E0,$64
+   143 00,2C0E F4 F4 F4 F4 FC +	 dta $F4,$F4,$F4,$F4,$FC,$DC,$54,$60,$60,$20,$20,$00,$20,$00,$00,$00
+   144 00,2C1E 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$42,$01,$40,$00,$00,$00,$00,$00
+   145 00,2C2E 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   146
+   147 00,2C3E 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   148 00,2C4E 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$02,$04,$00,$08,$10,$00,$40
+   149 00,2C5E 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   150 00,2C6E 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   151 00,2C7E 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$04,$02,$83,$41,$20,$10,$10,$08
+   152 00,2C8E 04 82 40 20 10 +	 dta $04,$82,$40,$20,$10,$00,$04,$00,$40,$20,$04,$0C,$06,$00,$00,$00
+   153
+   154 00,2C9E 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$01,$02,$0A,$10,$20,$00,$80
+   155 00,2CAE 00 04 08 10 01 +	 dta $00,$04,$08,$10,$01,$02,$04,$0C,$18,$45,$0A,$47,$0D,$85,$0E,$85
+   156 00,2CBE 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$80,$00,$80,$80,$80,$80,$80
+   157 00,2CCE D0 A0 DC 5E DC +	 dta $D0,$A0,$DC,$5E,$DC,$2E,$40,$00,$00,$00,$04,$04,$06,$00,$00,$00
+   158 00,2CDE 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   159 00,2CEE 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   160
+   161 00,2CFE 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   162 00,2D0E 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   163 00,2D1E 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$C0,$C0,$00,$00
+   164 00,2D2E 00 30 38 F8 F8 +	 dta $00,$30,$38,$F8,$F8,$F8,$F0,$60,$42,$02,$02,$06,$06,$00,$00,$00
+   165 00,2D3E 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$80,$40,$A0,$40,$00,$00
+   166 00,2D4E 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   167
+   168 00,2D5E 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   169 00,2D6E 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$40,$40,$40,$00,$00,$00,$00,$00
+   170 00,2D7E 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$40,$00,$40,$40,$80,$80,$80,$82,$82
+   171 00,2D8E 80 80 82 87 87 +	 dta $80,$80,$82,$87,$87,$07,$0F,$3F,$7E,$6C,$6E,$6E,$6E,$6E,$4E,$4E
+   172 00,2D9E 4C 8C 44 04 00 +	 dta $4C,$8C,$44,$04,$00,$00,$00,$00,$00,$00,$1C,$04,$01,$04,$41,$12
+   173 00,2DAE 07 01 00 00 00 +	 dta $07,$01,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   174
+   175 				; tmc_relocator 'title\forever.tm8' , title_msx
+   176 				; .sav [6] length
+   177
+   178 00,2DBE			main
+   179
+   180 00,2DBE 20 00 00		 jsr reset_pokey
+   181
+   182 				// czyscimy pmBase
+   183 00,2DC1 A0 00		 ldy #0
+   184 00,2DC3 98		 tya
+   185
+   186 00,2DC4			clr
+   187 				.rept 5
+   188 				 sta pmBase+$300+.r*$100,y
+   189 				.endr
+Source: REPT
+   188 00,2DC4 99 00 03		 sta pmBase+$300+.r*$100,y
+   188 00,2DC7 99 00 04		 sta pmBase+$300+.r*$100,y
+   188 00,2DCA 99 00 05		 sta pmBase+$300+.r*$100,y
+   188 00,2DCD 99 00 06		 sta pmBase+$300+.r*$100,y
+   188 00,2DD0 99 00 07		 sta pmBase+$300+.r*$100,y
+Source: D:\!Atari\getris2\title_lib.asm
+   190 00,2DD3 C8		 iny
+   191 00,2DD4 D0 EE		 bne clr
+   192
+   193 				// skopiowanie danych PMG pod adres pmBase
+   194 00,2DD6 A0 5F		 ldy #95
+   195
+   196 = 00,0000		?ofs = 0
+   197
+   198 00,2DD8			.local
+   199 00,2DD8			copy
+   200 				.rept 5
+   201 					lda pmg_logo+.r*96,y 
+   202 					sta pmBase+$300+?ofs+.r*$100,y
+   203 				.endr
+Source: REPT
+   201 00,2DD8 B9 DE 2B			lda pmg_logo+.r*96,y 
+   202 00,2DDB 99 00 03			sta pmBase+$300+?ofs+.r*$100,y
+   201 00,2DDE B9 3E 2C			lda pmg_logo+.r*96,y 
+   202 00,2DE1 99 00 04			sta pmBase+$300+?ofs+.r*$100,y
+   201 00,2DE4 B9 9E 2C			lda pmg_logo+.r*96,y 
+   202 00,2DE7 99 00 05			sta pmBase+$300+?ofs+.r*$100,y
+   201 00,2DEA B9 FE 2C			lda pmg_logo+.r*96,y 
+   202 00,2DED 99 00 06			sta pmBase+$300+?ofs+.r*$100,y
+   201 00,2DF0 B9 5E 2D			lda pmg_logo+.r*96,y 
+   202 00,2DF3 99 00 07			sta pmBase+$300+?ofs+.r*$100,y
+Source: D:\!Atari\getris2\title_lib.asm
+   204
+   205 00,2DF6 88		 dey
+   206 00,2DF7 10 DF		 bpl copy
+   207 				.endl
+   208
+   209  [0000] 00 03 04		 .put = 0,3,4
+   210
+   211 00,2DF9 A0 3E		 ldy #62
+   212
+   213 = 00,0083		?ofs = 128+3+8-8
+   214
+   215 00,2DFB			.local
+   216 00,2DFB			copy
+   217 				.rept 3
+   218 					lda pmg_credits+.r*63,y
+   219 					sta pmBase+$300+?ofs+.get[.r]*$100,y
+   220 				.endr
+Source: REPT
+   218 00,2DFB B9 21 2B			lda pmg_credits+.r*63,y
+   219 00,2DFE 99 83 03			sta pmBase+$300+?ofs+.get[.r]*$100,y
+   218 00,2E01 B9 60 2B			lda pmg_credits+.r*63,y
+   219 00,2E04 99 83 06			sta pmBase+$300+?ofs+.get[.r]*$100,y
+   218 00,2E07 B9 9F 2B			lda pmg_credits+.r*63,y
+   219 00,2E0A 99 83 07			sta pmBase+$300+?ofs+.get[.r]*$100,y
+Source: D:\!Atari\getris2\title_lib.asm
+   221
+   222 00,2E0D 88		 dey
+   223 00,2E0E 10 EB		 bpl copy
+   224 				.endl
+   225
+   226 00,2E10 20 7D 2F		 jsr fade.save_color
+   227
+   228 00,2E13 20 00 00		 jsr tmc_player.initialization
+   229
+   230 				 lda:rne $d40b
+   230 00,2E16 AD 0B D4		 lda $d40b
+   230 00,2E19 D0 FB		 rne$2E16 $d40b
+   231
+   232 				;-- init PMG
+   233 				 mva >pmBase $d407	;PMCTL - wyswietlac duchy i pociski
+Macro: MVA [Source: d:\!atari\macro\xasm.mac]
+     5 00,2E1B A9 00		 ldA >PMBASE
+     6 00,2E1D 8D 07 D4		 stA $D407
+Source: D:\!Atari\getris2\title_lib.asm
+Source: D:\!Atari\getris2\title_lib.asm
+   234 				 mva #3 $d01d		;PMCTL - show PMG
+Macro: MVA [Source: d:\!atari\macro\xasm.mac]
+     5 00,2E20 A9 03		 ldA #3
+     6 00,2E22 8D 1D D0		 stA $D01D
+Source: D:\!Atari\getris2\title_lib.asm
+Source: D:\!Atari\getris2\title_lib.asm
+   235
+   236 				 mwa #nmi $fffa
+Macro: MWA [Source: d:\!atari\macro\xasm.mac]
+    36 00,2E25 A9 C4		      ldA <NMI
+    37 00,2E27 8D FA FF		      stA $FFFA
+    38 00,2E2A A9 32		      ldA >NMI
+    39 00,2E2C 8D FB FF		      stA $FFFA+1
+Source: D:\!Atari\getris2\title_lib.asm
+   237 				 mva #$c0 $d40e
+Macro: MVA [Source: d:\!atari\macro\xasm.mac]
+     5 00,2E2F A9 C0		 ldA #$C0
+     6 00,2E31 8D 0E D4		 stA $D40E
+Source: D:\!Atari\getris2\title_lib.asm
+Source: D:\!Atari\getris2\title_lib.asm
+   238
+   239 00,2E34 A2 21		 ldx <fade.fade_in
+   240 00,2E36 A0 2F		 ldy >fade.fade_in
+   241 00,2E38 20 02 2F		 jsr fade.fade
+   242
+   243
+   244 00,2E3B			loop
+   245 				;        lda:cmp:req 20
+   246 				;        jsr tmc_player.play
+   247
+   248 				 play 20+32
+Macro: PLAY [Source: D:\!Atari\getris2\title_lib.asm]
+     2 00,2E3B AD 0B D4		wait    lda $d40b
+     3 00,2E3E C9 34		        cmp #20+32
+     4 00,2E40 D0 F9		        bne wait
+     9 00,2E42 20 00 00			jsr tmc_player.sound
+Source: D:\!Atari\getris2\title_lib.asm
+   249 				 play 76+16
+Macro: PLAY [Source: D:\!Atari\getris2\title_lib.asm]
+     2 00,2E45 AD 0B D4		wait    lda $d40b
+     3 00,2E48 C9 5C		        cmp #76+16
+     4 00,2E4A D0 F9		        bne wait
+     9 00,2E4C 20 00 00			jsr tmc_player.sound
+Source: D:\!Atari\getris2\title_lib.asm
+   250
+   251
+   252 00,2E4F			.local logos
+   253
+   254 00,2E4F A9 FF		_fad lda #$ff
+   255 00,2E51 D0 35		 bne _cnt2
+   256
+   257 00,2E53 A2 00		_idx ldx #0
+   258 00,2E55 BD DB 2E		 lda tfad,x
+   259 00,2E58 8D 9A 32		 sta c7+1
+   260 00,2E5B D0 1E		 bne skp
+   261
+   262 00,2E5D AC DA 2E		 ldy _log
+   263 00,2E60 B9 F4 2E		 lda tlog_l,y
+   264 00,2E63 8D 13 2B		 sta log_adr
+   265 00,2E66 B9 FB 2E		 lda tlog_h,y
+   266 00,2E69 8D 14 2B		 sta log_adr+1 
+   267
+   268 00,2E6C EE DA 2E		 inc _log
+   269 00,2E6F AD DA 2E		 lda _log 
+   270 00,2E72 C9 07		 cmp #ksywki
+   271 00,2E74 D0 05		 bne skp
+   272
+   273 00,2E76 A9 00		 lda #0
+   274 00,2E78 8D DA 2E		 sta _log
+   275
+   276 00,2E7B			skp
+   277 00,2E7B EE 54 2E		 inc _idx+1
+   278 00,2E7E E0 18		 cpx #25-1
+   279 00,2E80 D0 23		 bne _skp
+   280
+   281 00,2E82 8E 50 2E		 stx _fad+1
+   282 00,2E85 4C A5 2E		 jmp _skp
+   283
+   284
+   285 00,2E88			_cnt2
+   286 				 inw _cnt
+Macro: INW [Source: d:\!atari\macro\xasm.mac]
+     5 00,2E88 EE D8 2E		 inc _CNT
+     6 00,2E8B D0 03		 bne skip
+     8 00,2E8D EE D9 2E		 inc _CNT+1
+    10 00,2E90			skip
+Source: D:\!Atari\getris2\title_lib.asm
+   287 00,2E90 AD D9 2E		 lda _cnt+1
+   288 00,2E93 C9 01		 cmp #1
+   289 00,2E95 D0 0E		 bne _skp
+   290
+   291 00,2E97 A9 00		 lda #0
+   292 00,2E99 8D D8 2E		 sta _cnt
+   293 00,2E9C 8D D9 2E		 sta _cnt+1
+   294 00,2E9F 8D 50 2E		 sta _fad+1
+   295 00,2EA2 8D 54 2E		 sta _idx+1
+   296
+   297 00,2EA5			_skp
+   298
+   299 				.endl
+   300
+   301
+   302 00,2EA5 AD 1F D0		 lda $d01f
+   303 00,2EA8 C9 03		 cmp #%011	; OPTION
+   304 00,2EAA F0 09		 beq quit
+   305
+   306 00,2EAC C9 06		 cmp #%110	; START
+   307 00,2EAE F0 05		 beq quit
+   308
+   309 00,2EB0 AD 10 D0		 lda $d010
+   310 00,2EB3 D0 86		 bne loop
+   311
+   312 00,2EB5			quit
+   313
+   314 00,2EB5 8D D6 2E		 sta console
+   315
+   316 00,2EB8 A9 EA		 lda #{nop}
+   317 00,2EBA 8D 64 33		 sta nmi.player
+   318 00,2EBD 8D 65 33		 sta nmi.player+1
+   319 00,2EC0 8D 66 33		 sta nmi.player+2
+   320
+   321 00,2EC3 20 00 00		 jsr reset_pokey
+   322
+   323 00,2EC6 A2 52		 ldx <fade.fade_out
+   324 00,2EC8 A0 2F		 ldy >fade.fade_out
+   325 00,2ECA 20 02 2F		 jsr fade.fade
+   326
+   327
+   328 				 lda:rne $d40b
+   328 00,2ECD AD 0B D4		 lda $d40b
+   328 00,2ED0 D0 FB		 rne$2ECD $d40b
+   329
+   330 00,2ED2 20 00 00		 jsr default_nmi
+   331
+   332 00,2ED5 A9 07		 lda #%111
+   333 = 00,2ED6		console equ *-1
+   334 00,2ED7 60		 rts
+   335
+   336
+   337 00,2ED8 00 00		_cnt .word
+   338 00,2EDA 01		_log dta 1
+   339 00,2EDB 0C 0B 0A 09 08 +	tfad dta $c,$b,$a,9,8,7,6,5,4,3,2,1,0,1,2,3,4,5,6,7,8,9,$a,$b,$c
+   340
+   341 00,2EF4			tlog_l
+   342 				.rept ksywki
+   343 				 dta l(logosy+.r*80)
+   344 				.endr
+Source: REPT
+   343 00,2EF4 #00 00		 dta l(logosy+.r*80)
+   343 00,2EF5 #01 50		 dta l(logosy+.r*80)
+   343 00,2EF6 #02 A0		 dta l(logosy+.r*80)
+   343 00,2EF7 #03 F0		 dta l(logosy+.r*80)
+   343 00,2EF8 #04 40		 dta l(logosy+.r*80)
+   343 00,2EF9 #05 90		 dta l(logosy+.r*80)
+   343 00,2EFA #06 E0		 dta l(logosy+.r*80)
+Source: D:\!Atari\getris2\title_lib.asm
+   345
+   346 00,2EFB			tlog_h
+   347 				.rept ksywki
+   348 				 dta h(logosy+.r*80)
+   349 				.endr
+Source: REPT
+   348 00,2EFB #00 28		 dta h(logosy+.r*80)
+   348 00,2EFC #01 28		 dta h(logosy+.r*80)
+   348 00,2EFD #02 28		 dta h(logosy+.r*80)
+   348 00,2EFE #03 28		 dta h(logosy+.r*80)
+   348 00,2EFF #04 29		 dta h(logosy+.r*80)
+   348 00,2F00 #05 29		 dta h(logosy+.r*80)
+   348 00,2F01 #06 29		 dta h(logosy+.r*80)
+Source: D:\!Atari\getris2\title_lib.asm
+   350
+   351
+   352 00,2F02			.local fade
+   353 00,2F02				icl 'title\getr4.fad'
+Source: D:\!Atari\getris2\title\getr4.fad
+     1
+     2 = 00,001B		color_nr	equ 27
+     3
+     4 00,2F02			.proc fade
+     5 00,2F02 8E 18 2F		 stx adr+1
+     6 00,2F05 8C 19 2F		 sty adr+2
+     7
+     8 00,2F08 A2 10		 ldx #16
+     9 00,2F0A 20 0F 30		 jsr wait
+    10
+    11 00,2F0D A9 10		 lda #16
+    12 00,2F0F 8D 20 2F		 sta licz
+    13 00,2F12			fad
+    14 00,2F12 A2 02		 ldx #2
+    15 00,2F14 20 0F 30		 jsr wait
+    16 00,2F17 20 02 2F		adr jsr fade
+    17 00,2F1A CE 20 2F		 dec licz
+    18 00,2F1D D0 F3		 bne fad
+    19
+    20 00,2F1F 60		 rts
+    21
+    22 00,2F20 00		licz brk
+    23
+    24 				.endp
+    25
+    26
+    27 				;-----------;
+    28 				;- FADE IN -;
+    29 				;-----------;
+    30 00,2F21			.proc fade_in
+    31
+    32 00,2F21 A2 00		 ldx #0
+    33
+    34 00,2F23			fade_l
+    35 00,2F23 BD A3 2F		 lda l_tcol,x
+    36 00,2F26 85 43		 sta tmp
+    37 00,2F28 BD BE 2F		 lda h_tcol,x
+    38 00,2F2B 85 44		 sta tmp+1
+    39
+    40 00,2F2D A0 01		 ldy #1
+    41 00,2F2F B1 43		 lda (tmp),y
+    42 00,2F31 A8		 tay
+    43
+    44 00,2F32 29 0F		 and #$0f
+    45 00,2F34 DD D9 2F		 cmp t_satur,x
+    46 00,2F37 F0 01		 beq skp0
+    47
+    48 00,2F39 C8		 iny
+    49
+    50 00,2F3A			skp0
+    51
+    52 00,2F3A 98		 tya
+    53 00,2F3B 29 F0		 and #$f0
+    54 00,2F3D DD F4 2F		 cmp t_color,x
+    55 00,2F40 F0 05		 beq skp1
+    56
+    57 00,2F42 98		 tya
+    58 00,2F43 18		 clc
+    59 00,2F44 69 10		 adc #$10
+    60 00,2F46 A8		 tay
+    61
+    62 00,2F47			skp1
+    63 00,2F47 98		 tya
+    64
+    65 00,2F48 A0 01		 ldy #1
+    66 00,2F4A 91 43		 sta (tmp),y
+    67
+    68 00,2F4C E8		 inx
+    69 00,2F4D E0 1B		 cpx #color_nr
+    70 00,2F4F D0 D2		 bne fade_l
+    71 00,2F51 60		 rts
+    72
+    73 				.endp
+    74
+    75 				;------------;
+    76 				;- FADE OUT -;
+    77 				;------------;
+    78 00,2F52			.proc fade_out
+    79
+    80 00,2F52 A2 00		 ldx #0
+    81
+    82 00,2F54			fade_l
+    83 00,2F54 BD A3 2F		ltc1 lda l_tcol,x
+    84 00,2F57 85 43		 sta tmp
+    85 00,2F59 BD BE 2F		htc1 lda h_tcol,x
+    86 00,2F5C 85 44		 sta tmp+1
+    87
+    88 00,2F5E A0 01		 ldy #1
+    89 00,2F60 B1 43		 lda (tmp),y
+    90 00,2F62 A8		 tay
+    91
+    92 00,2F63 29 0F		 and #$0f
+    93 00,2F65 F0 01		 beq skp0
+    94
+    95 00,2F67 88		 dey
+    96
+    97 00,2F68			skp0
+    98
+    99 00,2F68 98		 tya
+   100 00,2F69 29 F0		 and #$f0
+   101 00,2F6B F0 05		 beq skp1
+   102
+   103 00,2F6D 98		 tya
+   104 00,2F6E 38		 sec
+   105 00,2F6F E9 10		 sbc #$10
+   106 00,2F71 A8		 tay
+   107
+   108 00,2F72			skp1
+   109 00,2F72 98		 tya
+   110
+   111 00,2F73 A0 01		 ldy #1
+   112 00,2F75 91 43		 sta (tmp),y
+   113
+   114 00,2F77 E8		 inx
+   115 00,2F78 E0 1B		col_nr1 cpx #color_nr
+   116 00,2F7A D0 D8		 bne fade_l
+   117 00,2F7C 60		 rts
+   118 				.endp
+   119
+   120
+   121 				;--------------;
+   122 				;- SAVE COLOR -;
+   123 				;--------------;
+   124 00,2F7D			save_color
+   125 00,2F7D A2 00		 ldx #0
+   126 00,2F7F			save_l
+   127 00,2F7F BD A3 2F		 lda l_tcol,x
+   128 00,2F82 85 43		 sta tmp
+   129 00,2F84 BD BE 2F		 lda h_tcol,x
+   130 00,2F87 85 44		 sta tmp+1
+   131
+   132 00,2F89 A0 01		 ldy #1
+   133 00,2F8B B1 43		 lda (tmp),y
+   134 00,2F8D 48		 pha
+   135 00,2F8E 29 0F		 and #$0f
+   136 00,2F90 9D D9 2F		 sta t_satur,x
+   137 00,2F93 68		 pla
+   138 00,2F94 29 F0		 and #$f0
+   139 00,2F96 9D F4 2F		 sta t_color,x
+   140
+   141 00,2F99 A9 00		 lda #0        ; black screen (all colors = $00)
+   142 00,2F9B 91 43		 sta (tmp),y
+   143
+   144 00,2F9D E8		 inx
+   145 00,2F9E E0 1B		 cpx #color_nr
+   146 00,2FA0 D0 DD		 bne save_l
+   147 00,2FA2 60		 rts
+   148
+   149
+   150 00,2FA3			l_tcol
+   151 00,2FA3 EB F0 F5 FA FF +	 dta l(nmi.c0,nmi.c1,nmi.c2,nmi.c3,nmi.c4,nmi.c5,nmi.c6,nmi.c7,nmi.c8,c9)
+   152 00,2FAD 70 84 86 A1 CB +	 dta l(c10,c11,c12,c13,c14,c15,c16,c17,c18,c19)
+   153 00,2FB7 DB EB 4B 4D 89 +	 dta l(c20,c21,c2,c3,c6,c7,c30)
+   154
+   155 00,2FBE			h_tcol
+   156 00,2FBE 32 32 32 32 32 +	 dta h(nmi.c0,nmi.c1,nmi.c2,nmi.c3,nmi.c4,nmi.c5,nmi.c6,nmi.c7,nmi.c8,c9)
+   157 00,2FC8 30 30 30 30 30 +	 dta h(c10,c11,c12,c13,c14,c15,c16,c17,c18,c19)
+   158 00,2FD2 31 31 32 32 32 +	 dta h(c20,c21,c2,c3,c6,c7,c30)
+   159
+   160 00,2FD9 00 00 00 00 00 +	t_satur :color_nr brk
+   161 00,2FF4 00 00 00 00 00 +	t_color :color_nr brk
+   354 				.endl
+   355
+   356
+   357 00,300F			.proc	wait
+   358 				 lda:cmp:req 20
+   358 00,300F A5 14		 lda 20
+   358 00,3011 C5 14		 cmp 20
+   358 00,3013 F0 FC		 req$3011 20
+   359 00,3015 CA		 dex
+   360 00,3016 D0 F7		 bne wait
+   361 00,3018 60		 rts
+   362 				.endp
+   363
+   364 = 00,3019			?old_dli = *
+   365 00,3019			dli1
+   366
+   367 				; sta $d40a                   ;line=0
+   368 				; sta $d40a                   ;line=1
+   369 				; sta $d40a                   ;line=2
+   370 				; sta $d40a                   ;line=3
+   371 				; sta $d40a                   ;line=4
+   372 				; sta $d40a                   ;line=5
+   373 				; sta $d40a                   ;line=6
+   374 				; sta $d40a                   ;line=7
+   375
+   376 00,3019 8D 0A D4		 sta $d40a                   ;line=8
+   377 00,301C A9 42		 lda #$42
+   378 				; sta $d40a                   ;line=9
+   379 00,301E 8D 01 D0		 sta Player1_PositionX
+   380 				; sta $d40a                   ;line=10
+   381 				; sta $d40a                   ;line=11
+   382 				; sta $d40a                   ;line=12
+   383 				; sta $d40a                   ;line=13
+   384 				; sta $d40a                   ;line=14
+   385 				; sta $d40a                   ;line=15
+   386
+   387 				 dli_quit dli1_2
+Macro: DLI_QUIT [Source: D:\!Atari\getris2\title_lib.asm]
+     5 00,3021 A9 29		 ldA <DLI1_2
+     6 00,3023 8D D0 32		 stA NMI.DLIV+1
+Source: D:\!Atari\getris2\title_lib.asm
+Source: D:\!Atari\getris2\title_lib.asm
+     8 00,3026 4C 67 33		  jmp nmi.quit
+    10 = 00,3029		  ?old_dli = *
+Source: D:\!Atari\getris2\title_lib.asm
+   388
+   389
+   390 00,3029			dli1_2
+   391 00,3029 8D 0A D4		 sta $d40a                   ;line=16
+   392 00,302C A9 3F		 lda #$3F
+   393 00,302E 8D 0A D4		 sta $d40a                   ;line=17
+   394 00,3031 8D 01 D0		 sta Player1_PositionX
+   395 00,3034 A9 6C		 lda #$6C
+   396 00,3036 8D 0A D4		 sta $d40a                   ;line=18
+   397 00,3039 8D 05 D0		 sta Missile1_PositionX
+   398 00,303C A9 3D		 lda #$3D
+   399 00,303E A2 74		 ldx #$74
+   400 00,3040 A0 6E		 ldy #$6E
+   401 00,3042 8D 0A D4		 sta $d40a                   ;line=19
+   402 00,3045 8D 01 D0		 sta Player1_PositionX
+   403 00,3048 8E 03 D0		 stx Player3_PositionX
+   404 00,304B 8C 05 D0		 sty Missile1_PositionX
+   405 00,304E A9 68		c9 lda #$68
+   406 00,3050 8D 15 D0		 sta Player3_Missile3_Color3_PM3
+   407 00,3053 8D 0A D4		 sta $d40a                   ;line=20
+   408 00,3056 A9 3C		 lda #$3C
+   409 00,3058 A2 6F		 ldx #$6F
+   410 00,305A A0 6D		 ldy #$6D
+   411 00,305C 8D 0A D4		 sta $d40a                   ;line=21
+   412 00,305F 8D 01 D0		 sta Player1_PositionX
+   413 00,3062 8E 05 D0		 stx Missile1_PositionX
+   414 00,3065 8C 07 D0		 sty Missile3_PositionX
+   415 00,3068 A9 70		 lda #$70
+   416 00,306A 8D 0A D4		 sta $d40a                   ;line=22
+   417 00,306D 8D 05 D0		 sta Missile1_PositionX
+   418 00,3070 A9 7A		c10 lda #$7A
+   419 00,3072 A2 3A		 ldx #$3A
+   420 00,3074 A0 71		 ldy #$71
+   421 00,3076 8D 0A D4		 sta $d40a                   ;line=23
+   422 00,3079 8D 18 D0		 sta Playfield_Color2_PF2
+   423 00,307C 8E 01 D0		 stx Player1_PositionX
+   424 00,307F 8C 05 D0		 sty Missile1_PositionX
+   425 00,3082 A9 14		 lda >fnt+$400*$01
+   426 00,3084 A2 54		c11 ldx #$54
+   427 00,3086 A0 68		c12 ldy #$68
+   428 00,3088 8D 0A D4		 sta $d40a                   ;line=24
+   429 00,308B 8D 09 D4		 sta CHARBASE
+   430 00,308E 8E 16 D0		 stx Playfield_Color0_PF0
+   431 00,3091 8C 17 D0		 sty Playfield_Color1_PF1
+   432 00,3094 A9 3C		 lda #$3C
+   433 00,3096 8D 01 D0		 sta Player1_PositionX
+   434 00,3099 A9 6B		 lda #$6B
+   435 00,309B 8D 0A D4		 sta $d40a                   ;line=25
+   436 00,309E 8D 05 D0		 sta Missile1_PositionX
+   437 00,30A1 A9 0C		c13 lda #$0C
+   438 00,30A3 8D 0A D4		 sta $d40a                   ;line=26
+   439 00,30A6 8D 13 D0		 sta Player1_Missile1_Color1_PM1
+   440 00,30A9 A9 03		 lda #$03
+   441 00,30AB A2 37		 ldx #$37
+   442 00,30AD 8D 0A D4		 sta $d40a                   ;line=27
+   443 00,30B0 8D 09 D0		 sta Player1_Size
+   444 00,30B3 8E 01 D0		 stx Player1_PositionX
+   445 00,30B6 8D 0A D4		 sta $d40a                   ;line=28
+   446 00,30B9 A9 FC		 lda #$FC
+   447 00,30BB A2 54		 ldx #$54
+   448 00,30BD A0 9B		 ldy #$9B
+   449 00,30BF 8D 0A D4		 sta $d40a                   ;line=29
+   450 00,30C2 8D 0C D0		 sta Missiles_Size
+   451 00,30C5 8E 05 D0		 stx Missile1_PositionX
+   452 00,30C8 8C 07 D0		 sty Missile3_PositionX
+   453 00,30CB A9 0C		c14 lda #$0C
+   454 00,30CD 8D 15 D0		 sta Player3_Missile3_Color3_PM3
+   455 				; sta $d40a                   ;line=30
+   456 				; sta $d40a                   ;line=31
+   457
+   458 				 dli_quit dli1_3
+Macro: DLI_QUIT [Source: D:\!Atari\getris2\title_lib.asm]
+     5 00,30D0 A9 D8		 ldA <DLI1_3
+     6 00,30D2 8D D0 32		 stA NMI.DLIV+1
+Source: D:\!Atari\getris2\title_lib.asm
+Source: D:\!Atari\getris2\title_lib.asm
+     8 00,30D5 4C 67 33		  jmp nmi.quit
+    10 = 00,30D8		  ?old_dli = *
+Source: D:\!Atari\getris2\title_lib.asm
+   459
+   460
+   461 00,30D8			dli1_3 
+   462 00,30D8 8D 0A D4		 sta $d40a                   ;line=32
+   463 00,30DB 8D 0A D4		 sta $d40a                   ;line=33
+   464 00,30DE A9 5A		 lda #$5A
+   465 00,30E0 8D 0A D4		 sta $d40a                   ;line=34
+   466 00,30E3 8D 00 D0		 sta Player0_PositionX
+   467 00,30E6 A9 76		 lda #$76
+   468 00,30E8 A2 9D		 ldx #$9D
+   469 00,30EA 8D 0A D4		 sta $d40a                   ;line=35
+   470 00,30ED 8D 03 D0		 sta Player3_PositionX
+   471 00,30F0 8E 07 D0		 stx Missile3_PositionX
+   472 00,30F3 8D 0A D4		 sta $d40a                   ;line=36
+   473 00,30F6 8D 0A D4		 sta $d40a                   ;line=37
+   474 00,30F9 A9 5C		 lda #$5C
+   475 00,30FB 8D 0A D4		 sta $d40a                   ;line=38
+   476 00,30FE 8D 06 D0		 sta Missile2_PositionX
+   477 00,3101 8D 0A D4		 sta $d40a                   ;line=39
+   478 00,3104 A9 35		 lda #$35
+   479 00,3106 A2 75		 ldx #$75
+   480 00,3108 A0 9E		 ldy #$9E
+   481 00,310A 8D 0A D4		 sta $d40a                   ;line=40
+   482 00,310D 8D 01 D0		 sta Player1_PositionX
+   483 00,3110 8E 03 D0		 stx Player3_PositionX
+   484 00,3113 8C 07 D0		 sty Missile3_PositionX
+   485 00,3116 A9 38		 lda #$38
+   486 00,3118 8D 0A D4		 sta $d40a                   ;line=41
+   487 00,311B 8D 01 D0		 sta Player1_PositionX
+   488 00,311E A9 01		 lda #$01
+   489 00,3120 A2 39		 ldx #$39
+   490 00,3122 A0 9F		 ldy #$9F
+   491 00,3124 8D 0A D4		 sta $d40a                   ;line=42
+   492 00,3127 8D 09 D0		 sta Player1_Size
+   493 00,312A 8E 01 D0		 stx Player1_PositionX
+   494 00,312D 8C 07 D0		 sty Missile3_PositionX
+   495 00,3130 A9 74		 lda #$74
+   496 00,3132 8D 0A D4		 sta $d40a                   ;line=43
+   497 00,3135 8D 03 D0		 sta Player3_PositionX
+   498 00,3138 8D 0A D4		 sta $d40a                   ;line=44
+   499 00,313B A9 A0		 lda #$A0
+   500 00,313D 8D 0A D4		 sta $d40a                   ;line=45
+   501 00,3140 8D 07 D0		 sta Missile3_PositionX
+   502 00,3143 A9 52		 lda #$52
+   503 00,3145 A2 A1		 ldx #$A1
+   504 00,3147 8D 0A D4		 sta $d40a                   ;line=46
+   505 00,314A 8D 05 D0		 sta Missile1_PositionX
+   506 00,314D 8E 07 D0		 stx Missile3_PositionX
+   507 00,3150 A9 01		 lda #$01
+   508 00,3152 A2 83		 ldx #$83
+   509 00,3154 A0 55		 ldy #$55
+   510 00,3156 8D 0A D4		 sta $d40a                   ;line=47
+   511 00,3159 8D 0B D0		 sta Player3_Size
+   512 00,315C 8E 03 D0		 stx Player3_PositionX
+   513 00,315F 8C 06 D0		 sty Missile2_PositionX
+   514 00,3162 A9 18		 lda >fnt+$400*$02
+   515 00,3164 A2 8F		 ldx #$8F
+   516 00,3166 8D 0A D4		 sta $d40a                   ;line=48
+   517 00,3169 8D 09 D4		 sta CHARBASE
+   518 00,316C 8E 04 D0		 stx Missile0_PositionX
+   519 00,316F 8D 0A D4		 sta $d40a                   ;line=49
+   520 00,3172 A9 82		 lda #$82
+   521 00,3174 8D 0A D4		 sta $d40a                   ;line=50
+   522 00,3177 8D 03 D0		 sta Player3_PositionX
+   523 00,317A 8D 0A D4		 sta $d40a                   ;line=51
+   524 00,317D 8D 0A D4		 sta $d40a                   ;line=52
+   525 00,3180 8D 0A D4		 sta $d40a                   ;line=53
+   526 00,3183 8D 0A D4		 sta $d40a                   ;line=54
+   527 00,3186 8D 0A D4		 sta $d40a                   ;line=55
+   528 00,3189 A9 00		 lda #$00
+   529 00,318B A2 62		 ldx #$62
+   530 00,318D A0 68		c15 ldy #$68
+   531 00,318F 8D 0A D4		 sta $d40a                   ;line=56
+   532 00,3192 8D 0A D0		 sta Player2_Size
+   533 00,3195 8E 02 D0		 stx Player2_PositionX
+   534 00,3198 8C 14 D0		 sty Player2_Missile2_Color2_PM2
+   535 00,319B 8D 0A D4		 sta $d40a                   ;line=57
+   536 00,319E A9 3C		 lda #$3C
+   537 00,31A0 A2 A6		 ldx #$A6
+   538 00,31A2 8D 0A D4		 sta $d40a                   ;line=58
+   539 00,31A5 8D 0C D0		 sta Missiles_Size
+   540 00,31A8 8E 07 D0		 stx Missile3_PositionX
+   541 00,31AB 8D 0A D4		 sta $d40a                   ;line=59
+   542 00,31AE 8D 0A D4		 sta $d40a                   ;line=60
+   543 00,31B1 A9 54		c16 lda #$54
+   544 00,31B3 8D 0A D4		 sta $d40a                   ;line=61
+   545 00,31B6 8D 15 D0		 sta Player3_Missile3_Color3_PM3
+   546 00,31B9 8D 0A D4		 sta $d40a                   ;line=62
+   547 00,31BC 8D 0A D4		 sta $d40a                   ;line=63
+   548 00,31BF A9 14		c17 lda #$14
+   549 00,31C1 8D 0A D4		 sta $d40a                   ;line=64
+   550 00,31C4 8D 16 D0		 sta Playfield_Color0_PF0
+   551 00,31C7 A9 00		 lda #$00
+   552 00,31C9 A2 8B		 ldx #$8B
+   553 00,31CB A0 68		c18 ldy #$68
+   554 00,31CD 8D 0A D4		 sta $d40a                   ;line=65
+   555 00,31D0 8D 0B D0		 sta Player3_Size
+   556 00,31D3 8E 03 D0		 stx Player3_PositionX
+   557 00,31D6 8C 15 D0		 sty Player3_Missile3_Color3_PM3
+   558 00,31D9 A9 26		c19 lda #$26
+   559 00,31DB A2 FA		c20 ldx #$FA
+   560 00,31DD A0 85		 ldy #$85
+   561 00,31DF 8D 0A D4		 sta $d40a                   ;line=66
+   562 00,31E2 8D 17 D0		 sta Playfield_Color1_PF1
+   563 00,31E5 8E 18 D0		 stx Playfield_Color2_PF2
+   564 00,31E8 8C 07 D0		 sty Missile3_PositionX
+   565 00,31EB A9 68		c21 lda #$68
+   566 00,31ED 8D 12 D0		 sta Player0_Missile0_Color0_PM0
+   567 00,31F0 8D 0A D4		 sta $d40a                   ;line=67
+   568 00,31F3 8D 0A D4		 sta $d40a                   ;line=68
+   569 00,31F6 8D 0A D4		 sta $d40a                   ;line=69
+   570 00,31F9 A9 61		 lda #$61
+   571 00,31FB 8D 0A D4		 sta $d40a                   ;line=70
+   572 00,31FE 8D 00 D0		 sta Player0_PositionX
+   573
+   574 				 dli_quit dli2
+Macro: DLI_QUIT [Source: D:\!Atari\getris2\title_lib.asm]
+    36 00,3201 A9 0E		      ldA <DLI2
+    37 00,3203 8D D0 32		      stA NMI.DLIV+1
+    38 00,3206 A9 32		      ldA >DLI2
+    39 00,3208 8D D1 32		      stA NMI.DLIV+1+1
+     8 00,320B 4C 67 33		  jmp nmi.quit
+    10 = 00,320E		  ?old_dli = *
+Source: D:\!Atari\getris2\title_lib.asm
+   575
+   576
+   577
+   578 00,320E			dli2
+   579 00,320E A9 1C		 lda >fnt+$400*$03
+   580 00,3210 8D 0A D4		 sta $d40a                   ;line=72
+   581 00,3213 8D 09 D4		 sta CHARBASE
+   582 00,3216 8D 0A D4		 sta $d40a                   ;line=73
+   583 00,3219 8D 0A D4		 sta $d40a                   ;line=74
+   584 00,321C 8D 0A D4		 sta $d40a                   ;line=75
+   585 00,321F 8D 0A D4		 sta $d40a                   ;line=76
+   586 00,3222 8D 0A D4		 sta $d40a                   ;line=77
+   587 00,3225 8D 0A D4		 sta $d40a                   ;line=78
+   588 00,3228 8D 0A D4		 sta $d40a                   ;line=79
+   589 00,322B A9 67		 lda #$67
+   590 00,322D 8D 0A D4		 sta $d40a                   ;line=80
+   591 00,3230 8D 00 D0		 sta Player0_PositionX
+   592
+   593 				 dli_quit dli3
+Macro: DLI_QUIT [Source: D:\!Atari\getris2\title_lib.asm]
+     5 00,3233 A9 3B		 ldA <DLI3
+     6 00,3235 8D D0 32		 stA NMI.DLIV+1
+Source: D:\!Atari\getris2\title_lib.asm
+Source: D:\!Atari\getris2\title_lib.asm
+     8 00,3238 4C 67 33		  jmp nmi.quit
+    10 = 00,323B		  ?old_dli = *
+Source: D:\!Atari\getris2\title_lib.asm
+   594
+   595
+   596 00,323B			dli3
+   597 00,323B A9 20		 lda >fnt+$400*$04
+   598 00,323D 8D 0A D4		 sta $d40a                   ;line=96
+   599 00,3240 8D 09 D4		 sta CHARBASE
+   600
+   601 				 dli_quit dli4
+Macro: DLI_QUIT [Source: D:\!Atari\getris2\title_lib.asm]
+     5 00,3243 A9 4B		 ldA <DLI4
+     6 00,3245 8D D0 32		 stA NMI.DLIV+1
+Source: D:\!Atari\getris2\title_lib.asm
+Source: D:\!Atari\getris2\title_lib.asm
+     8 00,3248 4C 67 33		  jmp nmi.quit
+    10 = 00,324B		  ?old_dli = *
+Source: D:\!Atari\getris2\title_lib.asm
+   602
+   603
+   604 00,324B			dli4
+   605
+   606 00,324B A9 00		c2 lda #$00
+   607 00,324D A2 08		c3 ldx #$08
+   608 00,324F 8D 0A D4		 sta $d40a                   ;line=104
+   609 00,3252 8D 16 D0		 sta color0
+   610 00,3255 8D 17 D0		 sta color1
+   611 00,3258 8E 18 D0		 stx color2
+   612 00,325B 8D 19 D0		 sta color3
+   613
+   614 00,325E A9 01		 lda #$01
+   615 00,3260 8D 1B D0		 sta gtictl
+   616 00,3263 A9 03		 lda #$03
+   617 00,3265 8D 0A D0		 sta sizep2
+   618 00,3268 8D 0B D0		 sta sizep3
+   619 00,326B A9 FC		 lda #$FC
+   620 00,326D 8D 0C D0		 sta sizem
+   621 00,3270 A9 A4		 lda #$A4
+   622 00,3272 8D 02 D0		 sta hposp2
+   623 00,3275 A9 7C		 lda #$7C
+   624 00,3277 8D 03 D0		 sta hposp3
+   625 00,327A A9 CC		 lda #$CC
+   626 00,327C 8D 05 D0		 sta hposm1
+   627 00,327F A9 C4		 lda #$C4
+   628 00,3281 8D 06 D0		 sta hposm2
+   629 00,3284 A9 9C		 lda #$9C
+   630 00,3286 8D 07 D0		 sta hposm3
+   631
+   632 00,3289 A9 0C		c6 lda #$0C
+   633 00,328B 8D 15 D0		 sta colpm3
+   634 00,328E 8D 14 D0		 sta colpm2
+   635
+   636 				 dli_quit dli5
+Macro: DLI_QUIT [Source: D:\!Atari\getris2\title_lib.asm]
+     5 00,3291 A9 99		 ldA <DLI5
+     6 00,3293 8D D0 32		 stA NMI.DLIV+1
+Source: D:\!Atari\getris2\title_lib.asm
+Source: D:\!Atari\getris2\title_lib.asm
+     8 00,3296 4C 67 33		  jmp nmi.quit
+    10 = 00,3299		  ?old_dli = *
+Source: D:\!Atari\getris2\title_lib.asm
+   637
+   638
+   639 00,3299			dli5
+   640 00,3299 A9 0C		c7 lda #$0C
+   641 00,329B 8D 0A D4		 sta $d40a
+   642 00,329E 8D 13 D0		 sta colpm1
+   643 00,32A1 8D 14 D0		 sta colpm2
+   644 00,32A4 8D 15 D0		 sta colpm3
+   645
+   646 				 dli_quit dli6
+Macro: DLI_QUIT [Source: D:\!Atari\getris2\title_lib.asm]
+     5 00,32A7 A9 AF		 ldA <DLI6
+     6 00,32A9 8D D0 32		 stA NMI.DLIV+1
+Source: D:\!Atari\getris2\title_lib.asm
+Source: D:\!Atari\getris2\title_lib.asm
+     8 00,32AC 4C 67 33		  jmp nmi.quit
+    10 = 00,32AF		  ?old_dli = *
+Source: D:\!Atari\getris2\title_lib.asm
+   647
+   648
+   649 00,32AF			dli6
+   650 00,32AF A9 24		 lda >fnt_press
+   651 00,32B1 A2 0E		c30 ldx #$0e
+   652 00,32B3 A0 00		 ldy #$00
+   653 00,32B5 8D 0A D4		 sta $d40a
+   654 00,32B8 8D 09 D4		 sta CHARBASE
+   655 00,32BB 8E 17 D0		 stx $d017
+   656 00,32BE 8C 18 D0		 sty $d018
+   657
+   658 00,32C1 4C 67 33		 jmp nmi.quit
+   659
+   660
+   661 				;--
+   662
+   663 00,32C4			.proc nmi
+   664
+   665 00,32C4 85 40		 sta rejA
+   666 00,32C6 86 41		 stx rejX
+   667 00,32C8 84 42		 sty rejY
+   668
+   669 00,32CA 2C 0F D4		 bit $d40f
+   670 00,32CD 10 03		 bpl vbl
+   671
+   672 00,32CF 4C 19 30		dliv jmp dli1
+   673
+   674 00,32D2			vbl
+   675 00,32D2 8D 0F D4		 sta $d40f		;reset znacznika przerwania $d40f
+   676
+   677 00,32D5 E6 14		 inc 20
+   678
+   679 				 mwa #ant $d402		;adres programu ANTICA ($d402,$d403)
+Macro: MWA [Source: d:\!atari\macro\xasm.mac]
+    36 00,32D7 A9 F8		      ldA <ANT
+    37 00,32D9 8D 02 D4		      stA $D402
+    38 00,32DC A9 2A		      ldA >ANT
+    39 00,32DE 8D 03 D4		      stA $D402+1
+Source: D:\!Atari\getris2\title_lib.asm
+   680 				 mva #scr40 $d400	;ustawienie szerokosci obrazu $d400
+Macro: MVA [Source: d:\!atari\macro\xasm.mac]
+     5 00,32E1 A9 3E		 ldA #SCR40
+     6 00,32E3 8D 00 D4		 stA $D400
+Source: D:\!Atari\getris2\title_lib.asm
+Source: D:\!Atari\getris2\title_lib.asm
+   681
+   682 				;-- init pierwszej linii
+   683
+   684 00,32E6 A9 10		 lda >fnt
+   685 00,32E8 8D 09 D4		 sta CHARBASE
+   686 00,32EB A9 00		c0 lda #$00
+   687 00,32ED 8D 1A D0		 sta Background_BAK
+   688 00,32F0 A9 14		c1 lda #$14
+   689 00,32F2 8D 16 D0		 sta Playfield_Color0_PF0
+   690 00,32F5 A9 26		c2 lda #$26
+   691 00,32F7 8D 17 D0		 sta Playfield_Color1_PF1
+   692 00,32FA A9 FA		c3 lda #$FA
+   693 00,32FC 8D 18 D0		 sta Playfield_Color2_PF2
+   694 00,32FF A9 54		c4 lda #$54
+   695 00,3301 8D 19 D0		 sta Playfield_Color3_PF3
+   696 00,3304 A9 04		 lda #$04
+   697 00,3306 8D 1B D0		 sta PRIOR_GTIACTL
+   698 00,3309 A9 00		 lda #$00
+   699 00,330B 8D 08 D0		 sta Player0_Size
+   700 00,330E 8D 09 D0		 sta Player1_Size
+   701 00,3311 A9 01		 lda #$01
+   702 00,3313 8D 0A D0		 sta Player2_Size
+   703 00,3316 A9 03		 lda #$03
+   704 00,3318 8D 0B D0		 sta Player3_Size
+   705 00,331B A9 34		 lda #$34
+   706 00,331D 8D 0C D0		 sta Missiles_Size
+   707 00,3320 A9 3F		 lda #$3F
+   708 00,3322 8D 00 D0		 sta Player0_PositionX
+   709 00,3325 A9 49		 lda #$49
+   710 00,3327 8D 01 D0		 sta Player1_PositionX
+   711 00,332A A9 B9		 lda #$B9
+   712 00,332C 8D 02 D0		 sta Player2_PositionX
+   713 00,332F A9 72		 lda #$72
+   714 00,3331 8D 03 D0		 sta Player3_PositionX
+   715 00,3334 8D 04 D0		 sta Missile0_PositionX
+   716 00,3337 A9 6B		 lda #$6B
+   717 00,3339 8D 05 D0		 sta Missile1_PositionX
+   718 00,333C A9 5E		 lda #$5E
+   719 00,333E 8D 06 D0		 sta Missile2_PositionX
+   720 00,3341 A9 6A		 lda #$6A
+   721 00,3343 8D 07 D0		 sta Missile3_PositionX
+   722 00,3346 A9 7A		c5 lda #$7A
+   723 00,3348 8D 12 D0		 sta Player0_Missile0_Color0_PM0
+   724 00,334B A9 68		c6 lda #$68
+   725 00,334D 8D 13 D0		 sta Player1_Missile1_Color1_PM1
+   726 00,3350 A9 0C		c7 lda #$0C
+   727 00,3352 8D 14 D0		 sta Player2_Missile2_Color2_PM2
+   728 00,3355 A9 FA		c8 lda #$FA
+   729 00,3357 8D 15 D0		 sta Player3_Missile3_Color3_PM3
+   730
+   731 				 mwa #dli1 dliv+1	;DLI ustawiamy na poczatek
+Macro: MWA [Source: d:\!atari\macro\xasm.mac]
+    36 00,335A A9 19		      ldA <DLI1
+    37 00,335C 8D D0 32		      stA DLIV+1
+    38 00,335F A9 30		      ldA >DLI1
+    39 00,3361 8D D1 32		      stA DLIV+1+1
+Source: D:\!Atari\getris2\title_lib.asm
+   732
+   733 00,3364 20 00 00		player jsr tmc_player.play
+   734
+   735 00,3367			quit
+   736 00,3367 A5 40		 lda rejA
+   737 00,3369 A6 41		 ldx rejX
+   738 00,336B A4 42		 ldy rejY
+   739 00,336D 40		 rti
+   740
+   741 				.endp
+   742
+   743
+   744 				/*
+   745 				  Aktualizacja adresow, wg kolejnosci deklaracji
+   746
+   747 				reset_pokey			ext .word
+   748 				tmc_player.initialization	ext .word
+   749 				tmc_player.sound		ext .word
+   750 				tmc_player.play			ext .word
+   751 				default_nmi			ext .word
+   752
+   753 				$FFEE,type(byte),count(word),length_label(word),label(text),address...
+   754
+   755 				*/
+   756 00,336E			start
+   757 00,336E 8E DF 33		 stx _word+1
+   758 00,3371 8C E0 33		 sty _word+2
+   759
+   760 				 mwa #update upd
+Macro: MWA [Source: d:\!atari\macro\xasm.mac]
+    36 00,3374 A9 F5		      ldA <UPDATE
+    37 00,3376 85 45		      stA UPD
+    38 00,3378 A9 33		      ldA >UPDATE
+    39 00,337A 85 46		      stA UPD+1
+Source: D:\!Atari\getris2\title_lib.asm
+   761
+   762 00,337C 20 8E 33		 jsr _upd	; reset_pokey
+   763 00,337F 20 8E 33		 jsr _upd	; tmc_player.initialization
+   764 00,3382 20 8E 33		 jsr _upd	; tmc_player.sound
+   765 00,3385 20 8E 33		 jsr _upd	; tmc_player.play
+   766 00,3388 20 8E 33		 jsr _upd	; default_nmi
+   767
+   768 				;kk lda $d20a
+   769 				; sta $d01a
+   770 				; jmp kk
+   771
+   772 00,338B 4C BE 2D		 jmp main
+   773
+   774
+   775 00,338E			_upd
+   776 00,338E A0 06		 ldy #6
+   777 00,3390			_cp
+   778 00,3390 B1 45		 lda (upd),y
+   779 00,3392 99 EE 33		 sta __tmp,y
+   780 00,3395 88		 dey
+   781 00,3396 10 F8		 bpl _cp
+   782
+   783 00,3398 A9 07		 lda #7		; omijamy 7 bajtow naglowka + dlugosc etykiety
+   784 00,339A 18		 clc
+   785 00,339B 6D F3 33		 adc __tmp+5
+   786 00,339E 20 E2 33		 jsr add_upd
+   787
+   788 00,33A1 AE F1 33		 ldx __tmp+3
+   789
+   790 00,33A4			_rep
+   791 00,33A4 A0 02		 ldy #3-1
+   792 00,33A6			__cp
+   793 00,33A6 B1 45		 lda (upd),y
+   794 00,33A8 99 EE 33		 sta __tmp,y
+   795 00,33AB 88		 dey
+   796 00,33AC 10 F8		 bpl __cp
+   797
+   798 00,33AE A9 03		 lda #3
+   799 00,33B0 20 E2 33		 jsr add_upd
+   800
+   801 				 mwa __tmp+1 tmp
+Macro: MWA [Source: d:\!atari\macro\xasm.mac]
+    44 00,33B3 AD EF 33		    ldA __TMP+1
+    45 00,33B6 85 43		    stA TMP
+    46 00,33B8 AD F0 33		    ldA __TMP+1+1
+    47 00,33BB 85 44		    stA TMP+1
+Source: D:\!Atari\getris2\title_lib.asm
+   802
+   803 00,33BD A0 00		 ldy #0
+   804 00,33BF 20 DE 33		 jsr _word
+   805 00,33C2 91 43		 sta (tmp),y
+   806
+   807 00,33C4 C8		 iny
+   808 00,33C5 20 DE 33		 jsr _word
+   809 00,33C8 91 43		 sta (tmp),y
+   810
+   811 00,33CA CA		 dex
+   812 00,33CB D0 D7		 bne _rep
+   813
+   814 				 inw _word+1
+Macro: INW [Source: d:\!atari\macro\xasm.mac]
+     5 00,33CD EE DF 33		 inc _WORD+1
+     6 00,33D0 D0 03		 bne skip
+     8 00,33D2 EE E0 33		 inc _WORD+1+1
+    10 00,33D5			skip
+Source: D:\!Atari\getris2\title_lib.asm
+   815 				 inw _word+1
+Macro: INW [Source: d:\!atari\macro\xasm.mac]
+     5 00,33D5 EE DF 33		 inc _WORD+1
+     6 00,33D8 D0 03		 bne skip
+     8 00,33DA EE E0 33		 inc _WORD+1+1
+    10 00,33DD			skip
+Source: D:\!Atari\getris2\title_lib.asm
+   816 00,33DD 60		 rts
+   817
+   818 00,33DE B9 FF FF		_word lda $ffff,y
+   819 00,33E1 60		 rts
+   820
+   821
+   822 00,33E2			add_upd
+   823 00,33E2 18		 clc
+   824 00,33E3 65 45		 adc upd
+   825 00,33E5 85 45		 sta upd
+   826 00,33E7 90 02		 scc$33EB
+   827 00,33E9 E6 46		 inc upd+1
+   828
+   829 00,33EB A0 00		 ldy #0
+   830 00,33ED 60		 rts
+   831
+   832
+   833 00,33EE 00 00 00 00 00 +	__tmp :7 brk
+   834
+   835 00,33F5			update
+   836
+   837 				;---
+Source: d:\!atari\macro\xasm.mac
+   871 				        opt l+
+   872
+   873 				;---
+   874 				; run main
+   875
+   876 00,33F5				blk update external
+   876 00,33F5 EE FF 57		
+   876 00,33F5 02 00 0B 00 52 +	RESET_POKEY
+   876 00,33F5 EE FF 57		
+   876 00,33F5 01 00 19 00 54 +	TMC_PLAYER.INITIALIZATION
+   876 00,33F5 EE FF 57		
+   876 00,33F5 03 00 10 00 54 +	TMC_PLAYER.SOUND
+   876 00,33F5 EE FF 57		
+   876 00,33F5 01 00 0F 00 54 +	TMC_PLAYER.PLAY
+   876 00,33F5 EE FF 57		
+   876 00,33F5 01 00 0B 00 44 +	DEFAULT_NMI

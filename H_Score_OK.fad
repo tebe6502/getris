@@ -1,0 +1,200 @@
+/*
+  Modyfikacji podlegaja adresy (+1):
+
+  fade_in.ltc0          l_tcol        adres tablicy z mlodszymi bajtami modyfikowanych adresow
+  fade_out.ltc1
+  ltc2
+
+  fade_in.htc0          h_tcol        adres tablicy ze starszymi bajtami modyfikowanych adresow
+  fade_out.htc1
+  htc2
+
+  fade_in.sat0          t_satur       adres tablicy przechowywujacej jasnosci
+  sat1
+
+  fade_in.tco0          t_color       adres tablicy przechowywujacej kolory
+  tco1
+  
+  fade_in.col_nr0                     adres bajtu zawierajacego liczbe zmian
+  fade_out.col_nr1
+  col_nr2
+*/
+
+color_nr equ 74
+
+;-----------;
+;- FADE IN -;
+;-----------;
+.proc fade_in
+
+ ldx #6
+ jsr wait
+ 
+ lda #16
+ sta licz
+fad
+ ldx #2
+ jsr wait
+ jsr fade
+ dec licz
+ bne fad
+ rts
+
+fade
+
+ ldx #0
+
+fade_l
+ltc0 lda l_tcol,x
+ sta tmp
+htc0 lda h_tcol,x
+ sta tmp+1
+
+ ldy #1
+ lda (tmp),y
+ tay
+
+ and #$0f
+sat0 cmp t_satur,x
+ beq skp0
+
+ iny
+
+skp0
+
+ tya
+ and #$f0
+tco0 cmp t_color,x
+ beq skp1
+
+ tya
+ clc
+ adc #$10
+ tay
+
+skp1
+ tya
+
+ ldy #1
+ sta (tmp),y
+
+ inx
+col_nr0 cpx #color_nr
+ bne fade_l
+ rts
+.endp
+
+
+;------------;
+;- FADE OUT -;
+;------------;
+.proc fade_out
+
+ ldx #6
+ jsr wait
+ 
+ lda #16
+ sta licz
+fad
+ ldx #2
+ jsr wait
+ jsr fade
+ dec licz
+ bne fad
+ rts
+
+fade
+
+ ldx #0
+
+fade_l
+ltc1 lda l_tcol,x
+ sta tmp
+htc1 lda h_tcol,x
+ sta tmp+1
+
+ ldy #1
+ lda (tmp),y
+ tay
+
+ and #$0f
+ beq skp0
+
+ dey
+
+skp0
+
+ tya
+ and #$f0
+ beq skp1
+
+ tya
+ sec
+ sbc #$10
+ tay
+
+skp1
+ tya
+
+ ldy #1
+ sta (tmp),y
+
+ inx
+col_nr1 cpx #color_nr
+ bne fade_l
+ rts
+.endp
+
+
+;--------------;
+;- SAVE COLOR -;
+;--------------;
+save_color
+
+ ldx #0
+save_l
+ltc2 lda l_tcol,x
+ sta tmp
+htc2 lda h_tcol,x
+ sta tmp+1
+
+ ldy #1
+ lda (tmp),y
+ pha
+ and #$0f
+sat1 sta t_satur,x
+ pla
+ and #$f0
+tco1 sta t_color,x
+
+ lda #0        ; black screen (all colors = $00)
+ sta (tmp),y
+
+ inx
+col_nr2 cpx #color_nr
+ bne save_l
+ rts
+
+
+l_tcol
+ dta l(logo.c0,logo.c1,logo.c2,logo.c3,logo.c4,logo.c5,logo.c6,logo.c7,c8,c9)
+ dta l(c10,c11,c12,c13,c14,c15,c16,c17,c18,c19)
+ dta l(c20,c21,c22,c23,c24,c25,c26,c27,c28,c29)
+ dta l(c30,c31,c32,c33,c34,c35,c36,c37,c38,c39)
+ dta l(c40,c41,c42,c43,c44,c45,c46,c47,c48,c49)
+ dta l(c50,c51,c52,c53,c54,c55,c56,c57,c58,c59)
+ dta l(c60,c61,c62,c63,c64,c65,c66,c67,c68,c69)
+ dta l(c70,c71,c72,c73)
+
+h_tcol
+ dta h(logo.c0,logo.c1,logo.c2,logo.c3,logo.c4,logo.c5,logo.c6,logo.c7,c8,c9)
+ dta h(c10,c11,c12,c13,c14,c15,c16,c17,c18,c19)
+ dta h(c20,c21,c22,c23,c24,c25,c26,c27,c28,c29)
+ dta h(c30,c31,c32,c33,c34,c35,c36,c37,c38,c39)
+ dta h(c40,c41,c42,c43,c44,c45,c46,c47,c48,c49)
+ dta h(c50,c51,c52,c53,c54,c55,c56,c57,c58,c59)
+ dta h(c60,c61,c62,c63,c64,c65,c66,c67,c68,c69)
+ dta h(c70,c71,c72,c73)
+
+t_satur .ds color_nr
+t_color .ds color_nr

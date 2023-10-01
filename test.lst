@@ -1,0 +1,15 @@
+mads 1.7.9
+Source: D:\!Atari\getris\test.asm
+     1
+     2 					org $6000
+     5 				 opt l+
+     6 FFFF> 6000-BFFF> EA 62 +  .sav [6] ?length
+     7 				 
+     8 				 .print ?length
+     9
+    10 C000				org $b000
+    13 				 opt l+
+    14 B000-015FFF> EA B2 1A +   .sav [6] ?length
+    15
+    16 				 .print ?length
+    17
