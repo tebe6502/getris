@@ -1,0 +1,3113 @@
+Mad-Assembler v1.6.9beta by TeBe/Madteam
+Source: D:\!Atari\getris2\intro\intro.asm
+     1
+     2 = 00,0030		fwidth  equ 48		; screen width in 'intro.scr' file
+     3 = 00,0080		swidth	equ 128		; screen width
+     4
+     5 = 00,B000		pmg	equ $b000
+     6
+     7 = 00,003F		scr48	equ %00111111	;screen 48b
+     8 = 00,003E		scr40	equ %00111110	;screen 40b
+     9
+    10 = 00,0014		cloc	equ $0014	;(1)
+    11
+    12 = 00,0080		ftmp	equ $80		;(2)
+    13 = 00,0082		regA	equ ftmp+2	;(1)
+    14 = 00,0083		regX	equ regA+1	;(1)
+    15 = 00,0084		regY	equ regX+1	;(1)
+    16
+    17 = 00,D000		hposp0	equ $D000
+    18 = 00,D001		hposp1	equ $D001
+    19 = 00,D002		hposp2	equ $D002
+    20 = 00,D003		hposp3	equ $D003
+    21 = 00,D004		hposm0	equ $D004
+    22 = 00,D005		hposm1	equ $D005
+    23 = 00,D006		hposm2	equ $D006
+    24 = 00,D007		hposm3	equ $D007
+    25 = 00,D008		sizep0	equ $D008
+    26 = 00,D009		sizep1	equ $D009
+    27 = 00,D00A		sizep2	equ $D00A
+    28 = 00,D00B		sizep3	equ $D00B
+    29 = 00,D00C		sizem	equ $D00C
+    30
+    31 = 00,D012		colpm0	equ $D012
+    32 = 00,D013		colpm1	equ $D013
+    33 = 00,D014		colpm2	equ $D014
+    34 = 00,D015		colpm3	equ $D015
+    35 = 00,D016		color0	equ $D016
+    36 = 00,D017		color1	equ $D017
+    37 = 00,D018		color2	equ $D018
+    38 = 00,D019		color3	equ $D019
+    39 = 00,D01A		colbak	equ $D01A
+    40 = 00,D01B		gtictl	equ $D01B
+    41
+    42 = 00,D409		chbase	equ $D409
+    43
+    44 				 org $b800
+    45 				.local loading
+    46 				 icl 'logo_loading.asm'
+Source: D:\!Atari\getris2\intro\logo_loading.asm
+     1
+     2 				fnt
+     3 FFFF> 00,B800-BD65> 00 +	 ins 'Logo_loading.fnt',0,70*8
+     4
+     5 00,BA30			scr
+     6 00,BA30 00 01 02 03 04 +	 ins 'Logo_loading.scr'
+     7
+     8 00,BD00			ant
+     9 00,BD00 70 70 70 44 30 +	 dta d'ppp',$44,a(scr)
+    10 00,BD06 04 04 70 04 04 +	 dta $04,$04,$70,$04,$04,$04
+    11 00,BD0C 70 04 04 04 70 +	 dta $70,$04,$04,$04,$70,$04
+    12 00,BD12 04 04 70 04 04 +	 dta $04,$04,$70,$04,$04,$04
+    13 00,BD18 70 04 04 04	 dta $70,$04,$04,$04
+    14 00,BD1C 41 00 BD		 dta $41,a(ant)
+    15
+    16
+    17 00,BD1F			main
+    18 00,BD1F 20 15 55		 jsr wait
+    19
+    20 00,BD22 A9 00		 lda #$00
+    21 00,BD24 8D C8 02		 sta 712
+    22 00,BD27 A9 54		 lda #$54
+    23 00,BD29 8D C4 02		 sta 708
+    24 00,BD2C A9 8A		 lda #$8A
+    25 00,BD2E 8D C5 02		 sta 709
+    26 00,BD31 A9 68		 lda #$68
+    27 00,BD33 8D C6 02		 sta 710
+    28
+    29 00,BD36 A9 0C		 lda #$c
+    30 00,BD38 8D C2 02		 sta 706
+    31 00,BD3B 8D C3 02		 sta 707
+    32
+    33 00,BD3E A9 00		 lda <ant
+    34 00,BD40 8D 02 D4		 sta $d402
+    35 00,BD43 8D 30 02		 sta 560
+    36 00,BD46 A9 BD		 lda >ant
+    37 00,BD48 8D 03 D4		 sta $d403
+    38 00,BD4B 8D 31 02		 sta 561
+    39
+    40 00,BD4E A9 3E		 lda #scr40
+    41 00,BD50 8D 00 D4		 sta $d400
+    42 00,BD53 8D 2F 02		 sta 559
+    43
+    44 00,BD56 A9 B8		 lda >fnt
+    45 00,BD58 8D 09 D4		 sta chbase
+    46
+    47 				 mva #$40 $d40e		;switch on NMI+DLI again
+Macro: MVA [Source: d:\!atari\macro\xasm.mac]
+     5 00,BD5B A9 40		 ldA #$40
+     6 00,BD5D 8D 0E D4		 stA $D40E
+Source: D:\!Atari\getris2\intro\logo_loading.asm
+Source: D:\!Atari\getris2\intro\logo_loading.asm
+    48
+    49 00,BD60 A9 FF		 lda #$ff
+    50 00,BD62 8D 01 D3		 sta $d301
+    51
+    52 00,BD65 60		 rts
+    47 				.endl
+    48
+    49
+    50 				;-- MAIN PROGRAM
+    51 00,BD66				org $2000
+    52
+    53 00,2000-4948> 00 00 00 +	fnt	ins 'intro.fnt'
+    54
+    55 = 00,000C			?ofs = 12
+    56
+    57 00,3000 70 F0 70		ant	dta $70,$f0,$70
+    58 00,3003 44 4D 30			dta $44, a(scr+?ofs)
+    59 00,3006 44 CD 30		        dta $44, a(scr+?ofs+swidth)
+    60 00,3009 C4 4D 31 70	        dta $c4, a(scr+?ofs+swidth*2) ,$70
+    61 00,300D C4 CD 31		        dta $c4, a(scr+?ofs+swidth*3)
+    62 00,3010 44 4D 32		        dta $44, a(scr+?ofs+swidth*4)
+    63 00,3013 C4 CD 32 F0	        dta $c4, a(scr+?ofs+swidth*5) ,$f0
+    64 00,3017 44 4D 33		        dta $44, a(scr+?ofs+swidth*6)
+    65 00,301A C4 CD 33		        dta $c4, a(scr+?ofs+swidth*7)
+    66 00,301D C4 4D 34 F0	        dta $c4, a(scr+?ofs+swidth*8) ,$f0
+    67 00,3021 44 CD 34		        dta $44, a(scr+?ofs+swidth*9)
+    68 00,3024 44 4D 35		        dta $44, a(scr+?ofs+swidth*10)
+    69 00,3027 C4 CD 35 F0	        dta $c4, a(scr+?ofs+swidth*11) ,$f0
+    70 00,302B C4 4D 36		        dta $c4, a(scr+?ofs+swidth*12)
+    71 00,302E C4 CD 36		        dta $c4, a(scr+?ofs+swidth*13)
+    72 00,3031 C4 4D 37 F0	        dta $c4, a(scr+?ofs+swidth*14) ,$f0
+    73 00,3035 C4 CD 37		        dta $c4, a(scr+?ofs+swidth*15)
+    74 00,3038 44 4D 38		        dta $44, a(scr+?ofs+swidth*16)
+    75 00,303B 44 CD 38		        dta $44, a(scr+?ofs+swidth*17)   
+    76 00,303E 41 00 30		 	dta $41, a(ant)
+    77
+    78 = 00,0090		        ?tmp = fwidth*3
+    79 = 00,0180		        ?hlp = swidth*3
+    80
+    81 00,3041 00 00 00 00 00 +	scr	:?hlp*6 brk
+    82
+    83 = 00,0000		        ?ofs = 0
+    84
+    85 					lfrm 0      , scr		; G
+Macro: LFRM [Source: D:\!Atari\getris2\intro\intro.asm]
+     1  [4000] 41		 .put[$4000+?ofs] = .lo(*)
+     2  [4100] 39		 .put[$4100+?ofs] = .hi(*)
+     3 = 00,0001		 ?ofs =?OFS+ 1
+Source: D:\!Atari\getris2\intro\intro.asm
+     3 00,3941			 .get [0] 'intro.scr',0+4,10
+     4 00,3941			 .get [10] 'intro.scr',0+48+4,10
+     5 00,3941			 .get [20] 'intro.scr',0+96+4,10
+     1 00,3941 A9 00		 lda #0
+     2 00,3943 99 41 30		 sta SCR,y
+     3 00,3946 99 C1 30		 sta SCR+swidth,y
+     4 00,3949 99 41 31		 sta SCR+swidth*2,y
+     6 00,394C 99 4C 30		 sta SCR+11,y
+     7 00,394F 99 CC 30		 sta SCR+swidth+11,y
+     8 00,3952 99 4C 31		 sta SCR+swidth*2+11,y
+    11 00,3955 A9 01		   lda #.get[.r]
+    12 00,3957 99 42 30		   sta SCR+.r+1,y
+    13 00,395A A9 28		   lda #.get[.r+10]
+    14 00,395C 99 C2 30		   sta SCR+.r+swidth+1,y
+    15 00,395F A9 4F		   lda #.get[.r+20]
+    16 00,3961 99 42 31		   sta SCR+.r+swidth*2+1,y
+    11 00,3964 A9 02		   lda #.get[.r]
+    12 00,3966 99 43 30		   sta SCR+.r+1,y
+    13 00,3969 A9 29		   lda #.get[.r+10]
+    14 00,396B 99 C3 30		   sta SCR+.r+swidth+1,y
+    15 00,396E A9 50		   lda #.get[.r+20]
+    16 00,3970 99 43 31		   sta SCR+.r+swidth*2+1,y
+    11 00,3973 A9 03		   lda #.get[.r]
+    12 00,3975 99 44 30		   sta SCR+.r+1,y
+    13 00,3978 A9 2A		   lda #.get[.r+10]
+    14 00,397A 99 C4 30		   sta SCR+.r+swidth+1,y
+    15 00,397D A9 51		   lda #.get[.r+20]
+    16 00,397F 99 44 31		   sta SCR+.r+swidth*2+1,y
+    11 00,3982 A9 04		   lda #.get[.r]
+    12 00,3984 99 45 30		   sta SCR+.r+1,y
+    13 00,3987 A9 2B		   lda #.get[.r+10]
+    14 00,3989 99 C5 30		   sta SCR+.r+swidth+1,y
+    15 00,398C A9 52		   lda #.get[.r+20]
+    16 00,398E 99 45 31		   sta SCR+.r+swidth*2+1,y
+    11 00,3991 A9 05		   lda #.get[.r]
+    12 00,3993 99 46 30		   sta SCR+.r+1,y
+    13 00,3996 A9 2C		   lda #.get[.r+10]
+    14 00,3998 99 C6 30		   sta SCR+.r+swidth+1,y
+    15 00,399B A9 53		   lda #.get[.r+20]
+    16 00,399D 99 46 31		   sta SCR+.r+swidth*2+1,y
+    11 00,39A0 A9 06		   lda #.get[.r]
+    12 00,39A2 99 47 30		   sta SCR+.r+1,y
+    13 00,39A5 A9 2D		   lda #.get[.r+10]
+    14 00,39A7 99 C7 30		   sta SCR+.r+swidth+1,y
+    15 00,39AA A9 54		   lda #.get[.r+20]
+    16 00,39AC 99 47 31		   sta SCR+.r+swidth*2+1,y
+    11 00,39AF A9 07		   lda #.get[.r]
+    12 00,39B1 99 48 30		   sta SCR+.r+1,y
+    13 00,39B4 A9 2E		   lda #.get[.r+10]
+    14 00,39B6 99 C8 30		   sta SCR+.r+swidth+1,y
+    15 00,39B9 A9 55		   lda #.get[.r+20]
+    16 00,39BB 99 48 31		   sta SCR+.r+swidth*2+1,y
+    11 00,39BE A9 08		   lda #.get[.r]
+    12 00,39C0 99 49 30		   sta SCR+.r+1,y
+    13 00,39C3 A9 2F		   lda #.get[.r+10]
+    14 00,39C5 99 C9 30		   sta SCR+.r+swidth+1,y
+    15 00,39C8 A9 56		   lda #.get[.r+20]
+    16 00,39CA 99 49 31		   sta SCR+.r+swidth*2+1,y
+    11 00,39CD A9 09		   lda #.get[.r]
+    12 00,39CF 99 4A 30		   sta SCR+.r+1,y
+    13 00,39D2 A9 30		   lda #.get[.r+10]
+    14 00,39D4 99 CA 30		   sta SCR+.r+swidth+1,y
+    15 00,39D7 A9 57		   lda #.get[.r+20]
+    16 00,39D9 99 4A 31		   sta SCR+.r+swidth*2+1,y
+    11 00,39DC A9 00		   lda #.get[.r]
+    12 00,39DE 99 4B 30		   sta SCR+.r+1,y
+    13 00,39E1 A9 00		   lda #.get[.r+10]
+    14 00,39E3 99 CB 30		   sta SCR+.r+swidth+1,y
+    15 00,39E6 A9 00		   lda #.get[.r+20]
+    16 00,39E8 99 4B 31		   sta SCR+.r+swidth*2+1,y
+Source: D:\!Atari\getris2\intro\intro.asm
+    19 00,39EB 60		 rts
+Source: D:\!Atari\getris2\intro\intro.asm
+     1  [4001] EC		 .put[$4000+?ofs] = .lo(*)
+     2  [4101] 39		 .put[$4100+?ofs] = .hi(*)
+     3 = 00,0002		 ?ofs =?OFS+ 1
+Source: D:\!Atari\getris2\intro\intro.asm
+     9 00,39EC			 .get [0] 'intro.scr',0+14,10
+    10 00,39EC			 .get [10] 'intro.scr',0+48+14,10
+    11 00,39EC			 .get [20] 'intro.scr',0+96+14,10
+     1 00,39EC A9 00		 lda #0
+     2 00,39EE 99 41 30		 sta SCR,y
+     3 00,39F1 99 C1 30		 sta SCR+swidth,y
+     4 00,39F4 99 41 31		 sta SCR+swidth*2,y
+     6 00,39F7 99 4C 30		 sta SCR+11,y
+     7 00,39FA 99 CC 30		 sta SCR+swidth+11,y
+     8 00,39FD 99 4C 31		 sta SCR+swidth*2+11,y
+    11 00,3A00 A9 0A		   lda #.get[.r]
+    12 00,3A02 99 42 30		   sta SCR+.r+1,y
+    13 00,3A05 A9 31		   lda #.get[.r+10]
+    14 00,3A07 99 C2 30		   sta SCR+.r+swidth+1,y
+    15 00,3A0A A9 58		   lda #.get[.r+20]
+    16 00,3A0C 99 42 31		   sta SCR+.r+swidth*2+1,y
+    11 00,3A0F A9 0B		   lda #.get[.r]
+    12 00,3A11 99 43 30		   sta SCR+.r+1,y
+    13 00,3A14 A9 32		   lda #.get[.r+10]
+    14 00,3A16 99 C3 30		   sta SCR+.r+swidth+1,y
+    15 00,3A19 A9 59		   lda #.get[.r+20]
+    16 00,3A1B 99 43 31		   sta SCR+.r+swidth*2+1,y
+    11 00,3A1E A9 0C		   lda #.get[.r]
+    12 00,3A20 99 44 30		   sta SCR+.r+1,y
+    13 00,3A23 A9 33		   lda #.get[.r+10]
+    14 00,3A25 99 C4 30		   sta SCR+.r+swidth+1,y
+    15 00,3A28 A9 5A		   lda #.get[.r+20]
+    16 00,3A2A 99 44 31		   sta SCR+.r+swidth*2+1,y
+    11 00,3A2D A9 0D		   lda #.get[.r]
+    12 00,3A2F 99 45 30		   sta SCR+.r+1,y
+    13 00,3A32 A9 34		   lda #.get[.r+10]
+    14 00,3A34 99 C5 30		   sta SCR+.r+swidth+1,y
+    15 00,3A37 A9 5B		   lda #.get[.r+20]
+    16 00,3A39 99 45 31		   sta SCR+.r+swidth*2+1,y
+    11 00,3A3C A9 0E		   lda #.get[.r]
+    12 00,3A3E 99 46 30		   sta SCR+.r+1,y
+    13 00,3A41 A9 35		   lda #.get[.r+10]
+    14 00,3A43 99 C6 30		   sta SCR+.r+swidth+1,y
+    15 00,3A46 A9 5C		   lda #.get[.r+20]
+    16 00,3A48 99 46 31		   sta SCR+.r+swidth*2+1,y
+    11 00,3A4B A9 0F		   lda #.get[.r]
+    12 00,3A4D 99 47 30		   sta SCR+.r+1,y
+    13 00,3A50 A9 36		   lda #.get[.r+10]
+    14 00,3A52 99 C7 30		   sta SCR+.r+swidth+1,y
+    15 00,3A55 A9 5D		   lda #.get[.r+20]
+    16 00,3A57 99 47 31		   sta SCR+.r+swidth*2+1,y
+    11 00,3A5A A9 10		   lda #.get[.r]
+    12 00,3A5C 99 48 30		   sta SCR+.r+1,y
+    13 00,3A5F A9 37		   lda #.get[.r+10]
+    14 00,3A61 99 C8 30		   sta SCR+.r+swidth+1,y
+    15 00,3A64 A9 5E		   lda #.get[.r+20]
+    16 00,3A66 99 48 31		   sta SCR+.r+swidth*2+1,y
+    11 00,3A69 A9 11		   lda #.get[.r]
+    12 00,3A6B 99 49 30		   sta SCR+.r+1,y
+    13 00,3A6E A9 38		   lda #.get[.r+10]
+    14 00,3A70 99 C9 30		   sta SCR+.r+swidth+1,y
+    15 00,3A73 A9 5F		   lda #.get[.r+20]
+    16 00,3A75 99 49 31		   sta SCR+.r+swidth*2+1,y
+    11 00,3A78 A9 12		   lda #.get[.r]
+    12 00,3A7A 99 4A 30		   sta SCR+.r+1,y
+    13 00,3A7D A9 39		   lda #.get[.r+10]
+    14 00,3A7F 99 CA 30		   sta SCR+.r+swidth+1,y
+    15 00,3A82 A9 60		   lda #.get[.r+20]
+    16 00,3A84 99 4A 31		   sta SCR+.r+swidth*2+1,y
+    11 00,3A87 A9 13		   lda #.get[.r]
+    12 00,3A89 99 4B 30		   sta SCR+.r+1,y
+    13 00,3A8C A9 3A		   lda #.get[.r+10]
+    14 00,3A8E 99 CB 30		   sta SCR+.r+swidth+1,y
+    15 00,3A91 A9 61		   lda #.get[.r+20]
+    16 00,3A93 99 4B 31		   sta SCR+.r+swidth*2+1,y
+Source: D:\!Atari\getris2\intro\intro.asm
+    19 00,3A96 60		 rts
+Source: D:\!Atari\getris2\intro\intro.asm
+     1  [4002] 97		 .put[$4000+?ofs] = .lo(*)
+     2  [4102] 3A		 .put[$4100+?ofs] = .hi(*)
+     3 = 00,0003		 ?ofs =?OFS+ 1
+Source: D:\!Atari\getris2\intro\intro.asm
+    15 00,3A97			 .get [0] 'intro.scr',0+24,10
+    16 00,3A97			 .get [10] 'intro.scr',0+48+24,10
+    17 00,3A97			 .get [20] 'intro.scr',0+96+24,10
+     1 00,3A97 A9 00		 lda #0
+     2 00,3A99 99 41 30		 sta SCR,y
+     3 00,3A9C 99 C1 30		 sta SCR+swidth,y
+     4 00,3A9F 99 41 31		 sta SCR+swidth*2,y
+     6 00,3AA2 99 4C 30		 sta SCR+11,y
+     7 00,3AA5 99 CC 30		 sta SCR+swidth+11,y
+     8 00,3AA8 99 4C 31		 sta SCR+swidth*2+11,y
+    11 00,3AAB A9 14		   lda #.get[.r]
+    12 00,3AAD 99 42 30		   sta SCR+.r+1,y
+    13 00,3AB0 A9 3B		   lda #.get[.r+10]
+    14 00,3AB2 99 C2 30		   sta SCR+.r+swidth+1,y
+    15 00,3AB5 A9 62		   lda #.get[.r+20]
+    16 00,3AB7 99 42 31		   sta SCR+.r+swidth*2+1,y
+    11 00,3ABA A9 15		   lda #.get[.r]
+    12 00,3ABC 99 43 30		   sta SCR+.r+1,y
+    13 00,3ABF A9 3C		   lda #.get[.r+10]
+    14 00,3AC1 99 C3 30		   sta SCR+.r+swidth+1,y
+    15 00,3AC4 A9 63		   lda #.get[.r+20]
+    16 00,3AC6 99 43 31		   sta SCR+.r+swidth*2+1,y
+    11 00,3AC9 A9 16		   lda #.get[.r]
+    12 00,3ACB 99 44 30		   sta SCR+.r+1,y
+    13 00,3ACE A9 3D		   lda #.get[.r+10]
+    14 00,3AD0 99 C4 30		   sta SCR+.r+swidth+1,y
+    15 00,3AD3 A9 64		   lda #.get[.r+20]
+    16 00,3AD5 99 44 31		   sta SCR+.r+swidth*2+1,y
+    11 00,3AD8 A9 17		   lda #.get[.r]
+    12 00,3ADA 99 45 30		   sta SCR+.r+1,y
+    13 00,3ADD A9 3E		   lda #.get[.r+10]
+    14 00,3ADF 99 C5 30		   sta SCR+.r+swidth+1,y
+    15 00,3AE2 A9 65		   lda #.get[.r+20]
+    16 00,3AE4 99 45 31		   sta SCR+.r+swidth*2+1,y
+    11 00,3AE7 A9 18		   lda #.get[.r]
+    12 00,3AE9 99 46 30		   sta SCR+.r+1,y
+    13 00,3AEC A9 3F		   lda #.get[.r+10]
+    14 00,3AEE 99 C6 30		   sta SCR+.r+swidth+1,y
+    15 00,3AF1 A9 66		   lda #.get[.r+20]
+    16 00,3AF3 99 46 31		   sta SCR+.r+swidth*2+1,y
+    11 00,3AF6 A9 19		   lda #.get[.r]
+    12 00,3AF8 99 47 30		   sta SCR+.r+1,y
+    13 00,3AFB A9 40		   lda #.get[.r+10]
+    14 00,3AFD 99 C7 30		   sta SCR+.r+swidth+1,y
+    15 00,3B00 A9 67		   lda #.get[.r+20]
+    16 00,3B02 99 47 31		   sta SCR+.r+swidth*2+1,y
+    11 00,3B05 A9 1A		   lda #.get[.r]
+    12 00,3B07 99 48 30		   sta SCR+.r+1,y
+    13 00,3B0A A9 41		   lda #.get[.r+10]
+    14 00,3B0C 99 C8 30		   sta SCR+.r+swidth+1,y
+    15 00,3B0F A9 68		   lda #.get[.r+20]
+    16 00,3B11 99 48 31		   sta SCR+.r+swidth*2+1,y
+    11 00,3B14 A9 1B		   lda #.get[.r]
+    12 00,3B16 99 49 30		   sta SCR+.r+1,y
+    13 00,3B19 A9 42		   lda #.get[.r+10]
+    14 00,3B1B 99 C9 30		   sta SCR+.r+swidth+1,y
+    15 00,3B1E A9 69		   lda #.get[.r+20]
+    16 00,3B20 99 49 31		   sta SCR+.r+swidth*2+1,y
+    11 00,3B23 A9 1C		   lda #.get[.r]
+    12 00,3B25 99 4A 30		   sta SCR+.r+1,y
+    13 00,3B28 A9 43		   lda #.get[.r+10]
+    14 00,3B2A 99 CA 30		   sta SCR+.r+swidth+1,y
+    15 00,3B2D A9 6A		   lda #.get[.r+20]
+    16 00,3B2F 99 4A 31		   sta SCR+.r+swidth*2+1,y
+    11 00,3B32 A9 1D		   lda #.get[.r]
+    12 00,3B34 99 4B 30		   sta SCR+.r+1,y
+    13 00,3B37 A9 44		   lda #.get[.r+10]
+    14 00,3B39 99 CB 30		   sta SCR+.r+swidth+1,y
+    15 00,3B3C A9 6B		   lda #.get[.r+20]
+    16 00,3B3E 99 4B 31		   sta SCR+.r+swidth*2+1,y
+Source: D:\!Atari\getris2\intro\intro.asm
+    19 00,3B41 60		 rts
+Source: D:\!Atari\getris2\intro\intro.asm
+     1  [4003] 42		 .put[$4000+?ofs] = .lo(*)
+     2  [4103] 3B		 .put[$4100+?ofs] = .hi(*)
+     3 = 00,0004		 ?ofs =?OFS+ 1
+Source: D:\!Atari\getris2\intro\intro.asm
+    21 00,3B42			 .get [0] 'intro.scr',0+34,10
+    22 00,3B42			 .get [10] 'intro.scr',0+48+34,10
+    23 00,3B42			 .get [20] 'intro.scr',0+96+34,10 
+     1 00,3B42 A9 00		 lda #0
+     2 00,3B44 99 41 30		 sta SCR,y
+     3 00,3B47 99 C1 30		 sta SCR+swidth,y
+     4 00,3B4A 99 41 31		 sta SCR+swidth*2,y
+     6 00,3B4D 99 4C 30		 sta SCR+11,y
+     7 00,3B50 99 CC 30		 sta SCR+swidth+11,y
+     8 00,3B53 99 4C 31		 sta SCR+swidth*2+11,y
+    11 00,3B56 A9 1E		   lda #.get[.r]
+    12 00,3B58 99 42 30		   sta SCR+.r+1,y
+    13 00,3B5B A9 45		   lda #.get[.r+10]
+    14 00,3B5D 99 C2 30		   sta SCR+.r+swidth+1,y
+    15 00,3B60 A9 6C		   lda #.get[.r+20]
+    16 00,3B62 99 42 31		   sta SCR+.r+swidth*2+1,y
+    11 00,3B65 A9 1F		   lda #.get[.r]
+    12 00,3B67 99 43 30		   sta SCR+.r+1,y
+    13 00,3B6A A9 46		   lda #.get[.r+10]
+    14 00,3B6C 99 C3 30		   sta SCR+.r+swidth+1,y
+    15 00,3B6F A9 6D		   lda #.get[.r+20]
+    16 00,3B71 99 43 31		   sta SCR+.r+swidth*2+1,y
+    11 00,3B74 A9 20		   lda #.get[.r]
+    12 00,3B76 99 44 30		   sta SCR+.r+1,y
+    13 00,3B79 A9 47		   lda #.get[.r+10]
+    14 00,3B7B 99 C4 30		   sta SCR+.r+swidth+1,y
+    15 00,3B7E A9 6E		   lda #.get[.r+20]
+    16 00,3B80 99 44 31		   sta SCR+.r+swidth*2+1,y
+    11 00,3B83 A9 21		   lda #.get[.r]
+    12 00,3B85 99 45 30		   sta SCR+.r+1,y
+    13 00,3B88 A9 48		   lda #.get[.r+10]
+    14 00,3B8A 99 C5 30		   sta SCR+.r+swidth+1,y
+    15 00,3B8D A9 6F		   lda #.get[.r+20]
+    16 00,3B8F 99 45 31		   sta SCR+.r+swidth*2+1,y
+    11 00,3B92 A9 22		   lda #.get[.r]
+    12 00,3B94 99 46 30		   sta SCR+.r+1,y
+    13 00,3B97 A9 49		   lda #.get[.r+10]
+    14 00,3B99 99 C6 30		   sta SCR+.r+swidth+1,y
+    15 00,3B9C A9 70		   lda #.get[.r+20]
+    16 00,3B9E 99 46 31		   sta SCR+.r+swidth*2+1,y
+    11 00,3BA1 A9 23		   lda #.get[.r]
+    12 00,3BA3 99 47 30		   sta SCR+.r+1,y
+    13 00,3BA6 A9 4A		   lda #.get[.r+10]
+    14 00,3BA8 99 C7 30		   sta SCR+.r+swidth+1,y
+    15 00,3BAB A9 71		   lda #.get[.r+20]
+    16 00,3BAD 99 47 31		   sta SCR+.r+swidth*2+1,y
+    11 00,3BB0 A9 24		   lda #.get[.r]
+    12 00,3BB2 99 48 30		   sta SCR+.r+1,y
+    13 00,3BB5 A9 4B		   lda #.get[.r+10]
+    14 00,3BB7 99 C8 30		   sta SCR+.r+swidth+1,y
+    15 00,3BBA A9 72		   lda #.get[.r+20]
+    16 00,3BBC 99 48 31		   sta SCR+.r+swidth*2+1,y
+    11 00,3BBF A9 25		   lda #.get[.r]
+    12 00,3BC1 99 49 30		   sta SCR+.r+1,y
+    13 00,3BC4 A9 4C		   lda #.get[.r+10]
+    14 00,3BC6 99 C9 30		   sta SCR+.r+swidth+1,y
+    15 00,3BC9 A9 73		   lda #.get[.r+20]
+    16 00,3BCB 99 49 31		   sta SCR+.r+swidth*2+1,y
+    11 00,3BCE A9 26		   lda #.get[.r]
+    12 00,3BD0 99 4A 30		   sta SCR+.r+1,y
+    13 00,3BD3 A9 4D		   lda #.get[.r+10]
+    14 00,3BD5 99 CA 30		   sta SCR+.r+swidth+1,y
+    15 00,3BD8 A9 74		   lda #.get[.r+20]
+    16 00,3BDA 99 4A 31		   sta SCR+.r+swidth*2+1,y
+    11 00,3BDD A9 27		   lda #.get[.r]
+    12 00,3BDF 99 4B 30		   sta SCR+.r+1,y
+    13 00,3BE2 A9 4E		   lda #.get[.r+10]
+    14 00,3BE4 99 CB 30		   sta SCR+.r+swidth+1,y
+    15 00,3BE7 A9 75		   lda #.get[.r+20]
+    16 00,3BE9 99 4B 31		   sta SCR+.r+swidth*2+1,y
+Source: D:\!Atari\getris2\intro\intro.asm
+    19 00,3BEC 60		 rts
+Source: D:\!Atari\getris2\intro\intro.asm
+Source: D:\!Atari\getris2\intro\intro.asm
+    86 					lfrm ?tmp   , scr+?hlp		; E
+Macro: LFRM [Source: D:\!Atari\getris2\intro\intro.asm]
+     1  [4004] ED		 .put[$4000+?ofs] = .lo(*)
+     2  [4104] 3B		 .put[$4100+?ofs] = .hi(*)
+     3 = 00,0005		 ?ofs =?OFS+ 1
+Source: D:\!Atari\getris2\intro\intro.asm
+     3 00,3BED			 .get [0] 'intro.scr',?TMP+4,10
+     4 00,3BED			 .get [10] 'intro.scr',?TMP+48+4,10
+     5 00,3BED			 .get [20] 'intro.scr',?TMP+96+4,10
+     1 00,3BED A9 00		 lda #0
+     2 00,3BEF 99 C1 31		 sta SCR+?HLP,y
+     3 00,3BF2 99 41 32		 sta SCR+?HLP+swidth,y
+     4 00,3BF5 99 C1 32		 sta SCR+?HLP+swidth*2,y
+     6 00,3BF8 99 CC 31		 sta SCR+?HLP+11,y
+     7 00,3BFB 99 4C 32		 sta SCR+?HLP+swidth+11,y
+     8 00,3BFE 99 CC 32		 sta SCR+?HLP+swidth*2+11,y
+    11 00,3C01 A9 01		   lda #.get[.r]
+    12 00,3C03 99 C2 31		   sta SCR+?HLP+.r+1,y
+    13 00,3C06 A9 01		   lda #.get[.r+10]
+    14 00,3C08 99 42 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3C0B A9 20		   lda #.get[.r+20]
+    16 00,3C0D 99 C2 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3C10 A9 02		   lda #.get[.r]
+    12 00,3C12 99 C3 31		   sta SCR+?HLP+.r+1,y
+    13 00,3C15 A9 02		   lda #.get[.r+10]
+    14 00,3C17 99 43 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3C1A A9 21		   lda #.get[.r+20]
+    16 00,3C1C 99 C3 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3C1F A9 03		   lda #.get[.r]
+    12 00,3C21 99 C4 31		   sta SCR+?HLP+.r+1,y
+    13 00,3C24 A9 03		   lda #.get[.r+10]
+    14 00,3C26 99 44 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3C29 A9 22		   lda #.get[.r+20]
+    16 00,3C2B 99 C4 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3C2E A9 04		   lda #.get[.r]
+    12 00,3C30 99 C5 31		   sta SCR+?HLP+.r+1,y
+    13 00,3C33 A9 04		   lda #.get[.r+10]
+    14 00,3C35 99 45 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3C38 A9 23		   lda #.get[.r+20]
+    16 00,3C3A 99 C5 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3C3D A9 05		   lda #.get[.r]
+    12 00,3C3F 99 C6 31		   sta SCR+?HLP+.r+1,y
+    13 00,3C42 A9 05		   lda #.get[.r+10]
+    14 00,3C44 99 46 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3C47 A9 24		   lda #.get[.r+20]
+    16 00,3C49 99 C6 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3C4C A9 06		   lda #.get[.r]
+    12 00,3C4E 99 C7 31		   sta SCR+?HLP+.r+1,y
+    13 00,3C51 A9 06		   lda #.get[.r+10]
+    14 00,3C53 99 47 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3C56 A9 25		   lda #.get[.r+20]
+    16 00,3C58 99 C7 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3C5B A9 07		   lda #.get[.r]
+    12 00,3C5D 99 C8 31		   sta SCR+?HLP+.r+1,y
+    13 00,3C60 A9 07		   lda #.get[.r+10]
+    14 00,3C62 99 48 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3C65 A9 26		   lda #.get[.r+20]
+    16 00,3C67 99 C8 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3C6A A9 08		   lda #.get[.r]
+    12 00,3C6C 99 C9 31		   sta SCR+?HLP+.r+1,y
+    13 00,3C6F A9 00		   lda #.get[.r+10]
+    14 00,3C71 99 49 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3C74 A9 27		   lda #.get[.r+20]
+    16 00,3C76 99 C9 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3C79 A9 09		   lda #.get[.r]
+    12 00,3C7B 99 CA 31		   sta SCR+?HLP+.r+1,y
+    13 00,3C7E A9 00		   lda #.get[.r+10]
+    14 00,3C80 99 4A 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3C83 A9 28		   lda #.get[.r+20]
+    16 00,3C85 99 CA 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3C88 A9 00		   lda #.get[.r]
+    12 00,3C8A 99 CB 31		   sta SCR+?HLP+.r+1,y
+    13 00,3C8D A9 00		   lda #.get[.r+10]
+    14 00,3C8F 99 4B 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3C92 A9 00		   lda #.get[.r+20]
+    16 00,3C94 99 CB 32		   sta SCR+?HLP+.r+swidth*2+1,y
+Source: D:\!Atari\getris2\intro\intro.asm
+    19 00,3C97 60		 rts
+Source: D:\!Atari\getris2\intro\intro.asm
+     1  [4005] 98		 .put[$4000+?ofs] = .lo(*)
+     2  [4105] 3C		 .put[$4100+?ofs] = .hi(*)
+     3 = 00,0006		 ?ofs =?OFS+ 1
+Source: D:\!Atari\getris2\intro\intro.asm
+     9 00,3C98			 .get [0] 'intro.scr',?TMP+14,10
+    10 00,3C98			 .get [10] 'intro.scr',?TMP+48+14,10
+    11 00,3C98			 .get [20] 'intro.scr',?TMP+96+14,10
+     1 00,3C98 A9 00		 lda #0
+     2 00,3C9A 99 C1 31		 sta SCR+?HLP,y
+     3 00,3C9D 99 41 32		 sta SCR+?HLP+swidth,y
+     4 00,3CA0 99 C1 32		 sta SCR+?HLP+swidth*2,y
+     6 00,3CA3 99 CC 31		 sta SCR+?HLP+11,y
+     7 00,3CA6 99 4C 32		 sta SCR+?HLP+swidth+11,y
+     8 00,3CA9 99 CC 32		 sta SCR+?HLP+swidth*2+11,y
+    11 00,3CAC A9 0A		   lda #.get[.r]
+    12 00,3CAE 99 C2 31		   sta SCR+?HLP+.r+1,y
+    13 00,3CB1 A9 08		   lda #.get[.r+10]
+    14 00,3CB3 99 42 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3CB6 A9 29		   lda #.get[.r+20]
+    16 00,3CB8 99 C2 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3CBB A9 0B		   lda #.get[.r]
+    12 00,3CBD 99 C3 31		   sta SCR+?HLP+.r+1,y
+    13 00,3CC0 A9 09		   lda #.get[.r+10]
+    14 00,3CC2 99 43 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3CC5 A9 2A		   lda #.get[.r+20]
+    16 00,3CC7 99 C3 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3CCA A9 0C		   lda #.get[.r]
+    12 00,3CCC 99 C4 31		   sta SCR+?HLP+.r+1,y
+    13 00,3CCF A9 0A		   lda #.get[.r+10]
+    14 00,3CD1 99 44 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3CD4 A9 2B		   lda #.get[.r+20]
+    16 00,3CD6 99 C4 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3CD9 A9 0D		   lda #.get[.r]
+    12 00,3CDB 99 C5 31		   sta SCR+?HLP+.r+1,y
+    13 00,3CDE A9 0B		   lda #.get[.r+10]
+    14 00,3CE0 99 45 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3CE3 A9 2C		   lda #.get[.r+20]
+    16 00,3CE5 99 C5 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3CE8 A9 0E		   lda #.get[.r]
+    12 00,3CEA 99 C6 31		   sta SCR+?HLP+.r+1,y
+    13 00,3CED A9 0C		   lda #.get[.r+10]
+    14 00,3CEF 99 46 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3CF2 A9 2D		   lda #.get[.r+20]
+    16 00,3CF4 99 C6 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3CF7 A9 0F		   lda #.get[.r]
+    12 00,3CF9 99 C7 31		   sta SCR+?HLP+.r+1,y
+    13 00,3CFC A9 0D		   lda #.get[.r+10]
+    14 00,3CFE 99 47 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3D01 A9 2E		   lda #.get[.r+20]
+    16 00,3D03 99 C7 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3D06 A9 10		   lda #.get[.r]
+    12 00,3D08 99 C8 31		   sta SCR+?HLP+.r+1,y
+    13 00,3D0B A9 0E		   lda #.get[.r+10]
+    14 00,3D0D 99 48 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3D10 A9 2F		   lda #.get[.r+20]
+    16 00,3D12 99 C8 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3D15 A9 11		   lda #.get[.r]
+    12 00,3D17 99 C9 31		   sta SCR+?HLP+.r+1,y
+    13 00,3D1A A9 0F		   lda #.get[.r+10]
+    14 00,3D1C 99 49 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3D1F A9 30		   lda #.get[.r+20]
+    16 00,3D21 99 C9 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3D24 A9 12		   lda #.get[.r]
+    12 00,3D26 99 CA 31		   sta SCR+?HLP+.r+1,y
+    13 00,3D29 A9 00		   lda #.get[.r+10]
+    14 00,3D2B 99 4A 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3D2E A9 31		   lda #.get[.r+20]
+    16 00,3D30 99 CA 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3D33 A9 13		   lda #.get[.r]
+    12 00,3D35 99 CB 31		   sta SCR+?HLP+.r+1,y
+    13 00,3D38 A9 00		   lda #.get[.r+10]
+    14 00,3D3A 99 4B 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3D3D A9 32		   lda #.get[.r+20]
+    16 00,3D3F 99 CB 32		   sta SCR+?HLP+.r+swidth*2+1,y
+Source: D:\!Atari\getris2\intro\intro.asm
+    19 00,3D42 60		 rts
+Source: D:\!Atari\getris2\intro\intro.asm
+     1  [4006] 43		 .put[$4000+?ofs] = .lo(*)
+     2  [4106] 3D		 .put[$4100+?ofs] = .hi(*)
+     3 = 00,0007		 ?ofs =?OFS+ 1
+Source: D:\!Atari\getris2\intro\intro.asm
+    15 00,3D43			 .get [0] 'intro.scr',?TMP+24,10
+    16 00,3D43			 .get [10] 'intro.scr',?TMP+48+24,10
+    17 00,3D43			 .get [20] 'intro.scr',?TMP+96+24,10
+     1 00,3D43 A9 00		 lda #0
+     2 00,3D45 99 C1 31		 sta SCR+?HLP,y
+     3 00,3D48 99 41 32		 sta SCR+?HLP+swidth,y
+     4 00,3D4B 99 C1 32		 sta SCR+?HLP+swidth*2,y
+     6 00,3D4E 99 CC 31		 sta SCR+?HLP+11,y
+     7 00,3D51 99 4C 32		 sta SCR+?HLP+swidth+11,y
+     8 00,3D54 99 CC 32		 sta SCR+?HLP+swidth*2+11,y
+    11 00,3D57 A9 14		   lda #.get[.r]
+    12 00,3D59 99 C2 31		   sta SCR+?HLP+.r+1,y
+    13 00,3D5C A9 10		   lda #.get[.r+10]
+    14 00,3D5E 99 42 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3D61 A9 33		   lda #.get[.r+20]
+    16 00,3D63 99 C2 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3D66 A9 15		   lda #.get[.r]
+    12 00,3D68 99 C3 31		   sta SCR+?HLP+.r+1,y
+    13 00,3D6B A9 11		   lda #.get[.r+10]
+    14 00,3D6D 99 43 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3D70 A9 34		   lda #.get[.r+20]
+    16 00,3D72 99 C3 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3D75 A9 16		   lda #.get[.r]
+    12 00,3D77 99 C4 31		   sta SCR+?HLP+.r+1,y
+    13 00,3D7A A9 12		   lda #.get[.r+10]
+    14 00,3D7C 99 44 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3D7F A9 35		   lda #.get[.r+20]
+    16 00,3D81 99 C4 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3D84 A9 17		   lda #.get[.r]
+    12 00,3D86 99 C5 31		   sta SCR+?HLP+.r+1,y
+    13 00,3D89 A9 13		   lda #.get[.r+10]
+    14 00,3D8B 99 45 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3D8E A9 36		   lda #.get[.r+20]
+    16 00,3D90 99 C5 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3D93 A9 18		   lda #.get[.r]
+    12 00,3D95 99 C6 31		   sta SCR+?HLP+.r+1,y
+    13 00,3D98 A9 14		   lda #.get[.r+10]
+    14 00,3D9A 99 46 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3D9D A9 37		   lda #.get[.r+20]
+    16 00,3D9F 99 C6 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3DA2 A9 19		   lda #.get[.r]
+    12 00,3DA4 99 C7 31		   sta SCR+?HLP+.r+1,y
+    13 00,3DA7 A9 15		   lda #.get[.r+10]
+    14 00,3DA9 99 47 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3DAC A9 38		   lda #.get[.r+20]
+    16 00,3DAE 99 C7 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3DB1 A9 1A		   lda #.get[.r]
+    12 00,3DB3 99 C8 31		   sta SCR+?HLP+.r+1,y
+    13 00,3DB6 A9 16		   lda #.get[.r+10]
+    14 00,3DB8 99 48 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3DBB A9 39		   lda #.get[.r+20]
+    16 00,3DBD 99 C8 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3DC0 A9 1B		   lda #.get[.r]
+    12 00,3DC2 99 C9 31		   sta SCR+?HLP+.r+1,y
+    13 00,3DC5 A9 17		   lda #.get[.r+10]
+    14 00,3DC7 99 49 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3DCA A9 3A		   lda #.get[.r+20]
+    16 00,3DCC 99 C9 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3DCF A9 1C		   lda #.get[.r]
+    12 00,3DD1 99 CA 31		   sta SCR+?HLP+.r+1,y
+    13 00,3DD4 A9 00		   lda #.get[.r+10]
+    14 00,3DD6 99 4A 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3DD9 A9 3B		   lda #.get[.r+20]
+    16 00,3DDB 99 CA 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3DDE A9 1D		   lda #.get[.r]
+    12 00,3DE0 99 CB 31		   sta SCR+?HLP+.r+1,y
+    13 00,3DE3 A9 00		   lda #.get[.r+10]
+    14 00,3DE5 99 4B 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3DE8 A9 3C		   lda #.get[.r+20]
+    16 00,3DEA 99 CB 32		   sta SCR+?HLP+.r+swidth*2+1,y
+Source: D:\!Atari\getris2\intro\intro.asm
+    19 00,3DED 60		 rts
+Source: D:\!Atari\getris2\intro\intro.asm
+     1  [4007] EE		 .put[$4000+?ofs] = .lo(*)
+     2  [4107] 3D		 .put[$4100+?ofs] = .hi(*)
+     3 = 00,0008		 ?ofs =?OFS+ 1
+Source: D:\!Atari\getris2\intro\intro.asm
+    21 00,3DEE			 .get [0] 'intro.scr',?TMP+34,10
+    22 00,3DEE			 .get [10] 'intro.scr',?TMP+48+34,10
+    23 00,3DEE			 .get [20] 'intro.scr',?TMP+96+34,10 
+     1 00,3DEE A9 00		 lda #0
+     2 00,3DF0 99 C1 31		 sta SCR+?HLP,y
+     3 00,3DF3 99 41 32		 sta SCR+?HLP+swidth,y
+     4 00,3DF6 99 C1 32		 sta SCR+?HLP+swidth*2,y
+     6 00,3DF9 99 CC 31		 sta SCR+?HLP+11,y
+     7 00,3DFC 99 4C 32		 sta SCR+?HLP+swidth+11,y
+     8 00,3DFF 99 CC 32		 sta SCR+?HLP+swidth*2+11,y
+    11 00,3E02 A9 1E		   lda #.get[.r]
+    12 00,3E04 99 C2 31		   sta SCR+?HLP+.r+1,y
+    13 00,3E07 A9 18		   lda #.get[.r+10]
+    14 00,3E09 99 42 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3E0C A9 3D		   lda #.get[.r+20]
+    16 00,3E0E 99 C2 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3E11 A9 1F		   lda #.get[.r]
+    12 00,3E13 99 C3 31		   sta SCR+?HLP+.r+1,y
+    13 00,3E16 A9 19		   lda #.get[.r+10]
+    14 00,3E18 99 43 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3E1B A9 3E		   lda #.get[.r+20]
+    16 00,3E1D 99 C3 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3E20 A9 20		   lda #.get[.r]
+    12 00,3E22 99 C4 31		   sta SCR+?HLP+.r+1,y
+    13 00,3E25 A9 1A		   lda #.get[.r+10]
+    14 00,3E27 99 44 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3E2A A9 3F		   lda #.get[.r+20]
+    16 00,3E2C 99 C4 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3E2F A9 21		   lda #.get[.r]
+    12 00,3E31 99 C5 31		   sta SCR+?HLP+.r+1,y
+    13 00,3E34 A9 1B		   lda #.get[.r+10]
+    14 00,3E36 99 45 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3E39 A9 40		   lda #.get[.r+20]
+    16 00,3E3B 99 C5 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3E3E A9 22		   lda #.get[.r]
+    12 00,3E40 99 C6 31		   sta SCR+?HLP+.r+1,y
+    13 00,3E43 A9 1C		   lda #.get[.r+10]
+    14 00,3E45 99 46 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3E48 A9 41		   lda #.get[.r+20]
+    16 00,3E4A 99 C6 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3E4D A9 23		   lda #.get[.r]
+    12 00,3E4F 99 C7 31		   sta SCR+?HLP+.r+1,y
+    13 00,3E52 A9 1D		   lda #.get[.r+10]
+    14 00,3E54 99 47 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3E57 A9 42		   lda #.get[.r+20]
+    16 00,3E59 99 C7 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3E5C A9 24		   lda #.get[.r]
+    12 00,3E5E 99 C8 31		   sta SCR+?HLP+.r+1,y
+    13 00,3E61 A9 1E		   lda #.get[.r+10]
+    14 00,3E63 99 48 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3E66 A9 43		   lda #.get[.r+20]
+    16 00,3E68 99 C8 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3E6B A9 25		   lda #.get[.r]
+    12 00,3E6D 99 C9 31		   sta SCR+?HLP+.r+1,y
+    13 00,3E70 A9 1F		   lda #.get[.r+10]
+    14 00,3E72 99 49 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3E75 A9 44		   lda #.get[.r+20]
+    16 00,3E77 99 C9 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3E7A A9 26		   lda #.get[.r]
+    12 00,3E7C 99 CA 31		   sta SCR+?HLP+.r+1,y
+    13 00,3E7F A9 00		   lda #.get[.r+10]
+    14 00,3E81 99 4A 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3E84 A9 45		   lda #.get[.r+20]
+    16 00,3E86 99 CA 32		   sta SCR+?HLP+.r+swidth*2+1,y
+    11 00,3E89 A9 27		   lda #.get[.r]
+    12 00,3E8B 99 CB 31		   sta SCR+?HLP+.r+1,y
+    13 00,3E8E A9 00		   lda #.get[.r+10]
+    14 00,3E90 99 4B 32		   sta SCR+?HLP+.r+swidth+1,y
+    15 00,3E93 A9 46		   lda #.get[.r+20]
+    16 00,3E95 99 CB 32		   sta SCR+?HLP+.r+swidth*2+1,y
+Source: D:\!Atari\getris2\intro\intro.asm
+    19 00,3E98 60		 rts
+Source: D:\!Atari\getris2\intro\intro.asm
+Source: D:\!Atari\getris2\intro\intro.asm
+    87 					lfrm ?tmp*2 , scr+?hlp*2	; T
+Macro: LFRM [Source: D:\!Atari\getris2\intro\intro.asm]
+     1  [4008] 99		 .put[$4000+?ofs] = .lo(*)
+     2  [4108] 3E		 .put[$4100+?ofs] = .hi(*)
+     3 = 00,0009		 ?ofs =?OFS+ 1
+Source: D:\!Atari\getris2\intro\intro.asm
+     3 00,3E99			 .get [0] 'intro.scr',?TMP*2+4,10
+     4 00,3E99			 .get [10] 'intro.scr',?TMP*2+48+4,10
+     5 00,3E99			 .get [20] 'intro.scr',?TMP*2+96+4,10
+     1 00,3E99 A9 00		 lda #0
+     2 00,3E9B 99 41 33		 sta SCR+?HLP*2,y
+     3 00,3E9E 99 C1 33		 sta SCR+?HLP*2+swidth,y
+     4 00,3EA1 99 41 34		 sta SCR+?HLP*2+swidth*2,y
+     6 00,3EA4 99 4C 33		 sta SCR+?HLP*2+11,y
+     7 00,3EA7 99 CC 33		 sta SCR+?HLP*2+swidth+11,y
+     8 00,3EAA 99 4C 34		 sta SCR+?HLP*2+swidth*2+11,y
+    11 00,3EAD A9 47		   lda #.get[.r]
+    12 00,3EAF 99 42 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,3EB2 A9 00		   lda #.get[.r+10]
+    14 00,3EB4 99 C2 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,3EB7 A9 00		   lda #.get[.r+20]
+    16 00,3EB9 99 42 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,3EBC A9 48		   lda #.get[.r]
+    12 00,3EBE 99 43 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,3EC1 A9 00		   lda #.get[.r+10]
+    14 00,3EC3 99 C3 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,3EC6 A9 00		   lda #.get[.r+20]
+    16 00,3EC8 99 43 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,3ECB A9 49		   lda #.get[.r]
+    12 00,3ECD 99 44 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,3ED0 A9 00		   lda #.get[.r+10]
+    14 00,3ED2 99 C4 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,3ED5 A9 00		   lda #.get[.r+20]
+    16 00,3ED7 99 44 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,3EDA A9 4A		   lda #.get[.r]
+    12 00,3EDC 99 45 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,3EDF A9 00		   lda #.get[.r+10]
+    14 00,3EE1 99 C5 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,3EE4 A9 00		   lda #.get[.r+20]
+    16 00,3EE6 99 45 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,3EE9 A9 4B		   lda #.get[.r]
+    12 00,3EEB 99 46 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,3EEE A9 00		   lda #.get[.r+10]
+    14 00,3EF0 99 C6 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,3EF3 A9 00		   lda #.get[.r+20]
+    16 00,3EF5 99 46 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,3EF8 A9 4C		   lda #.get[.r]
+    12 00,3EFA 99 47 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,3EFD A9 00		   lda #.get[.r+10]
+    14 00,3EFF 99 C7 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,3F02 A9 00		   lda #.get[.r+20]
+    16 00,3F04 99 47 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,3F07 A9 4D		   lda #.get[.r]
+    12 00,3F09 99 48 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,3F0C A9 01		   lda #.get[.r+10]
+    14 00,3F0E 99 C8 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,3F11 A9 01		   lda #.get[.r+20]
+    16 00,3F13 99 48 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,3F16 A9 4E		   lda #.get[.r]
+    12 00,3F18 99 49 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,3F1B A9 6D		   lda #.get[.r+10]
+    14 00,3F1D 99 C9 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,3F20 A9 02		   lda #.get[.r+20]
+    16 00,3F22 99 49 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,3F25 A9 4F		   lda #.get[.r]
+    12 00,3F27 99 4A 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,3F2A A9 6E		   lda #.get[.r+10]
+    14 00,3F2C 99 CA 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,3F2F A9 03		   lda #.get[.r+20]
+    16 00,3F31 99 4A 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,3F34 A9 00		   lda #.get[.r]
+    12 00,3F36 99 4B 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,3F39 A9 00		   lda #.get[.r+10]
+    14 00,3F3B 99 CB 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,3F3E A9 00		   lda #.get[.r+20]
+    16 00,3F40 99 4B 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+Source: D:\!Atari\getris2\intro\intro.asm
+    19 00,3F43 60		 rts
+Source: D:\!Atari\getris2\intro\intro.asm
+     1  [4009] 44		 .put[$4000+?ofs] = .lo(*)
+     2  [4109] 3F		 .put[$4100+?ofs] = .hi(*)
+     3 = 00,000A		 ?ofs =?OFS+ 1
+Source: D:\!Atari\getris2\intro\intro.asm
+     9 00,3F44			 .get [0] 'intro.scr',?TMP*2+14,10
+    10 00,3F44			 .get [10] 'intro.scr',?TMP*2+48+14,10
+    11 00,3F44			 .get [20] 'intro.scr',?TMP*2+96+14,10
+     1 00,3F44 A9 00		 lda #0
+     2 00,3F46 99 41 33		 sta SCR+?HLP*2,y
+     3 00,3F49 99 C1 33		 sta SCR+?HLP*2+swidth,y
+     4 00,3F4C 99 41 34		 sta SCR+?HLP*2+swidth*2,y
+     6 00,3F4F 99 4C 33		 sta SCR+?HLP*2+11,y
+     7 00,3F52 99 CC 33		 sta SCR+?HLP*2+swidth+11,y
+     8 00,3F55 99 4C 34		 sta SCR+?HLP*2+swidth*2+11,y
+    11 00,3F58 A9 50		   lda #.get[.r]
+    12 00,3F5A 99 42 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,3F5D A9 00		   lda #.get[.r+10]
+    14 00,3F5F 99 C2 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,3F62 A9 00		   lda #.get[.r+20]
+    16 00,3F64 99 42 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,3F67 A9 51		   lda #.get[.r]
+    12 00,3F69 99 43 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,3F6C A9 00		   lda #.get[.r+10]
+    14 00,3F6E 99 C3 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,3F71 A9 00		   lda #.get[.r+20]
+    16 00,3F73 99 43 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,3F76 A9 52		   lda #.get[.r]
+    12 00,3F78 99 44 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,3F7B A9 00		   lda #.get[.r+10]
+    14 00,3F7D 99 C4 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,3F80 A9 00		   lda #.get[.r+20]
+    16 00,3F82 99 44 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,3F85 A9 53		   lda #.get[.r]
+    12 00,3F87 99 45 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,3F8A A9 00		   lda #.get[.r+10]
+    14 00,3F8C 99 C5 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,3F8F A9 00		   lda #.get[.r+20]
+    16 00,3F91 99 45 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,3F94 A9 54		   lda #.get[.r]
+    12 00,3F96 99 46 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,3F99 A9 00		   lda #.get[.r+10]
+    14 00,3F9B 99 C6 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,3F9E A9 00		   lda #.get[.r+20]
+    16 00,3FA0 99 46 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,3FA3 A9 55		   lda #.get[.r]
+    12 00,3FA5 99 47 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,3FA8 A9 00		   lda #.get[.r+10]
+    14 00,3FAA 99 C7 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,3FAD A9 00		   lda #.get[.r+20]
+    16 00,3FAF 99 47 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,3FB2 A9 56		   lda #.get[.r]
+    12 00,3FB4 99 48 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,3FB7 A9 08		   lda #.get[.r+10]
+    14 00,3FB9 99 C8 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,3FBC A9 04		   lda #.get[.r+20]
+    16 00,3FBE 99 48 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,3FC1 A9 57		   lda #.get[.r]
+    12 00,3FC3 99 49 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,3FC6 A9 6F		   lda #.get[.r+10]
+    14 00,3FC8 99 C9 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,3FCB A9 05		   lda #.get[.r+20]
+    16 00,3FCD 99 49 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,3FD0 A9 58		   lda #.get[.r]
+    12 00,3FD2 99 4A 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,3FD5 A9 70		   lda #.get[.r+10]
+    14 00,3FD7 99 CA 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,3FDA A9 06		   lda #.get[.r+20]
+    16 00,3FDC 99 4A 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,3FDF A9 32		   lda #.get[.r]
+    12 00,3FE1 99 4B 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,3FE4 A9 32		   lda #.get[.r+10]
+    14 00,3FE6 99 CB 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,3FE9 A9 07		   lda #.get[.r+20]
+    16 00,3FEB 99 4B 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+Source: D:\!Atari\getris2\intro\intro.asm
+    19 00,3FEE 60		 rts
+Source: D:\!Atari\getris2\intro\intro.asm
+     1  [400A] EF		 .put[$4000+?ofs] = .lo(*)
+     2  [410A] 3F		 .put[$4100+?ofs] = .hi(*)
+     3 = 00,000B		 ?ofs =?OFS+ 1
+Source: D:\!Atari\getris2\intro\intro.asm
+    15 00,3FEF			 .get [0] 'intro.scr',?TMP*2+24,10
+    16 00,3FEF			 .get [10] 'intro.scr',?TMP*2+48+24,10
+    17 00,3FEF			 .get [20] 'intro.scr',?TMP*2+96+24,10
+     1 00,3FEF A9 00		 lda #0
+     2 00,3FF1 99 41 33		 sta SCR+?HLP*2,y
+     3 00,3FF4 99 C1 33		 sta SCR+?HLP*2+swidth,y
+     4 00,3FF7 99 41 34		 sta SCR+?HLP*2+swidth*2,y
+     6 00,3FFA 99 4C 33		 sta SCR+?HLP*2+11,y
+     7 00,3FFD 99 CC 33		 sta SCR+?HLP*2+swidth+11,y
+     8 00,4000 99 4C 34		 sta SCR+?HLP*2+swidth*2+11,y
+    11 00,4003 A9 59		   lda #.get[.r]
+    12 00,4005 99 42 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,4008 A9 00		   lda #.get[.r+10]
+    14 00,400A 99 C2 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,400D A9 00		   lda #.get[.r+20]
+    16 00,400F 99 42 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,4012 A9 5A		   lda #.get[.r]
+    12 00,4014 99 43 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,4017 A9 00		   lda #.get[.r+10]
+    14 00,4019 99 C3 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,401C A9 00		   lda #.get[.r+20]
+    16 00,401E 99 43 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,4021 A9 5B		   lda #.get[.r]
+    12 00,4023 99 44 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,4026 A9 00		   lda #.get[.r+10]
+    14 00,4028 99 C4 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,402B A9 00		   lda #.get[.r+20]
+    16 00,402D 99 44 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,4030 A9 5C		   lda #.get[.r]
+    12 00,4032 99 45 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,4035 A9 00		   lda #.get[.r+10]
+    14 00,4037 99 C5 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,403A A9 00		   lda #.get[.r+20]
+    16 00,403C 99 45 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,403F A9 5D		   lda #.get[.r]
+    12 00,4041 99 46 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,4044 A9 00		   lda #.get[.r+10]
+    14 00,4046 99 C6 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,4049 A9 00		   lda #.get[.r+20]
+    16 00,404B 99 46 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,404E A9 5E		   lda #.get[.r]
+    12 00,4050 99 47 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,4053 A9 00		   lda #.get[.r+10]
+    14 00,4055 99 C7 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,4058 A9 00		   lda #.get[.r+20]
+    16 00,405A 99 47 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,405D A9 5F		   lda #.get[.r]
+    12 00,405F 99 48 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,4062 A9 10		   lda #.get[.r+10]
+    14 00,4064 99 C8 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,4067 A9 08		   lda #.get[.r+20]
+    16 00,4069 99 48 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,406C A9 60		   lda #.get[.r]
+    12 00,406E 99 49 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,4071 A9 71		   lda #.get[.r+10]
+    14 00,4073 99 C9 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,4076 A9 09		   lda #.get[.r+20]
+    16 00,4078 99 49 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,407B A9 61		   lda #.get[.r]
+    12 00,407D 99 4A 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,4080 A9 72		   lda #.get[.r+10]
+    14 00,4082 99 CA 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,4085 A9 0A		   lda #.get[.r+20]
+    16 00,4087 99 4A 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,408A A9 62		   lda #.get[.r]
+    12 00,408C 99 4B 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,408F A9 73		   lda #.get[.r+10]
+    14 00,4091 99 CB 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,4094 A9 0B		   lda #.get[.r+20]
+    16 00,4096 99 4B 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+Source: D:\!Atari\getris2\intro\intro.asm
+    19 00,4099 60		 rts
+Source: D:\!Atari\getris2\intro\intro.asm
+     1  [400B] 9A		 .put[$4000+?ofs] = .lo(*)
+     2  [410B] 40		 .put[$4100+?ofs] = .hi(*)
+     3 = 00,000C		 ?ofs =?OFS+ 1
+Source: D:\!Atari\getris2\intro\intro.asm
+    21 00,409A			 .get [0] 'intro.scr',?TMP*2+34,10
+    22 00,409A			 .get [10] 'intro.scr',?TMP*2+48+34,10
+    23 00,409A			 .get [20] 'intro.scr',?TMP*2+96+34,10 
+     1 00,409A A9 00		 lda #0
+     2 00,409C 99 41 33		 sta SCR+?HLP*2,y
+     3 00,409F 99 C1 33		 sta SCR+?HLP*2+swidth,y
+     4 00,40A2 99 41 34		 sta SCR+?HLP*2+swidth*2,y
+     6 00,40A5 99 4C 33		 sta SCR+?HLP*2+11,y
+     7 00,40A8 99 CC 33		 sta SCR+?HLP*2+swidth+11,y
+     8 00,40AB 99 4C 34		 sta SCR+?HLP*2+swidth*2+11,y
+    11 00,40AE A9 63		   lda #.get[.r]
+    12 00,40B0 99 42 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,40B3 A9 00		   lda #.get[.r+10]
+    14 00,40B5 99 C2 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,40B8 A9 00		   lda #.get[.r+20]
+    16 00,40BA 99 42 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,40BD A9 64		   lda #.get[.r]
+    12 00,40BF 99 43 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,40C2 A9 00		   lda #.get[.r+10]
+    14 00,40C4 99 C3 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,40C7 A9 00		   lda #.get[.r+20]
+    16 00,40C9 99 43 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,40CC A9 65		   lda #.get[.r]
+    12 00,40CE 99 44 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,40D1 A9 00		   lda #.get[.r+10]
+    14 00,40D3 99 C4 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,40D6 A9 00		   lda #.get[.r+20]
+    16 00,40D8 99 44 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,40DB A9 66		   lda #.get[.r]
+    12 00,40DD 99 45 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,40E0 A9 00		   lda #.get[.r+10]
+    14 00,40E2 99 C5 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,40E5 A9 00		   lda #.get[.r+20]
+    16 00,40E7 99 45 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,40EA A9 67		   lda #.get[.r]
+    12 00,40EC 99 46 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,40EF A9 00		   lda #.get[.r+10]
+    14 00,40F1 99 C6 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,40F4 A9 00		   lda #.get[.r+20]
+    16 00,40F6 99 46 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,40F9 A9 68		   lda #.get[.r]
+    12 00,40FB 99 47 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,40FE A9 00		   lda #.get[.r+10]
+    14 00,4100 99 C7 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,4103 A9 00		   lda #.get[.r+20]
+    16 00,4105 99 47 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,4108 A9 69		   lda #.get[.r]
+    12 00,410A 99 48 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,410D A9 18		   lda #.get[.r+10]
+    14 00,410F 99 C8 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,4112 A9 0C		   lda #.get[.r+20]
+    16 00,4114 99 48 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,4117 A9 6A		   lda #.get[.r]
+    12 00,4119 99 49 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,411C A9 74		   lda #.get[.r+10]
+    14 00,411E 99 C9 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,4121 A9 0D		   lda #.get[.r+20]
+    16 00,4123 99 49 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,4126 A9 6B		   lda #.get[.r]
+    12 00,4128 99 4A 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,412B A9 75		   lda #.get[.r+10]
+    14 00,412D 99 CA 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,4130 A9 0E		   lda #.get[.r+20]
+    16 00,4132 99 4A 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+    11 00,4135 A9 6C		   lda #.get[.r]
+    12 00,4137 99 4B 33		   sta SCR+?HLP*2+.r+1,y
+    13 00,413A A9 76		   lda #.get[.r+10]
+    14 00,413C 99 CB 33		   sta SCR+?HLP*2+.r+swidth+1,y
+    15 00,413F A9 0F		   lda #.get[.r+20]
+    16 00,4141 99 4B 34		   sta SCR+?HLP*2+.r+swidth*2+1,y
+Source: D:\!Atari\getris2\intro\intro.asm
+    19 00,4144 60		 rts
+Source: D:\!Atari\getris2\intro\intro.asm
+Source: D:\!Atari\getris2\intro\intro.asm
+    88 					lfrm ?tmp*3 , scr+?hlp*3	; R
+Macro: LFRM [Source: D:\!Atari\getris2\intro\intro.asm]
+     1  [400C] 45		 .put[$4000+?ofs] = .lo(*)
+     2  [410C] 41		 .put[$4100+?ofs] = .hi(*)
+     3 = 00,000D		 ?ofs =?OFS+ 1
+Source: D:\!Atari\getris2\intro\intro.asm
+     3 00,4145			 .get [0] 'intro.scr',?TMP*3+4,10
+     4 00,4145			 .get [10] 'intro.scr',?TMP*3+48+4,10
+     5 00,4145			 .get [20] 'intro.scr',?TMP*3+96+4,10
+     1 00,4145 A9 00		 lda #0
+     2 00,4147 99 C1 34		 sta SCR+?HLP*3,y
+     3 00,414A 99 41 35		 sta SCR+?HLP*3+swidth,y
+     4 00,414D 99 C1 35		 sta SCR+?HLP*3+swidth*2,y
+     6 00,4150 99 CC 34		 sta SCR+?HLP*3+11,y
+     7 00,4153 99 4C 35		 sta SCR+?HLP*3+swidth+11,y
+     8 00,4156 99 CC 35		 sta SCR+?HLP*3+swidth*2+11,y
+    11 00,4159 A9 10		   lda #.get[.r]
+    12 00,415B 99 C2 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,415E A9 37		   lda #.get[.r+10]
+    14 00,4160 99 42 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,4163 A9 01		   lda #.get[.r+20]
+    16 00,4165 99 C2 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,4168 A9 11		   lda #.get[.r]
+    12 00,416A 99 C3 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,416D A9 38		   lda #.get[.r+10]
+    14 00,416F 99 43 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,4172 A9 02		   lda #.get[.r+20]
+    16 00,4174 99 C3 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,4177 A9 12		   lda #.get[.r]
+    12 00,4179 99 C4 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,417C A9 39		   lda #.get[.r+10]
+    14 00,417E 99 44 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,4181 A9 03		   lda #.get[.r+20]
+    16 00,4183 99 C4 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,4186 A9 13		   lda #.get[.r]
+    12 00,4188 99 C5 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,418B A9 3A		   lda #.get[.r+10]
+    14 00,418D 99 45 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,4190 A9 00		   lda #.get[.r+20]
+    16 00,4192 99 C5 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,4195 A9 14		   lda #.get[.r]
+    12 00,4197 99 C6 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,419A A9 3B		   lda #.get[.r+10]
+    14 00,419C 99 46 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,419F A9 00		   lda #.get[.r+20]
+    16 00,41A1 99 C6 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,41A4 A9 15		   lda #.get[.r]
+    12 00,41A6 99 C7 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,41A9 A9 3C		   lda #.get[.r+10]
+    14 00,41AB 99 47 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,41AE A9 00		   lda #.get[.r+20]
+    16 00,41B0 99 C7 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,41B3 A9 16		   lda #.get[.r]
+    12 00,41B5 99 C8 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,41B8 A9 3D		   lda #.get[.r+10]
+    14 00,41BA 99 48 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,41BD A9 01		   lda #.get[.r+20]
+    16 00,41BF 99 C8 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,41C2 A9 17		   lda #.get[.r]
+    12 00,41C4 99 C9 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,41C7 A9 3E		   lda #.get[.r+10]
+    14 00,41C9 99 49 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,41CC A9 02		   lda #.get[.r+20]
+    16 00,41CE 99 C9 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,41D1 A9 18		   lda #.get[.r]
+    12 00,41D3 99 CA 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,41D6 A9 3F		   lda #.get[.r+10]
+    14 00,41D8 99 4A 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,41DB A9 03		   lda #.get[.r+20]
+    16 00,41DD 99 CA 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,41E0 A9 00		   lda #.get[.r]
+    12 00,41E2 99 CB 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,41E5 A9 00		   lda #.get[.r+10]
+    14 00,41E7 99 4B 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,41EA A9 00		   lda #.get[.r+20]
+    16 00,41EC 99 CB 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+Source: D:\!Atari\getris2\intro\intro.asm
+    19 00,41EF 60		 rts
+Source: D:\!Atari\getris2\intro\intro.asm
+     1  [400D] F0		 .put[$4000+?ofs] = .lo(*)
+     2  [410D] 41		 .put[$4100+?ofs] = .hi(*)
+     3 = 00,000E		 ?ofs =?OFS+ 1
+Source: D:\!Atari\getris2\intro\intro.asm
+     9 00,41F0			 .get [0] 'intro.scr',?TMP*3+14,10
+    10 00,41F0			 .get [10] 'intro.scr',?TMP*3+48+14,10
+    11 00,41F0			 .get [20] 'intro.scr',?TMP*3+96+14,10
+     1 00,41F0 A9 00		 lda #0
+     2 00,41F2 99 C1 34		 sta SCR+?HLP*3,y
+     3 00,41F5 99 41 35		 sta SCR+?HLP*3+swidth,y
+     4 00,41F8 99 C1 35		 sta SCR+?HLP*3+swidth*2,y
+     6 00,41FB 99 CC 34		 sta SCR+?HLP*3+11,y
+     7 00,41FE 99 4C 35		 sta SCR+?HLP*3+swidth+11,y
+     8 00,4201 99 CC 35		 sta SCR+?HLP*3+swidth*2+11,y
+    11 00,4204 A9 19		   lda #.get[.r]
+    12 00,4206 99 C2 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,4209 A9 40		   lda #.get[.r+10]
+    14 00,420B 99 42 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,420E A9 04		   lda #.get[.r+20]
+    16 00,4210 99 C2 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,4213 A9 1A		   lda #.get[.r]
+    12 00,4215 99 C3 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,4218 A9 41		   lda #.get[.r+10]
+    14 00,421A 99 43 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,421D A9 05		   lda #.get[.r+20]
+    16 00,421F 99 C3 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,4222 A9 1B		   lda #.get[.r]
+    12 00,4224 99 C4 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,4227 A9 42		   lda #.get[.r+10]
+    14 00,4229 99 44 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,422C A9 06		   lda #.get[.r+20]
+    16 00,422E 99 C4 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,4231 A9 1C		   lda #.get[.r]
+    12 00,4233 99 C5 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,4236 A9 43		   lda #.get[.r+10]
+    14 00,4238 99 45 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,423B A9 07		   lda #.get[.r+20]
+    16 00,423D 99 C5 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,4240 A9 1D		   lda #.get[.r]
+    12 00,4242 99 C6 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,4245 A9 44		   lda #.get[.r+10]
+    14 00,4247 99 46 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,424A A9 00		   lda #.get[.r+20]
+    16 00,424C 99 C6 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,424F A9 1E		   lda #.get[.r]
+    12 00,4251 99 C7 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,4254 A9 45		   lda #.get[.r+10]
+    14 00,4256 99 47 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,4259 A9 00		   lda #.get[.r+20]
+    16 00,425B 99 C7 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,425E A9 1F		   lda #.get[.r]
+    12 00,4260 99 C8 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,4263 A9 46		   lda #.get[.r+10]
+    14 00,4265 99 48 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,4268 A9 04		   lda #.get[.r+20]
+    16 00,426A 99 C8 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,426D A9 20		   lda #.get[.r]
+    12 00,426F 99 C9 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,4272 A9 47		   lda #.get[.r+10]
+    14 00,4274 99 49 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,4277 A9 05		   lda #.get[.r+20]
+    16 00,4279 99 C9 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,427C A9 21		   lda #.get[.r]
+    12 00,427E 99 CA 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,4281 A9 48		   lda #.get[.r+10]
+    14 00,4283 99 4A 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,4286 A9 06		   lda #.get[.r+20]
+    16 00,4288 99 CA 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,428B A9 22		   lda #.get[.r]
+    12 00,428D 99 CB 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,4290 A9 49		   lda #.get[.r+10]
+    14 00,4292 99 4B 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,4295 A9 07		   lda #.get[.r+20]
+    16 00,4297 99 CB 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+Source: D:\!Atari\getris2\intro\intro.asm
+    19 00,429A 60		 rts
+Source: D:\!Atari\getris2\intro\intro.asm
+     1  [400E] 9B		 .put[$4000+?ofs] = .lo(*)
+     2  [410E] 42		 .put[$4100+?ofs] = .hi(*)
+     3 = 00,000F		 ?ofs =?OFS+ 1
+Source: D:\!Atari\getris2\intro\intro.asm
+    15 00,429B			 .get [0] 'intro.scr',?TMP*3+24,10
+    16 00,429B			 .get [10] 'intro.scr',?TMP*3+48+24,10
+    17 00,429B			 .get [20] 'intro.scr',?TMP*3+96+24,10
+     1 00,429B A9 00		 lda #0
+     2 00,429D 99 C1 34		 sta SCR+?HLP*3,y
+     3 00,42A0 99 41 35		 sta SCR+?HLP*3+swidth,y
+     4 00,42A3 99 C1 35		 sta SCR+?HLP*3+swidth*2,y
+     6 00,42A6 99 CC 34		 sta SCR+?HLP*3+11,y
+     7 00,42A9 99 4C 35		 sta SCR+?HLP*3+swidth+11,y
+     8 00,42AC 99 CC 35		 sta SCR+?HLP*3+swidth*2+11,y
+    11 00,42AF A9 23		   lda #.get[.r]
+    12 00,42B1 99 C2 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,42B4 A9 4A		   lda #.get[.r+10]
+    14 00,42B6 99 42 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,42B9 A9 08		   lda #.get[.r+20]
+    16 00,42BB 99 C2 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,42BE A9 24		   lda #.get[.r]
+    12 00,42C0 99 C3 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,42C3 A9 4B		   lda #.get[.r+10]
+    14 00,42C5 99 43 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,42C8 A9 09		   lda #.get[.r+20]
+    16 00,42CA 99 C3 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,42CD A9 25		   lda #.get[.r]
+    12 00,42CF 99 C4 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,42D2 A9 4C		   lda #.get[.r+10]
+    14 00,42D4 99 44 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,42D7 A9 0A		   lda #.get[.r+20]
+    16 00,42D9 99 C4 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,42DC A9 26		   lda #.get[.r]
+    12 00,42DE 99 C5 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,42E1 A9 4D		   lda #.get[.r+10]
+    14 00,42E3 99 45 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,42E6 A9 0B		   lda #.get[.r+20]
+    16 00,42E8 99 C5 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,42EB A9 27		   lda #.get[.r]
+    12 00,42ED 99 C6 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,42F0 A9 4E		   lda #.get[.r+10]
+    14 00,42F2 99 46 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,42F5 A9 00		   lda #.get[.r+20]
+    16 00,42F7 99 C6 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,42FA A9 28		   lda #.get[.r]
+    12 00,42FC 99 C7 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,42FF A9 4F		   lda #.get[.r+10]
+    14 00,4301 99 47 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,4304 A9 00		   lda #.get[.r+20]
+    16 00,4306 99 C7 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,4309 A9 29		   lda #.get[.r]
+    12 00,430B 99 C8 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,430E A9 50		   lda #.get[.r+10]
+    14 00,4310 99 48 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,4313 A9 08		   lda #.get[.r+20]
+    16 00,4315 99 C8 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,4318 A9 2A		   lda #.get[.r]
+    12 00,431A 99 C9 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,431D A9 51		   lda #.get[.r+10]
+    14 00,431F 99 49 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,4322 A9 09		   lda #.get[.r+20]
+    16 00,4324 99 C9 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,4327 A9 2B		   lda #.get[.r]
+    12 00,4329 99 CA 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,432C A9 52		   lda #.get[.r+10]
+    14 00,432E 99 4A 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,4331 A9 0A		   lda #.get[.r+20]
+    16 00,4333 99 CA 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,4336 A9 2C		   lda #.get[.r]
+    12 00,4338 99 CB 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,433B A9 53		   lda #.get[.r+10]
+    14 00,433D 99 4B 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,4340 A9 0B		   lda #.get[.r+20]
+    16 00,4342 99 CB 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+Source: D:\!Atari\getris2\intro\intro.asm
+    19 00,4345 60		 rts
+Source: D:\!Atari\getris2\intro\intro.asm
+     1  [400F] 46		 .put[$4000+?ofs] = .lo(*)
+     2  [410F] 43		 .put[$4100+?ofs] = .hi(*)
+     3 = 00,0010		 ?ofs =?OFS+ 1
+Source: D:\!Atari\getris2\intro\intro.asm
+    21 00,4346			 .get [0] 'intro.scr',?TMP*3+34,10
+    22 00,4346			 .get [10] 'intro.scr',?TMP*3+48+34,10
+    23 00,4346			 .get [20] 'intro.scr',?TMP*3+96+34,10 
+     1 00,4346 A9 00		 lda #0
+     2 00,4348 99 C1 34		 sta SCR+?HLP*3,y
+     3 00,434B 99 41 35		 sta SCR+?HLP*3+swidth,y
+     4 00,434E 99 C1 35		 sta SCR+?HLP*3+swidth*2,y
+     6 00,4351 99 CC 34		 sta SCR+?HLP*3+11,y
+     7 00,4354 99 4C 35		 sta SCR+?HLP*3+swidth+11,y
+     8 00,4357 99 CC 35		 sta SCR+?HLP*3+swidth*2+11,y
+    11 00,435A A9 2D		   lda #.get[.r]
+    12 00,435C 99 C2 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,435F A9 54		   lda #.get[.r+10]
+    14 00,4361 99 42 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,4364 A9 0C		   lda #.get[.r+20]
+    16 00,4366 99 C2 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,4369 A9 2E		   lda #.get[.r]
+    12 00,436B 99 C3 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,436E A9 55		   lda #.get[.r+10]
+    14 00,4370 99 43 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,4373 A9 0D		   lda #.get[.r+20]
+    16 00,4375 99 C3 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,4378 A9 2F		   lda #.get[.r]
+    12 00,437A 99 C4 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,437D A9 56		   lda #.get[.r+10]
+    14 00,437F 99 44 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,4382 A9 0E		   lda #.get[.r+20]
+    16 00,4384 99 C4 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,4387 A9 30		   lda #.get[.r]
+    12 00,4389 99 C5 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,438C A9 57		   lda #.get[.r+10]
+    14 00,438E 99 45 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,4391 A9 0F		   lda #.get[.r+20]
+    16 00,4393 99 C5 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,4396 A9 31		   lda #.get[.r]
+    12 00,4398 99 C6 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,439B A9 58		   lda #.get[.r+10]
+    14 00,439D 99 46 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,43A0 A9 00		   lda #.get[.r+20]
+    16 00,43A2 99 C6 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,43A5 A9 32		   lda #.get[.r]
+    12 00,43A7 99 C7 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,43AA A9 59		   lda #.get[.r+10]
+    14 00,43AC 99 47 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,43AF A9 00		   lda #.get[.r+20]
+    16 00,43B1 99 C7 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,43B4 A9 33		   lda #.get[.r]
+    12 00,43B6 99 C8 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,43B9 A9 5A		   lda #.get[.r+10]
+    14 00,43BB 99 48 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,43BE A9 0C		   lda #.get[.r+20]
+    16 00,43C0 99 C8 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,43C3 A9 34		   lda #.get[.r]
+    12 00,43C5 99 C9 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,43C8 A9 5B		   lda #.get[.r+10]
+    14 00,43CA 99 49 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,43CD A9 0D		   lda #.get[.r+20]
+    16 00,43CF 99 C9 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,43D2 A9 35		   lda #.get[.r]
+    12 00,43D4 99 CA 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,43D7 A9 5C		   lda #.get[.r+10]
+    14 00,43D9 99 4A 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,43DC A9 0E		   lda #.get[.r+20]
+    16 00,43DE 99 CA 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+    11 00,43E1 A9 36		   lda #.get[.r]
+    12 00,43E3 99 CB 34		   sta SCR+?HLP*3+.r+1,y
+    13 00,43E6 A9 5D		   lda #.get[.r+10]
+    14 00,43E8 99 4B 35		   sta SCR+?HLP*3+.r+swidth+1,y
+    15 00,43EB A9 0F		   lda #.get[.r+20]
+    16 00,43ED 99 CB 35		   sta SCR+?HLP*3+.r+swidth*2+1,y
+Source: D:\!Atari\getris2\intro\intro.asm
+    19 00,43F0 60		 rts
+Source: D:\!Atari\getris2\intro\intro.asm
+Source: D:\!Atari\getris2\intro\intro.asm
+    89 					lfrm ?tmp*4 , scr+?hlp*4	; I
+Macro: LFRM [Source: D:\!Atari\getris2\intro\intro.asm]
+     1  [4010] F1		 .put[$4000+?ofs] = .lo(*)
+     2  [4110] 43		 .put[$4100+?ofs] = .hi(*)
+     3 = 00,0011		 ?ofs =?OFS+ 1
+Source: D:\!Atari\getris2\intro\intro.asm
+     3 00,43F1			 .get [0] 'intro.scr',?TMP*4+4,10
+     4 00,43F1			 .get [10] 'intro.scr',?TMP*4+48+4,10
+     5 00,43F1			 .get [20] 'intro.scr',?TMP*4+96+4,10
+     1 00,43F1 A9 00		 lda #0
+     2 00,43F3 99 41 36		 sta SCR+?HLP*4,y
+     3 00,43F6 99 C1 36		 sta SCR+?HLP*4+swidth,y
+     4 00,43F9 99 41 37		 sta SCR+?HLP*4+swidth*2,y
+     6 00,43FC 99 4C 36		 sta SCR+?HLP*4+11,y
+     7 00,43FF 99 CC 36		 sta SCR+?HLP*4+swidth+11,y
+     8 00,4402 99 4C 37		 sta SCR+?HLP*4+swidth*2+11,y
+    11 00,4405 A9 00		   lda #.get[.r]
+    12 00,4407 99 42 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,440A A9 00		   lda #.get[.r+10]
+    14 00,440C 99 C2 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,440F A9 00		   lda #.get[.r+20]
+    16 00,4411 99 42 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,4414 A9 00		   lda #.get[.r]
+    12 00,4416 99 43 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,4419 A9 00		   lda #.get[.r+10]
+    14 00,441B 99 C3 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,441E A9 00		   lda #.get[.r+20]
+    16 00,4420 99 43 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,4423 A9 00		   lda #.get[.r]
+    12 00,4425 99 44 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,4428 A9 00		   lda #.get[.r+10]
+    14 00,442A 99 C4 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,442D A9 00		   lda #.get[.r+20]
+    16 00,442F 99 44 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,4432 A9 10		   lda #.get[.r]
+    12 00,4434 99 45 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,4437 A9 01		   lda #.get[.r+10]
+    14 00,4439 99 C5 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,443C A9 01		   lda #.get[.r+20]
+    16 00,443E 99 45 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,4441 A9 11		   lda #.get[.r]
+    12 00,4443 99 46 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,4446 A9 02		   lda #.get[.r+10]
+    14 00,4448 99 C6 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,444B A9 02		   lda #.get[.r+20]
+    16 00,444D 99 46 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,4450 A9 5E		   lda #.get[.r]
+    12 00,4452 99 47 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,4455 A9 6E		   lda #.get[.r+10]
+    14 00,4457 99 C7 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,445A A9 03		   lda #.get[.r+20]
+    16 00,445C 99 47 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,445F A9 00		   lda #.get[.r]
+    12 00,4461 99 48 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,4464 A9 00		   lda #.get[.r+10]
+    14 00,4466 99 C8 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,4469 A9 00		   lda #.get[.r+20]
+    16 00,446B 99 48 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,446E A9 00		   lda #.get[.r]
+    12 00,4470 99 49 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,4473 A9 00		   lda #.get[.r+10]
+    14 00,4475 99 C9 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,4478 A9 00		   lda #.get[.r+20]
+    16 00,447A 99 49 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,447D A9 00		   lda #.get[.r]
+    12 00,447F 99 4A 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,4482 A9 00		   lda #.get[.r+10]
+    14 00,4484 99 CA 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,4487 A9 00		   lda #.get[.r+20]
+    16 00,4489 99 4A 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,448C A9 00		   lda #.get[.r]
+    12 00,448E 99 4B 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,4491 A9 00		   lda #.get[.r+10]
+    14 00,4493 99 CB 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,4496 A9 00		   lda #.get[.r+20]
+    16 00,4498 99 4B 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+Source: D:\!Atari\getris2\intro\intro.asm
+    19 00,449B 60		 rts
+Source: D:\!Atari\getris2\intro\intro.asm
+     1  [4011] 9C		 .put[$4000+?ofs] = .lo(*)
+     2  [4111] 44		 .put[$4100+?ofs] = .hi(*)
+     3 = 00,0012		 ?ofs =?OFS+ 1
+Source: D:\!Atari\getris2\intro\intro.asm
+     9 00,449C			 .get [0] 'intro.scr',?TMP*4+14,10
+    10 00,449C			 .get [10] 'intro.scr',?TMP*4+48+14,10
+    11 00,449C			 .get [20] 'intro.scr',?TMP*4+96+14,10
+     1 00,449C A9 00		 lda #0
+     2 00,449E 99 41 36		 sta SCR+?HLP*4,y
+     3 00,44A1 99 C1 36		 sta SCR+?HLP*4+swidth,y
+     4 00,44A4 99 41 37		 sta SCR+?HLP*4+swidth*2,y
+     6 00,44A7 99 4C 36		 sta SCR+?HLP*4+11,y
+     7 00,44AA 99 CC 36		 sta SCR+?HLP*4+swidth+11,y
+     8 00,44AD 99 4C 37		 sta SCR+?HLP*4+swidth*2+11,y
+    11 00,44B0 A9 00		   lda #.get[.r]
+    12 00,44B2 99 42 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,44B5 A9 00		   lda #.get[.r+10]
+    14 00,44B7 99 C2 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,44BA A9 00		   lda #.get[.r+20]
+    16 00,44BC 99 42 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,44BF A9 00		   lda #.get[.r]
+    12 00,44C1 99 43 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,44C4 A9 00		   lda #.get[.r+10]
+    14 00,44C6 99 C3 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,44C9 A9 00		   lda #.get[.r+20]
+    16 00,44CB 99 43 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,44CE A9 00		   lda #.get[.r]
+    12 00,44D0 99 44 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,44D3 A9 00		   lda #.get[.r+10]
+    14 00,44D5 99 C4 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,44D8 A9 00		   lda #.get[.r+20]
+    16 00,44DA 99 44 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,44DD A9 19		   lda #.get[.r]
+    12 00,44DF 99 45 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,44E2 A9 08		   lda #.get[.r+10]
+    14 00,44E4 99 C5 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,44E7 A9 04		   lda #.get[.r+20]
+    16 00,44E9 99 45 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,44EC A9 1A		   lda #.get[.r]
+    12 00,44EE 99 46 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,44F1 A9 09		   lda #.get[.r+10]
+    14 00,44F3 99 C6 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,44F6 A9 05		   lda #.get[.r+20]
+    16 00,44F8 99 46 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,44FB A9 5F		   lda #.get[.r]
+    12 00,44FD 99 47 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,4500 A9 70		   lda #.get[.r+10]
+    14 00,4502 99 C7 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,4505 A9 06		   lda #.get[.r+20]
+    16 00,4507 99 47 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,450A A9 07		   lda #.get[.r]
+    12 00,450C 99 48 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,450F A9 32		   lda #.get[.r+10]
+    14 00,4511 99 C8 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,4514 A9 07		   lda #.get[.r+20]
+    16 00,4516 99 48 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,4519 A9 00		   lda #.get[.r]
+    12 00,451B 99 49 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,451E A9 00		   lda #.get[.r+10]
+    14 00,4520 99 C9 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,4523 A9 00		   lda #.get[.r+20]
+    16 00,4525 99 49 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,4528 A9 00		   lda #.get[.r]
+    12 00,452A 99 4A 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,452D A9 00		   lda #.get[.r+10]
+    14 00,452F 99 CA 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,4532 A9 00		   lda #.get[.r+20]
+    16 00,4534 99 4A 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,4537 A9 00		   lda #.get[.r]
+    12 00,4539 99 4B 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,453C A9 00		   lda #.get[.r+10]
+    14 00,453E 99 CB 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,4541 A9 00		   lda #.get[.r+20]
+    16 00,4543 99 4B 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+Source: D:\!Atari\getris2\intro\intro.asm
+    19 00,4546 60		 rts
+Source: D:\!Atari\getris2\intro\intro.asm
+     1  [4012] 47		 .put[$4000+?ofs] = .lo(*)
+     2  [4112] 45		 .put[$4100+?ofs] = .hi(*)
+     3 = 00,0013		 ?ofs =?OFS+ 1
+Source: D:\!Atari\getris2\intro\intro.asm
+    15 00,4547			 .get [0] 'intro.scr',?TMP*4+24,10
+    16 00,4547			 .get [10] 'intro.scr',?TMP*4+48+24,10
+    17 00,4547			 .get [20] 'intro.scr',?TMP*4+96+24,10
+     1 00,4547 A9 00		 lda #0
+     2 00,4549 99 41 36		 sta SCR+?HLP*4,y
+     3 00,454C 99 C1 36		 sta SCR+?HLP*4+swidth,y
+     4 00,454F 99 41 37		 sta SCR+?HLP*4+swidth*2,y
+     6 00,4552 99 4C 36		 sta SCR+?HLP*4+11,y
+     7 00,4555 99 CC 36		 sta SCR+?HLP*4+swidth+11,y
+     8 00,4558 99 4C 37		 sta SCR+?HLP*4+swidth*2+11,y
+    11 00,455B A9 00		   lda #.get[.r]
+    12 00,455D 99 42 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,4560 A9 00		   lda #.get[.r+10]
+    14 00,4562 99 C2 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,4565 A9 00		   lda #.get[.r+20]
+    16 00,4567 99 42 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,456A A9 00		   lda #.get[.r]
+    12 00,456C 99 43 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,456F A9 00		   lda #.get[.r+10]
+    14 00,4571 99 C3 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,4574 A9 00		   lda #.get[.r+20]
+    16 00,4576 99 43 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,4579 A9 00		   lda #.get[.r]
+    12 00,457B 99 44 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,457E A9 00		   lda #.get[.r+10]
+    14 00,4580 99 C4 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,4583 A9 00		   lda #.get[.r+20]
+    16 00,4585 99 44 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,4588 A9 23		   lda #.get[.r]
+    12 00,458A 99 45 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,458D A9 10		   lda #.get[.r+10]
+    14 00,458F 99 C5 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,4592 A9 08		   lda #.get[.r+20]
+    16 00,4594 99 45 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,4597 A9 24		   lda #.get[.r]
+    12 00,4599 99 46 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,459C A9 11		   lda #.get[.r+10]
+    14 00,459E 99 C6 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,45A1 A9 09		   lda #.get[.r+20]
+    16 00,45A3 99 46 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,45A6 A9 60		   lda #.get[.r]
+    12 00,45A8 99 47 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,45AB A9 72		   lda #.get[.r+10]
+    14 00,45AD 99 C7 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,45B0 A9 0A		   lda #.get[.r+20]
+    16 00,45B2 99 47 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,45B5 A9 61		   lda #.get[.r]
+    12 00,45B7 99 48 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,45BA A9 73		   lda #.get[.r+10]
+    14 00,45BC 99 C8 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,45BF A9 0B		   lda #.get[.r+20]
+    16 00,45C1 99 48 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,45C4 A9 00		   lda #.get[.r]
+    12 00,45C6 99 49 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,45C9 A9 00		   lda #.get[.r+10]
+    14 00,45CB 99 C9 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,45CE A9 00		   lda #.get[.r+20]
+    16 00,45D0 99 49 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,45D3 A9 00		   lda #.get[.r]
+    12 00,45D5 99 4A 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,45D8 A9 00		   lda #.get[.r+10]
+    14 00,45DA 99 CA 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,45DD A9 00		   lda #.get[.r+20]
+    16 00,45DF 99 4A 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,45E2 A9 00		   lda #.get[.r]
+    12 00,45E4 99 4B 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,45E7 A9 00		   lda #.get[.r+10]
+    14 00,45E9 99 CB 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,45EC A9 00		   lda #.get[.r+20]
+    16 00,45EE 99 4B 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+Source: D:\!Atari\getris2\intro\intro.asm
+    19 00,45F1 60		 rts
+Source: D:\!Atari\getris2\intro\intro.asm
+     1  [4013] F2		 .put[$4000+?ofs] = .lo(*)
+     2  [4113] 45		 .put[$4100+?ofs] = .hi(*)
+     3 = 00,0014		 ?ofs =?OFS+ 1
+Source: D:\!Atari\getris2\intro\intro.asm
+    21 00,45F2			 .get [0] 'intro.scr',?TMP*4+34,10
+    22 00,45F2			 .get [10] 'intro.scr',?TMP*4+48+34,10
+    23 00,45F2			 .get [20] 'intro.scr',?TMP*4+96+34,10 
+     1 00,45F2 A9 00		 lda #0
+     2 00,45F4 99 41 36		 sta SCR+?HLP*4,y
+     3 00,45F7 99 C1 36		 sta SCR+?HLP*4+swidth,y
+     4 00,45FA 99 41 37		 sta SCR+?HLP*4+swidth*2,y
+     6 00,45FD 99 4C 36		 sta SCR+?HLP*4+11,y
+     7 00,4600 99 CC 36		 sta SCR+?HLP*4+swidth+11,y
+     8 00,4603 99 4C 37		 sta SCR+?HLP*4+swidth*2+11,y
+    11 00,4606 A9 00		   lda #.get[.r]
+    12 00,4608 99 42 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,460B A9 00		   lda #.get[.r+10]
+    14 00,460D 99 C2 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,4610 A9 00		   lda #.get[.r+20]
+    16 00,4612 99 42 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,4615 A9 00		   lda #.get[.r]
+    12 00,4617 99 43 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,461A A9 00		   lda #.get[.r+10]
+    14 00,461C 99 C3 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,461F A9 00		   lda #.get[.r+20]
+    16 00,4621 99 43 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,4624 A9 00		   lda #.get[.r]
+    12 00,4626 99 44 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,4629 A9 00		   lda #.get[.r+10]
+    14 00,462B 99 C4 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,462E A9 00		   lda #.get[.r+20]
+    16 00,4630 99 44 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,4633 A9 2D		   lda #.get[.r]
+    12 00,4635 99 45 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,4638 A9 18		   lda #.get[.r+10]
+    14 00,463A 99 C5 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,463D A9 0C		   lda #.get[.r+20]
+    16 00,463F 99 45 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,4642 A9 2E		   lda #.get[.r]
+    12 00,4644 99 46 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,4647 A9 19		   lda #.get[.r+10]
+    14 00,4649 99 C6 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,464C A9 0D		   lda #.get[.r+20]
+    16 00,464E 99 46 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,4651 A9 62		   lda #.get[.r]
+    12 00,4653 99 47 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,4656 A9 75		   lda #.get[.r+10]
+    14 00,4658 99 C7 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,465B A9 0E		   lda #.get[.r+20]
+    16 00,465D 99 47 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,4660 A9 63		   lda #.get[.r]
+    12 00,4662 99 48 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,4665 A9 76		   lda #.get[.r+10]
+    14 00,4667 99 C8 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,466A A9 0F		   lda #.get[.r+20]
+    16 00,466C 99 48 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,466F A9 00		   lda #.get[.r]
+    12 00,4671 99 49 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,4674 A9 00		   lda #.get[.r+10]
+    14 00,4676 99 C9 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,4679 A9 00		   lda #.get[.r+20]
+    16 00,467B 99 49 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,467E A9 00		   lda #.get[.r]
+    12 00,4680 99 4A 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,4683 A9 00		   lda #.get[.r+10]
+    14 00,4685 99 CA 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,4688 A9 00		   lda #.get[.r+20]
+    16 00,468A 99 4A 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+    11 00,468D A9 00		   lda #.get[.r]
+    12 00,468F 99 4B 36		   sta SCR+?HLP*4+.r+1,y
+    13 00,4692 A9 00		   lda #.get[.r+10]
+    14 00,4694 99 CB 36		   sta SCR+?HLP*4+.r+swidth+1,y
+    15 00,4697 A9 00		   lda #.get[.r+20]
+    16 00,4699 99 4B 37		   sta SCR+?HLP*4+.r+swidth*2+1,y
+Source: D:\!Atari\getris2\intro\intro.asm
+    19 00,469C 60		 rts
+Source: D:\!Atari\getris2\intro\intro.asm
+Source: D:\!Atari\getris2\intro\intro.asm
+    90 					lfrm ?tmp*5 , scr+?hlp*5	; S
+Macro: LFRM [Source: D:\!Atari\getris2\intro\intro.asm]
+     1  [4014] 9D		 .put[$4000+?ofs] = .lo(*)
+     2  [4114] 46		 .put[$4100+?ofs] = .hi(*)
+     3 = 00,0015		 ?ofs =?OFS+ 1
+Source: D:\!Atari\getris2\intro\intro.asm
+     3 00,469D			 .get [0] 'intro.scr',?TMP*5+4,10
+     4 00,469D			 .get [10] 'intro.scr',?TMP*5+48+4,10
+     5 00,469D			 .get [20] 'intro.scr',?TMP*5+96+4,10
+     1 00,469D A9 00		 lda #0
+     2 00,469F 99 C1 37		 sta SCR+?HLP*5,y
+     3 00,46A2 99 41 38		 sta SCR+?HLP*5+swidth,y
+     4 00,46A5 99 C1 38		 sta SCR+?HLP*5+swidth*2,y
+     6 00,46A8 99 CC 37		 sta SCR+?HLP*5+11,y
+     7 00,46AB 99 4C 38		 sta SCR+?HLP*5+swidth+11,y
+     8 00,46AE 99 CC 38		 sta SCR+?HLP*5+swidth*2+11,y
+    11 00,46B1 A9 64		   lda #.get[.r]
+    12 00,46B3 99 C2 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,46B6 A9 01		   lda #.get[.r+10]
+    14 00,46B8 99 42 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,46BB A9 28		   lda #.get[.r+20]
+    16 00,46BD 99 C2 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,46C0 A9 65		   lda #.get[.r]
+    12 00,46C2 99 C3 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,46C5 A9 02		   lda #.get[.r+10]
+    14 00,46C7 99 43 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,46CA A9 29		   lda #.get[.r+20]
+    16 00,46CC 99 C3 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,46CF A9 66		   lda #.get[.r]
+    12 00,46D1 99 C4 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,46D4 A9 03		   lda #.get[.r+10]
+    14 00,46D6 99 44 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,46D9 A9 2A		   lda #.get[.r+20]
+    16 00,46DB 99 C4 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,46DE A9 13		   lda #.get[.r]
+    12 00,46E0 99 C5 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,46E3 A9 04		   lda #.get[.r+10]
+    14 00,46E5 99 45 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,46E8 A9 2B		   lda #.get[.r+20]
+    16 00,46EA 99 C5 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,46ED A9 14		   lda #.get[.r]
+    12 00,46EF 99 C6 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,46F2 A9 05		   lda #.get[.r+10]
+    14 00,46F4 99 46 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,46F7 A9 2C		   lda #.get[.r+20]
+    16 00,46F9 99 C6 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,46FC A9 15		   lda #.get[.r]
+    12 00,46FE 99 C7 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,4701 A9 06		   lda #.get[.r+10]
+    14 00,4703 99 47 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,4706 A9 2D		   lda #.get[.r+20]
+    16 00,4708 99 C7 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,470B A9 67		   lda #.get[.r]
+    12 00,470D 99 C8 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,4710 A9 07		   lda #.get[.r+10]
+    14 00,4712 99 48 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,4715 A9 2E		   lda #.get[.r+20]
+    16 00,4717 99 C8 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,471A A9 17		   lda #.get[.r]
+    12 00,471C 99 C9 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,471F A9 08		   lda #.get[.r+10]
+    14 00,4721 99 49 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,4724 A9 2F		   lda #.get[.r+20]
+    16 00,4726 99 C9 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,4729 A9 68		   lda #.get[.r]
+    12 00,472B 99 CA 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,472E A9 09		   lda #.get[.r+10]
+    14 00,4730 99 4A 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,4733 A9 30		   lda #.get[.r+20]
+    16 00,4735 99 CA 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,4738 A9 00		   lda #.get[.r]
+    12 00,473A 99 CB 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,473D A9 00		   lda #.get[.r+10]
+    14 00,473F 99 4B 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,4742 A9 00		   lda #.get[.r+20]
+    16 00,4744 99 CB 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+Source: D:\!Atari\getris2\intro\intro.asm
+    19 00,4747 60		 rts
+Source: D:\!Atari\getris2\intro\intro.asm
+     1  [4015] 48		 .put[$4000+?ofs] = .lo(*)
+     2  [4115] 47		 .put[$4100+?ofs] = .hi(*)
+     3 = 00,0016		 ?ofs =?OFS+ 1
+Source: D:\!Atari\getris2\intro\intro.asm
+     9 00,4748			 .get [0] 'intro.scr',?TMP*5+14,10
+    10 00,4748			 .get [10] 'intro.scr',?TMP*5+48+14,10
+    11 00,4748			 .get [20] 'intro.scr',?TMP*5+96+14,10
+     1 00,4748 A9 00		 lda #0
+     2 00,474A 99 C1 37		 sta SCR+?HLP*5,y
+     3 00,474D 99 41 38		 sta SCR+?HLP*5+swidth,y
+     4 00,4750 99 C1 38		 sta SCR+?HLP*5+swidth*2,y
+     6 00,4753 99 CC 37		 sta SCR+?HLP*5+11,y
+     7 00,4756 99 4C 38		 sta SCR+?HLP*5+swidth+11,y
+     8 00,4759 99 CC 38		 sta SCR+?HLP*5+swidth*2+11,y
+    11 00,475C A9 69		   lda #.get[.r]
+    12 00,475E 99 C2 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,4761 A9 0A		   lda #.get[.r+10]
+    14 00,4763 99 42 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,4766 A9 31		   lda #.get[.r+20]
+    16 00,4768 99 C2 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,476B A9 6A		   lda #.get[.r]
+    12 00,476D 99 C3 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,4770 A9 0B		   lda #.get[.r+10]
+    14 00,4772 99 43 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,4775 A9 32		   lda #.get[.r+20]
+    16 00,4777 99 C3 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,477A A9 6B		   lda #.get[.r]
+    12 00,477C 99 C4 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,477F A9 0C		   lda #.get[.r+10]
+    14 00,4781 99 44 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,4784 A9 33		   lda #.get[.r+20]
+    16 00,4786 99 C4 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,4789 A9 1C		   lda #.get[.r]
+    12 00,478B 99 C5 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,478E A9 0D		   lda #.get[.r+10]
+    14 00,4790 99 45 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,4793 A9 34		   lda #.get[.r+20]
+    16 00,4795 99 C5 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,4798 A9 1D		   lda #.get[.r]
+    12 00,479A 99 C6 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,479D A9 0E		   lda #.get[.r+10]
+    14 00,479F 99 46 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,47A2 A9 35		   lda #.get[.r+20]
+    16 00,47A4 99 C6 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,47A7 A9 1E		   lda #.get[.r]
+    12 00,47A9 99 C7 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,47AC A9 0F		   lda #.get[.r+10]
+    14 00,47AE 99 47 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,47B1 A9 36		   lda #.get[.r+20]
+    16 00,47B3 99 C7 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,47B6 A9 6C		   lda #.get[.r]
+    12 00,47B8 99 C8 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,47BB A9 10		   lda #.get[.r+10]
+    14 00,47BD 99 48 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,47C0 A9 37		   lda #.get[.r+20]
+    16 00,47C2 99 C8 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,47C5 A9 20		   lda #.get[.r]
+    12 00,47C7 99 C9 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,47CA A9 11		   lda #.get[.r+10]
+    14 00,47CC 99 49 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,47CF A9 38		   lda #.get[.r+20]
+    16 00,47D1 99 C9 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,47D4 A9 6D		   lda #.get[.r]
+    12 00,47D6 99 CA 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,47D9 A9 12		   lda #.get[.r+10]
+    14 00,47DB 99 4A 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,47DE A9 39		   lda #.get[.r+20]
+    16 00,47E0 99 CA 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,47E3 A9 22		   lda #.get[.r]
+    12 00,47E5 99 CB 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,47E8 A9 13		   lda #.get[.r+10]
+    14 00,47EA 99 4B 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,47ED A9 3A		   lda #.get[.r+20]
+    16 00,47EF 99 CB 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+Source: D:\!Atari\getris2\intro\intro.asm
+    19 00,47F2 60		 rts
+Source: D:\!Atari\getris2\intro\intro.asm
+     1  [4016] F3		 .put[$4000+?ofs] = .lo(*)
+     2  [4116] 47		 .put[$4100+?ofs] = .hi(*)
+     3 = 00,0017		 ?ofs =?OFS+ 1
+Source: D:\!Atari\getris2\intro\intro.asm
+    15 00,47F3			 .get [0] 'intro.scr',?TMP*5+24,10
+    16 00,47F3			 .get [10] 'intro.scr',?TMP*5+48+24,10
+    17 00,47F3			 .get [20] 'intro.scr',?TMP*5+96+24,10
+     1 00,47F3 A9 00		 lda #0
+     2 00,47F5 99 C1 37		 sta SCR+?HLP*5,y
+     3 00,47F8 99 41 38		 sta SCR+?HLP*5+swidth,y
+     4 00,47FB 99 C1 38		 sta SCR+?HLP*5+swidth*2,y
+     6 00,47FE 99 CC 37		 sta SCR+?HLP*5+11,y
+     7 00,4801 99 4C 38		 sta SCR+?HLP*5+swidth+11,y
+     8 00,4804 99 CC 38		 sta SCR+?HLP*5+swidth*2+11,y
+    11 00,4807 A9 6E		   lda #.get[.r]
+    12 00,4809 99 C2 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,480C A9 14		   lda #.get[.r+10]
+    14 00,480E 99 42 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,4811 A9 3B		   lda #.get[.r+20]
+    16 00,4813 99 C2 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,4816 A9 6F		   lda #.get[.r]
+    12 00,4818 99 C3 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,481B A9 15		   lda #.get[.r+10]
+    14 00,481D 99 43 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,4820 A9 3C		   lda #.get[.r+20]
+    16 00,4822 99 C3 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,4825 A9 70		   lda #.get[.r]
+    12 00,4827 99 C4 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,482A A9 16		   lda #.get[.r+10]
+    14 00,482C 99 44 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,482F A9 3D		   lda #.get[.r+20]
+    16 00,4831 99 C4 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,4834 A9 26		   lda #.get[.r]
+    12 00,4836 99 C5 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,4839 A9 17		   lda #.get[.r+10]
+    14 00,483B 99 45 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,483E A9 3E		   lda #.get[.r+20]
+    16 00,4840 99 C5 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,4843 A9 27		   lda #.get[.r]
+    12 00,4845 99 C6 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,4848 A9 18		   lda #.get[.r+10]
+    14 00,484A 99 46 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,484D A9 3F		   lda #.get[.r+20]
+    16 00,484F 99 C6 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,4852 A9 28		   lda #.get[.r]
+    12 00,4854 99 C7 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,4857 A9 19		   lda #.get[.r+10]
+    14 00,4859 99 47 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,485C A9 40		   lda #.get[.r+20]
+    16 00,485E 99 C7 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,4861 A9 71		   lda #.get[.r]
+    12 00,4863 99 C8 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,4866 A9 1A		   lda #.get[.r+10]
+    14 00,4868 99 48 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,486B A9 41		   lda #.get[.r+20]
+    16 00,486D 99 C8 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,4870 A9 72		   lda #.get[.r]
+    12 00,4872 99 C9 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,4875 A9 1B		   lda #.get[.r+10]
+    14 00,4877 99 49 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,487A A9 42		   lda #.get[.r+20]
+    16 00,487C 99 C9 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,487F A9 73		   lda #.get[.r]
+    12 00,4881 99 CA 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,4884 A9 1C		   lda #.get[.r+10]
+    14 00,4886 99 4A 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,4889 A9 43		   lda #.get[.r+20]
+    16 00,488B 99 CA 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,488E A9 74		   lda #.get[.r]
+    12 00,4890 99 CB 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,4893 A9 1D		   lda #.get[.r+10]
+    14 00,4895 99 4B 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,4898 A9 44		   lda #.get[.r+20]
+    16 00,489A 99 CB 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+Source: D:\!Atari\getris2\intro\intro.asm
+    19 00,489D 60		 rts
+Source: D:\!Atari\getris2\intro\intro.asm
+     1  [4017] 9E		 .put[$4000+?ofs] = .lo(*)
+     2  [4117] 48		 .put[$4100+?ofs] = .hi(*)
+     3 = 00,0018		 ?ofs =?OFS+ 1
+Source: D:\!Atari\getris2\intro\intro.asm
+    21 00,489E			 .get [0] 'intro.scr',?TMP*5+34,10
+    22 00,489E			 .get [10] 'intro.scr',?TMP*5+48+34,10
+    23 00,489E			 .get [20] 'intro.scr',?TMP*5+96+34,10 
+     1 00,489E A9 00		 lda #0
+     2 00,48A0 99 C1 37		 sta SCR+?HLP*5,y
+     3 00,48A3 99 41 38		 sta SCR+?HLP*5+swidth,y
+     4 00,48A6 99 C1 38		 sta SCR+?HLP*5+swidth*2,y
+     6 00,48A9 99 CC 37		 sta SCR+?HLP*5+11,y
+     7 00,48AC 99 4C 38		 sta SCR+?HLP*5+swidth+11,y
+     8 00,48AF 99 CC 38		 sta SCR+?HLP*5+swidth*2+11,y
+    11 00,48B2 A9 75		   lda #.get[.r]
+    12 00,48B4 99 C2 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,48B7 A9 1E		   lda #.get[.r+10]
+    14 00,48B9 99 42 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,48BC A9 45		   lda #.get[.r+20]
+    16 00,48BE 99 C2 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,48C1 A9 76		   lda #.get[.r]
+    12 00,48C3 99 C3 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,48C6 A9 1F		   lda #.get[.r+10]
+    14 00,48C8 99 43 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,48CB A9 46		   lda #.get[.r+20]
+    16 00,48CD 99 C3 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,48D0 A9 77		   lda #.get[.r]
+    12 00,48D2 99 C4 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,48D5 A9 20		   lda #.get[.r+10]
+    14 00,48D7 99 44 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,48DA A9 47		   lda #.get[.r+20]
+    16 00,48DC 99 C4 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,48DF A9 78		   lda #.get[.r]
+    12 00,48E1 99 C5 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,48E4 A9 21		   lda #.get[.r+10]
+    14 00,48E6 99 45 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,48E9 A9 48		   lda #.get[.r+20]
+    16 00,48EB 99 C5 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,48EE A9 31		   lda #.get[.r]
+    12 00,48F0 99 C6 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,48F3 A9 22		   lda #.get[.r+10]
+    14 00,48F5 99 46 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,48F8 A9 49		   lda #.get[.r+20]
+    16 00,48FA 99 C6 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,48FD A9 32		   lda #.get[.r]
+    12 00,48FF 99 C7 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,4902 A9 23		   lda #.get[.r+10]
+    14 00,4904 99 47 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,4907 A9 4A		   lda #.get[.r+20]
+    16 00,4909 99 C7 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,490C A9 79		   lda #.get[.r]
+    12 00,490E 99 C8 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,4911 A9 24		   lda #.get[.r+10]
+    14 00,4913 99 48 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,4916 A9 4B		   lda #.get[.r+20]
+    16 00,4918 99 C8 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,491B A9 7A		   lda #.get[.r]
+    12 00,491D 99 C9 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,4920 A9 25		   lda #.get[.r+10]
+    14 00,4922 99 49 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,4925 A9 4C		   lda #.get[.r+20]
+    16 00,4927 99 C9 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,492A A9 7B		   lda #.get[.r]
+    12 00,492C 99 CA 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,492F A9 26		   lda #.get[.r+10]
+    14 00,4931 99 4A 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,4934 A9 4D		   lda #.get[.r+20]
+    16 00,4936 99 CA 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+    11 00,4939 A9 7C		   lda #.get[.r]
+    12 00,493B 99 CB 37		   sta SCR+?HLP*5+.r+1,y
+    13 00,493E A9 27		   lda #.get[.r+10]
+    14 00,4940 99 4B 38		   sta SCR+?HLP*5+.r+swidth+1,y
+    15 00,4943 A9 4E		   lda #.get[.r+20]
+    16 00,4945 99 CB 38		   sta SCR+?HLP*5+.r+swidth*2+1,y
+Source: D:\!Atari\getris2\intro\intro.asm
+    19 00,4948 60		 rts
+Source: D:\!Atari\getris2\intro\intro.asm
+Source: D:\!Atari\getris2\intro\intro.asm
+    91
+    92 					ALIGN $100
+Macro: ALIGN [Source: D:\!Atari\getris2\intro\intro.mac]
+     1 00,4949			 org (*/$100)*$100+$100
+Source: D:\!Atari\getris2\intro\intro.asm
+    93
+    94 00,4A00			l_prc
+    95 				.rept ?ofs
+    96 				 dta .get[$4000+.r]
+    97 				.endr
+Source: REPT
+    96 00,4A00-52CC> 41		 dta .get[$4000+.r]
+    96 00,4A01 #01 EC		 dta .get[$4000+.r]
+    96 00,4A02 #02 97		 dta .get[$4000+.r]
+    96 00,4A03 #03 42		 dta .get[$4000+.r]
+    96 00,4A04 #04 ED		 dta .get[$4000+.r]
+    96 00,4A05 #05 98		 dta .get[$4000+.r]
+    96 00,4A06 #06 43		 dta .get[$4000+.r]
+    96 00,4A07 #07 EE		 dta .get[$4000+.r]
+    96 00,4A08 #08 99		 dta .get[$4000+.r]
+    96 00,4A09 #09 44		 dta .get[$4000+.r]
+    96 00,4A0A #0A EF		 dta .get[$4000+.r]
+    96 00,4A0B #0B 9A		 dta .get[$4000+.r]
+    96 00,4A0C #0C 45		 dta .get[$4000+.r]
+    96 00,4A0D #0D F0		 dta .get[$4000+.r]
+    96 00,4A0E #0E 9B		 dta .get[$4000+.r]
+    96 00,4A0F #0F 46		 dta .get[$4000+.r]
+    96 00,4A10 #10 F1		 dta .get[$4000+.r]
+    96 00,4A11 #11 9C		 dta .get[$4000+.r]
+    96 00,4A12 #12 47		 dta .get[$4000+.r]
+    96 00,4A13 #13 F2		 dta .get[$4000+.r]
+    96 00,4A14 #14 9D		 dta .get[$4000+.r]
+    96 00,4A15 #15 48		 dta .get[$4000+.r]
+    96 00,4A16 #16 F3		 dta .get[$4000+.r]
+    96 00,4A17 #17 9E		 dta .get[$4000+.r]
+Source: D:\!Atari\getris2\intro\intro.asm
+    98
+    99 00,4A18			h_prc
+   100 				.rept ?ofs
+   101 				 dta .get[$4100+.r]
+   102 				.endr
+Source: REPT
+   101 00,4A18 #00 39		 dta .get[$4100+.r]
+   101 00,4A19 #01 39		 dta .get[$4100+.r]
+   101 00,4A1A #02 3A		 dta .get[$4100+.r]
+   101 00,4A1B #03 3B		 dta .get[$4100+.r]
+   101 00,4A1C #04 3B		 dta .get[$4100+.r]
+   101 00,4A1D #05 3C		 dta .get[$4100+.r]
+   101 00,4A1E #06 3D		 dta .get[$4100+.r]
+   101 00,4A1F #07 3D		 dta .get[$4100+.r]
+   101 00,4A20 #08 3E		 dta .get[$4100+.r]
+   101 00,4A21 #09 3F		 dta .get[$4100+.r]
+   101 00,4A22 #0A 3F		 dta .get[$4100+.r]
+   101 00,4A23 #0B 40		 dta .get[$4100+.r]
+   101 00,4A24 #0C 41		 dta .get[$4100+.r]
+   101 00,4A25 #0D 41		 dta .get[$4100+.r]
+   101 00,4A26 #0E 42		 dta .get[$4100+.r]
+   101 00,4A27 #0F 43		 dta .get[$4100+.r]
+   101 00,4A28 #10 43		 dta .get[$4100+.r]
+   101 00,4A29 #11 44		 dta .get[$4100+.r]
+   101 00,4A2A #12 45		 dta .get[$4100+.r]
+   101 00,4A2B #13 45		 dta .get[$4100+.r]
+   101 00,4A2C #14 46		 dta .get[$4100+.r]
+   101 00,4A2D #15 47		 dta .get[$4100+.r]
+   101 00,4A2E #16 47		 dta .get[$4100+.r]
+   101 00,4A2F #17 48		 dta .get[$4100+.r]
+Source: D:\!Atari\getris2\intro\intro.asm
+   103
+   104 				;	ALIGN $100	
+   105
+   106 00,4A30 00 00 00 00 00 +	tsin	:96 dta 0
+   107 00,4A90 20 22 25 27 29 +		dta b( sin( 32 , 48 , 128 , 0 , 511 ) )
+   108
+   109 00,4C90 00 00 00 00 00 +	_tsin	:144 dta 0
+   110 00,4D20 21 23 26 28 2A +		dta b( sin( 33 , 48 , 128 , 0 , 511 ) )
+   111
+   112
+   113 00,4F20			main
+   114 				;-- init PMG
+   115 				 mva >pmg $d407		;missiles and players data address
+Macro: MVA [Source: d:\!atari\macro\xasm.mac]
+     5 00,4F20 A9 B0		 ldA >PMG
+     6 00,4F22 8D 07 D4		 stA $D407
+Source: D:\!Atari\getris2\intro\intro.asm
+Source: D:\!Atari\getris2\intro\intro.asm
+   116 				 mva #3 $d01d		;enable players and missiles
+Macro: MVA [Source: d:\!atari\macro\xasm.mac]
+     5 00,4F25 A9 03		 ldA #3
+     6 00,4F27 8D 1D D0		 stA $D01D
+Source: D:\!Atari\getris2\intro\intro.asm
+Source: D:\!Atari\getris2\intro\intro.asm
+   117
+   118 00,4F2A 20 15 55		 jsr wait		;wait 1 frame
+   119
+   120 00,4F2D 78		 sei			;stop interrups
+   121 				 mva #0 $d40e		;stop all interrupts
+Macro: MVA [Source: d:\!atari\macro\xasm.mac]
+     5 00,4F2E A9 00		 ldA #0
+     6 00,4F30 8D 0E D4		 stA $D40E
+Source: D:\!Atari\getris2\intro\intro.asm
+Source: D:\!Atari\getris2\intro\intro.asm
+   122 				 mva #$fe $d301		;switch off ROM to get 16k more ram
+Macro: MVA [Source: d:\!atari\macro\xasm.mac]
+     5 00,4F33 A9 FE		 ldA #$FE
+     6 00,4F35 8D 01 D3		 stA $D301
+Source: D:\!Atari\getris2\intro\intro.asm
+Source: D:\!Atari\getris2\intro\intro.asm
+   123
+   124 00,4F38 A0 00		 ldy #0
+   125 00,4F3A			mov
+   126 00,4F3A A9 00		 lda #0
+   127 00,4F3C 99 00 B4		 sta pmg+$400,y
+   128 00,4F3F 99 00 B5		 sta pmg+$500,y
+   129
+   130 00,4F42 B9 1C 55		 lda _m23,y
+   131 00,4F45 99 00 B3		 sta pmg+$300,y
+   132 00,4F48 B9 1C 56		 lda _p23,y
+   133 00,4F4B 99 00 B6		 sta pmg+$600,y
+   134 00,4F4E 99 00 B7		 sta pmg+$700,y
+   135 00,4F51 C8		 iny
+   136 00,4F52 D0 E6		 bne mov
+   137
+   138 				 mwa #nmi $fffa		;new NMI handler
+Macro: MWA [Source: d:\!atari\macro\xasm.mac]
+    36 00,4F54 A9 90		      ldA <NMI
+    37 00,4F56 8D FA FF		      stA $FFFA
+    38 00,4F59 A9 54		      ldA >NMI
+    39 00,4F5B 8D FB FF		      stA $FFFA+1
+Source: D:\!Atari\getris2\intro\intro.asm
+   139 				 mva #$c0 $d40e		;switch on NMI+DLI again
+Macro: MVA [Source: d:\!atari\macro\xasm.mac]
+     5 00,4F5E A9 C0		 ldA #$C0
+     6 00,4F60 8D 0E D4		 stA $D40E
+Source: D:\!Atari\getris2\intro\intro.asm
+Source: D:\!Atari\getris2\intro\intro.asm
+   140
+   141 				;-- SCROLL
+   142
+   143 00,4F63			loop
+   144 00,4F63 20 15 55		 jsr wait
+   145
+   146 = 00,000C			?ofs = 12
+   147
+   148 					scrol 0      , 0  , 0 , 0 , 64
+Macro: SCROL [Source: D:\!Atari\getris2\intro\intro.asm]
+     1 00,4F66 A2 00		idx ldx #0
+     2 00,4F68 BD 30 4A		 lda tsin+0,x
+     4 00,4F6B 8D CD 52		 sta hpos_l+0
+     5 00,4F6E 8D 8D 4F		 sta _x+1
+     7 00,4F71 4A		 lsr @
+     8 00,4F72 4A		 lsr @
+     5 00,4F73 18		 clc
+     6 00,4F74 69 00		 adc #0
+Source: D:\!Atari\getris2\intro\intro.asm
+    11 00,4F76 A8		 tay
+    13 00,4F77 BD 30 4A		 lda tsin+0,x
+    14 00,4F7A 29 03		 and #3
+    15 00,4F7C AA		 tax 
+    17 00,4F7D BD 00 4A		 lda l_prc+0,x
+    18 00,4F80 8D 8A 4F		 sta _jsr+1
+    19 00,4F83 BD 18 4A		 lda h_prc+0,x
+    20 00,4F86 8D 8B 4F		 sta _jsr+2
+    22 00,4F89 20 FF FF		_jsr jsr $ffff 
+    24 00,4F8C A9 00		_x lda #0
+    25 00,4F8E C9 40		 cmp #64
+    26 00,4F90 D0 14		 bne _cnt
+    28 00,4F92 A9 FF		 lda #$ff
+    29 00,4F94 8D E5 52		 sta stop_l+0
+    31 00,4F97 AD D9 52		 lda thit_l+0
+    32 00,4F9A C9 02		 cmp #2
+    33 00,4F9C B0 0B		 bcs _ext
+    34 00,4F9E EE D9 52		 inc thit_l+0
+    35 00,4FA1 A9 00		 lda #0
+    36 00,4FA3 8D E5 52		 sta stop_l+0
+    37 00,4FA6			_cnt
+    38 00,4FA6 EE 67 4F		 inc idx+1
+    40 00,4FA9			_ext
+Source: D:\!Atari\getris2\intro\intro.asm
+   149 					scrol ?ofs   , 4  , 0 , 1 , 64
+Macro: SCROL [Source: D:\!Atari\getris2\intro\intro.asm]
+     1 00,4FA9 A2 00		idx ldx #0
+     2 00,4FAB BD 3C 4A		 lda tsin+?OFS,x
+     4 00,4FAE 8D CE 52		 sta hpos_l+1
+     5 00,4FB1 8D D0 4F		 sta _x+1
+     7 00,4FB4 4A		 lsr @
+     8 00,4FB5 4A		 lsr @
+     5 00,4FB6 18		 clc
+     6 00,4FB7 69 00		 adc #0
+Source: D:\!Atari\getris2\intro\intro.asm
+    11 00,4FB9 A8		 tay
+    13 00,4FBA BD 3C 4A		 lda tsin+?OFS,x
+    14 00,4FBD 29 03		 and #3
+    15 00,4FBF AA		 tax 
+    17 00,4FC0 BD 04 4A		 lda l_prc+4,x
+    18 00,4FC3 8D CD 4F		 sta _jsr+1
+    19 00,4FC6 BD 1C 4A		 lda h_prc+4,x
+    20 00,4FC9 8D CE 4F		 sta _jsr+2
+    22 00,4FCC 20 FF FF		_jsr jsr $ffff 
+    24 00,4FCF A9 00		_x lda #0
+    25 00,4FD1 C9 40		 cmp #64
+    26 00,4FD3 D0 14		 bne _cnt
+    28 00,4FD5 A9 FF		 lda #$ff
+    29 00,4FD7 8D E6 52		 sta stop_l+1
+    31 00,4FDA AD DA 52		 lda thit_l+1
+    32 00,4FDD C9 02		 cmp #2
+    33 00,4FDF B0 0B		 bcs _ext
+    34 00,4FE1 EE DA 52		 inc thit_l+1
+    35 00,4FE4 A9 00		 lda #0
+    36 00,4FE6 8D E6 52		 sta stop_l+1
+    37 00,4FE9			_cnt
+    38 00,4FE9 EE AA 4F		 inc idx+1
+    40 00,4FEC			_ext
+Source: D:\!Atari\getris2\intro\intro.asm
+   150 					scrol ?ofs*2 , 8  , 0 , 2 , 64
+Macro: SCROL [Source: D:\!Atari\getris2\intro\intro.asm]
+     1 00,4FEC A2 00		idx ldx #0
+     2 00,4FEE BD 48 4A		 lda tsin+?OFS*2,x
+     4 00,4FF1 8D CF 52		 sta hpos_l+2
+     5 00,4FF4 8D 13 50		 sta _x+1
+     7 00,4FF7 4A		 lsr @
+     8 00,4FF8 4A		 lsr @
+     5 00,4FF9 18		 clc
+     6 00,4FFA 69 00		 adc #0
+Source: D:\!Atari\getris2\intro\intro.asm
+    11 00,4FFC A8		 tay
+    13 00,4FFD BD 48 4A		 lda tsin+?OFS*2,x
+    14 00,5000 29 03		 and #3
+    15 00,5002 AA		 tax 
+    17 00,5003 BD 08 4A		 lda l_prc+8,x
+    18 00,5006 8D 10 50		 sta _jsr+1
+    19 00,5009 BD 20 4A		 lda h_prc+8,x
+    20 00,500C 8D 11 50		 sta _jsr+2
+    22 00,500F 20 FF FF		_jsr jsr $ffff 
+    24 00,5012 A9 00		_x lda #0
+    25 00,5014 C9 40		 cmp #64
+    26 00,5016 D0 14		 bne _cnt
+    28 00,5018 A9 FF		 lda #$ff
+    29 00,501A 8D E7 52		 sta stop_l+2
+    31 00,501D AD DB 52		 lda thit_l+2
+    32 00,5020 C9 02		 cmp #2
+    33 00,5022 B0 0B		 bcs _ext
+    34 00,5024 EE DB 52		 inc thit_l+2
+    35 00,5027 A9 00		 lda #0
+    36 00,5029 8D E7 52		 sta stop_l+2
+    37 00,502C			_cnt
+    38 00,502C EE ED 4F		 inc idx+1
+    40 00,502F			_ext
+Source: D:\!Atari\getris2\intro\intro.asm
+   151 					scrol ?ofs*3 , 12 , 0 , 3 , 64
+Macro: SCROL [Source: D:\!Atari\getris2\intro\intro.asm]
+     1 00,502F A2 00		idx ldx #0
+     2 00,5031 BD 54 4A		 lda tsin+?OFS*3,x
+     4 00,5034 8D D0 52		 sta hpos_l+3
+     5 00,5037 8D 56 50		 sta _x+1
+     7 00,503A 4A		 lsr @
+     8 00,503B 4A		 lsr @
+     5 00,503C 18		 clc
+     6 00,503D 69 00		 adc #0
+Source: D:\!Atari\getris2\intro\intro.asm
+    11 00,503F A8		 tay
+    13 00,5040 BD 54 4A		 lda tsin+?OFS*3,x
+    14 00,5043 29 03		 and #3
+    15 00,5045 AA		 tax 
+    17 00,5046 BD 0C 4A		 lda l_prc+12,x
+    18 00,5049 8D 53 50		 sta _jsr+1
+    19 00,504C BD 24 4A		 lda h_prc+12,x
+    20 00,504F 8D 54 50		 sta _jsr+2
+    22 00,5052 20 FF FF		_jsr jsr $ffff 
+    24 00,5055 A9 00		_x lda #0
+    25 00,5057 C9 40		 cmp #64
+    26 00,5059 D0 14		 bne _cnt
+    28 00,505B A9 FF		 lda #$ff
+    29 00,505D 8D E8 52		 sta stop_l+3
+    31 00,5060 AD DC 52		 lda thit_l+3
+    32 00,5063 C9 02		 cmp #2
+    33 00,5065 B0 0B		 bcs _ext
+    34 00,5067 EE DC 52		 inc thit_l+3
+    35 00,506A A9 00		 lda #0
+    36 00,506C 8D E8 52		 sta stop_l+3
+    37 00,506F			_cnt
+    38 00,506F EE 30 50		 inc idx+1
+    40 00,5072			_ext
+Source: D:\!Atari\getris2\intro\intro.asm
+   152 					scrol ?ofs*4 , 16 , 0 , 4 , 64
+Macro: SCROL [Source: D:\!Atari\getris2\intro\intro.asm]
+     1 00,5072 A2 00		idx ldx #0
+     2 00,5074 BD 60 4A		 lda tsin+?OFS*4,x
+     4 00,5077 8D D1 52		 sta hpos_l+4
+     5 00,507A 8D 99 50		 sta _x+1
+     7 00,507D 4A		 lsr @
+     8 00,507E 4A		 lsr @
+     5 00,507F 18		 clc
+     6 00,5080 69 00		 adc #0
+Source: D:\!Atari\getris2\intro\intro.asm
+    11 00,5082 A8		 tay
+    13 00,5083 BD 60 4A		 lda tsin+?OFS*4,x
+    14 00,5086 29 03		 and #3
+    15 00,5088 AA		 tax 
+    17 00,5089 BD 10 4A		 lda l_prc+16,x
+    18 00,508C 8D 96 50		 sta _jsr+1
+    19 00,508F BD 28 4A		 lda h_prc+16,x
+    20 00,5092 8D 97 50		 sta _jsr+2
+    22 00,5095 20 FF FF		_jsr jsr $ffff 
+    24 00,5098 A9 00		_x lda #0
+    25 00,509A C9 40		 cmp #64
+    26 00,509C D0 14		 bne _cnt
+    28 00,509E A9 FF		 lda #$ff
+    29 00,50A0 8D E9 52		 sta stop_l+4
+    31 00,50A3 AD DD 52		 lda thit_l+4
+    32 00,50A6 C9 02		 cmp #2
+    33 00,50A8 B0 0B		 bcs _ext
+    34 00,50AA EE DD 52		 inc thit_l+4
+    35 00,50AD A9 00		 lda #0
+    36 00,50AF 8D E9 52		 sta stop_l+4
+    37 00,50B2			_cnt
+    38 00,50B2 EE 73 50		 inc idx+1
+    40 00,50B5			_ext
+Source: D:\!Atari\getris2\intro\intro.asm
+   153 					scrol ?ofs*5 , 20 , 0 , 5 , 64 
+Macro: SCROL [Source: D:\!Atari\getris2\intro\intro.asm]
+     1 00,50B5 A2 00		idx ldx #0
+     2 00,50B7 BD 6C 4A		 lda tsin+?OFS*5,x
+     4 00,50BA 8D D2 52		 sta hpos_l+5
+     5 00,50BD 8D DC 50		 sta _x+1
+     7 00,50C0 4A		 lsr @
+     8 00,50C1 4A		 lsr @
+     5 00,50C2 18		 clc
+     6 00,50C3 69 00		 adc #0
+Source: D:\!Atari\getris2\intro\intro.asm
+    11 00,50C5 A8		 tay
+    13 00,50C6 BD 6C 4A		 lda tsin+?OFS*5,x
+    14 00,50C9 29 03		 and #3
+    15 00,50CB AA		 tax 
+    17 00,50CC BD 14 4A		 lda l_prc+20,x
+    18 00,50CF 8D D9 50		 sta _jsr+1
+    19 00,50D2 BD 2C 4A		 lda h_prc+20,x
+    20 00,50D5 8D DA 50		 sta _jsr+2
+    22 00,50D8 20 FF FF		_jsr jsr $ffff 
+    24 00,50DB A9 00		_x lda #0
+    25 00,50DD C9 40		 cmp #64
+    26 00,50DF D0 14		 bne _cnt
+    28 00,50E1 A9 FF		 lda #$ff
+    29 00,50E3 8D EA 52		 sta stop_l+5
+    31 00,50E6 AD DE 52		 lda thit_l+5
+    32 00,50E9 C9 02		 cmp #2
+    33 00,50EB B0 0B		 bcs _ext
+    34 00,50ED EE DE 52		 inc thit_l+5
+    35 00,50F0 A9 00		 lda #0
+    36 00,50F2 8D EA 52		 sta stop_l+5
+    37 00,50F5			_cnt
+    38 00,50F5 EE B6 50		 inc idx+1
+    40 00,50F8			_ext
+Source: D:\!Atari\getris2\intro\intro.asm
+   154
+   155 = 00,0008			?ofs = 8
+   156
+   157 					_scrol 32+0      , 0  , 60 , 0 , 64
+Macro: _SCROL [Source: D:\!Atari\getris2\intro\intro.asm]
+     1 00,50F8 A2 00		idx ldx #0
+     2 00,50FA BD B0 4C		 lda _tsin+32+0,x
+     4 00,50FD 8D D3 52		 sta hpos_r+0
+     5 00,5100 8D 26 51		 sta _x+1
+     7 00,5103 4A		 lsr @
+     8 00,5104 4A		 lsr @
+     9 00,5105 8D 0C 51		 sta _val+1
+    10 00,5108 A9 3C		 lda #60
+    11 00,510A 38		 sec
+    12 00,510B E9 00		_val sbc #0
+    13 00,510D A8		 tay
+    15 00,510E BD B0 4C		 lda _tsin+32+0,x
+    16
+    17 00,5111 49 FF		 eor #$ff
+    18 00,5113 29 03		 and #3
+    19 00,5115 AA		 tax
+    20 00,5116 BD 00 4A		 lda l_prc+0,x
+    21 00,5119 8D 23 51		 sta _jsr+1
+    22 00,511C BD 18 4A		 lda h_prc+0,x
+    23 00,511F 8D 24 51		 sta _jsr+2
+    25 00,5122 20 FF FF		_jsr jsr $ffff 
+    27 00,5125 A9 00		_x lda #0
+    28 00,5127 C9 3F		 cmp #63        
+    29 00,5129 D0 12		 bne _cnt
+    31 00,512B A9 FF		 lda #$ff
+    32 00,512D 8D EB 52		 sta stop_r+0
+    34 00,5130 AD DF 52		 lda thit_r+0
+    35
+    36 00,5133 B0 0B		 bcs _ext
+    37 00,5135 EE DF 52		 inc thit_r+0
+    38 00,5138 A9 00		 lda #0
+    39 00,513A 8D EB 52		 sta stop_r+0
+    41 00,513D			_cnt
+    42 00,513D EE F9 50		 inc idx+1
+    44 00,5140			_ext
+Source: D:\!Atari\getris2\intro\intro.asm
+   158 					_scrol 32+?ofs   , 4  , 60 , 1 , 64
+Macro: _SCROL [Source: D:\!Atari\getris2\intro\intro.asm]
+     1 00,5140 A2 00		idx ldx #0
+     2 00,5142 BD B8 4C		 lda _tsin+32+?OFS,x
+     4 00,5145 8D D4 52		 sta hpos_r+1
+     5 00,5148 8D 6E 51		 sta _x+1
+     7 00,514B 4A		 lsr @
+     8 00,514C 4A		 lsr @
+     9 00,514D 8D 54 51		 sta _val+1
+    10 00,5150 A9 3C		 lda #60
+    11 00,5152 38		 sec
+    12 00,5153 E9 00		_val sbc #0
+    13 00,5155 A8		 tay
+    15 00,5156 BD B8 4C		 lda _tsin+32+?OFS,x
+    16
+    17 00,5159 49 FF		 eor #$ff
+    18 00,515B 29 03		 and #3
+    19 00,515D AA		 tax
+    20 00,515E BD 04 4A		 lda l_prc+4,x
+    21 00,5161 8D 6B 51		 sta _jsr+1
+    22 00,5164 BD 1C 4A		 lda h_prc+4,x
+    23 00,5167 8D 6C 51		 sta _jsr+2
+    25 00,516A 20 FF FF		_jsr jsr $ffff 
+    27 00,516D A9 00		_x lda #0
+    28 00,516F C9 3F		 cmp #63        
+    29 00,5171 D0 12		 bne _cnt
+    31 00,5173 A9 FF		 lda #$ff
+    32 00,5175 8D EC 52		 sta stop_r+1
+    34 00,5178 AD E0 52		 lda thit_r+1
+    35
+    36 00,517B B0 0B		 bcs _ext
+    37 00,517D EE E0 52		 inc thit_r+1
+    38 00,5180 A9 00		 lda #0
+    39 00,5182 8D EC 52		 sta stop_r+1
+    41 00,5185			_cnt
+    42 00,5185 EE 41 51		 inc idx+1
+    44 00,5188			_ext
+Source: D:\!Atari\getris2\intro\intro.asm
+   159 					_scrol 32+?ofs*2 , 8  , 60 , 2 , 64
+Macro: _SCROL [Source: D:\!Atari\getris2\intro\intro.asm]
+     1 00,5188 A2 00		idx ldx #0
+     2 00,518A BD C0 4C		 lda _tsin+32+?OFS*2,x
+     4 00,518D 8D D5 52		 sta hpos_r+2
+     5 00,5190 8D B6 51		 sta _x+1
+     7 00,5193 4A		 lsr @
+     8 00,5194 4A		 lsr @
+     9 00,5195 8D 9C 51		 sta _val+1
+    10 00,5198 A9 3C		 lda #60
+    11 00,519A 38		 sec
+    12 00,519B E9 00		_val sbc #0
+    13 00,519D A8		 tay
+    15 00,519E BD C0 4C		 lda _tsin+32+?OFS*2,x
+    16
+    17 00,51A1 49 FF		 eor #$ff
+    18 00,51A3 29 03		 and #3
+    19 00,51A5 AA		 tax
+    20 00,51A6 BD 08 4A		 lda l_prc+8,x
+    21 00,51A9 8D B3 51		 sta _jsr+1
+    22 00,51AC BD 20 4A		 lda h_prc+8,x
+    23 00,51AF 8D B4 51		 sta _jsr+2
+    25 00,51B2 20 FF FF		_jsr jsr $ffff 
+    27 00,51B5 A9 00		_x lda #0
+    28 00,51B7 C9 3F		 cmp #63        
+    29 00,51B9 D0 12		 bne _cnt
+    31 00,51BB A9 FF		 lda #$ff
+    32 00,51BD 8D ED 52		 sta stop_r+2
+    34 00,51C0 AD E1 52		 lda thit_r+2
+    35
+    36 00,51C3 B0 0B		 bcs _ext
+    37 00,51C5 EE E1 52		 inc thit_r+2
+    38 00,51C8 A9 00		 lda #0
+    39 00,51CA 8D ED 52		 sta stop_r+2
+    41 00,51CD			_cnt
+    42 00,51CD EE 89 51		 inc idx+1
+    44 00,51D0			_ext
+Source: D:\!Atari\getris2\intro\intro.asm
+   160 					_scrol 32+?ofs*3 , 12 , 60 , 3 , 64
+Macro: _SCROL [Source: D:\!Atari\getris2\intro\intro.asm]
+     1 00,51D0 A2 00		idx ldx #0
+     2 00,51D2 BD C8 4C		 lda _tsin+32+?OFS*3,x
+     4 00,51D5 8D D6 52		 sta hpos_r+3
+     5 00,51D8 8D FE 51		 sta _x+1
+     7 00,51DB 4A		 lsr @
+     8 00,51DC 4A		 lsr @
+     9 00,51DD 8D E4 51		 sta _val+1
+    10 00,51E0 A9 3C		 lda #60
+    11 00,51E2 38		 sec
+    12 00,51E3 E9 00		_val sbc #0
+    13 00,51E5 A8		 tay
+    15 00,51E6 BD C8 4C		 lda _tsin+32+?OFS*3,x
+    16
+    17 00,51E9 49 FF		 eor #$ff
+    18 00,51EB 29 03		 and #3
+    19 00,51ED AA		 tax
+    20 00,51EE BD 0C 4A		 lda l_prc+12,x
+    21 00,51F1 8D FB 51		 sta _jsr+1
+    22 00,51F4 BD 24 4A		 lda h_prc+12,x
+    23 00,51F7 8D FC 51		 sta _jsr+2
+    25 00,51FA 20 FF FF		_jsr jsr $ffff 
+    27 00,51FD A9 00		_x lda #0
+    28 00,51FF C9 3F		 cmp #63        
+    29 00,5201 D0 12		 bne _cnt
+    31 00,5203 A9 FF		 lda #$ff
+    32 00,5205 8D EE 52		 sta stop_r+3
+    34 00,5208 AD E2 52		 lda thit_r+3
+    35
+    36 00,520B B0 0B		 bcs _ext
+    37 00,520D EE E2 52		 inc thit_r+3
+    38 00,5210 A9 00		 lda #0
+    39 00,5212 8D EE 52		 sta stop_r+3
+    41 00,5215			_cnt
+    42 00,5215 EE D1 51		 inc idx+1
+    44 00,5218			_ext
+Source: D:\!Atari\getris2\intro\intro.asm
+   161 					_scrol 32+?ofs*4 , 16 , 60 , 4 , 64
+Macro: _SCROL [Source: D:\!Atari\getris2\intro\intro.asm]
+     1 00,5218 A2 00		idx ldx #0
+     2 00,521A BD D0 4C		 lda _tsin+32+?OFS*4,x
+     4 00,521D 8D D7 52		 sta hpos_r+4
+     5 00,5220 8D 46 52		 sta _x+1
+     7 00,5223 4A		 lsr @
+     8 00,5224 4A		 lsr @
+     9 00,5225 8D 2C 52		 sta _val+1
+    10 00,5228 A9 3C		 lda #60
+    11 00,522A 38		 sec
+    12 00,522B E9 00		_val sbc #0
+    13 00,522D A8		 tay
+    15 00,522E BD D0 4C		 lda _tsin+32+?OFS*4,x
+    16
+    17 00,5231 49 FF		 eor #$ff
+    18 00,5233 29 03		 and #3
+    19 00,5235 AA		 tax
+    20 00,5236 BD 10 4A		 lda l_prc+16,x
+    21 00,5239 8D 43 52		 sta _jsr+1
+    22 00,523C BD 28 4A		 lda h_prc+16,x
+    23 00,523F 8D 44 52		 sta _jsr+2
+    25 00,5242 20 FF FF		_jsr jsr $ffff 
+    27 00,5245 A9 00		_x lda #0
+    28 00,5247 C9 3F		 cmp #63        
+    29 00,5249 D0 12		 bne _cnt
+    31 00,524B A9 FF		 lda #$ff
+    32 00,524D 8D EF 52		 sta stop_r+4
+    34 00,5250 AD E3 52		 lda thit_r+4
+    35
+    36 00,5253 B0 0B		 bcs _ext
+    37 00,5255 EE E3 52		 inc thit_r+4
+    38 00,5258 A9 00		 lda #0
+    39 00,525A 8D EF 52		 sta stop_r+4
+    41 00,525D			_cnt
+    42 00,525D EE 19 52		 inc idx+1
+    44 00,5260			_ext
+Source: D:\!Atari\getris2\intro\intro.asm
+   162 					_scrol 32+?ofs*5 , 20 , 60 , 5 , 64
+Macro: _SCROL [Source: D:\!Atari\getris2\intro\intro.asm]
+     1 00,5260 A2 00		idx ldx #0
+     2 00,5262 BD D8 4C		 lda _tsin+32+?OFS*5,x
+     4 00,5265 8D D8 52		 sta hpos_r+5
+     5 00,5268 8D 8E 52		 sta _x+1
+     7 00,526B 4A		 lsr @
+     8 00,526C 4A		 lsr @
+     9 00,526D 8D 74 52		 sta _val+1
+    10 00,5270 A9 3C		 lda #60
+    11 00,5272 38		 sec
+    12 00,5273 E9 00		_val sbc #0
+    13 00,5275 A8		 tay
+    15 00,5276 BD D8 4C		 lda _tsin+32+?OFS*5,x
+    16
+    17 00,5279 49 FF		 eor #$ff
+    18 00,527B 29 03		 and #3
+    19 00,527D AA		 tax
+    20 00,527E BD 14 4A		 lda l_prc+20,x
+    21 00,5281 8D 8B 52		 sta _jsr+1
+    22 00,5284 BD 2C 4A		 lda h_prc+20,x
+    23 00,5287 8D 8C 52		 sta _jsr+2
+    25 00,528A 20 FF FF		_jsr jsr $ffff 
+    27 00,528D A9 00		_x lda #0
+    28 00,528F C9 3F		 cmp #63        
+    29 00,5291 D0 12		 bne _cnt
+    31 00,5293 A9 FF		 lda #$ff
+    32 00,5295 8D F0 52		 sta stop_r+5
+    34 00,5298 AD E4 52		 lda thit_r+5
+    35
+    36 00,529B B0 0B		 bcs _ext
+    37 00,529D EE E4 52		 inc thit_r+5
+    38 00,52A0 A9 00		 lda #0
+    39 00,52A2 8D F0 52		 sta stop_r+5
+    41 00,52A5			_cnt
+    42 00,52A5 EE 61 52		 inc idx+1
+    44 00,52A8			_ext
+Source: D:\!Atari\getris2\intro\intro.asm
+   163
+   164 00,52A8 AD E5 52		 lda stop_l
+   165 00,52AB F0 1D		 beq _lp
+   166 00,52AD AD E6 52		 lda stop_l+1
+   167 00,52B0 F0 18		 beq _lp
+   168 00,52B2 AD E7 52		 lda stop_l+2
+   169 00,52B5 F0 13		 beq _lp
+   170 00,52B7 AD E8 52		 lda stop_l+3
+   171 00,52BA F0 0E		 beq _lp
+   172 00,52BC AD E9 52		 lda stop_l+4
+   173 00,52BF F0 09		 beq _lp
+   174 00,52C1 AD EA 52		 lda stop_l+5
+   175 00,52C4 F0 04		 beq _lp
+   176
+   177 00,52C6 20 1F BD		 jsr loading.main
+   178 00,52C9 60		 rts
+   179
+   180 00,52CA			_lp
+   181 00,52CA 4C 63 4F		 jmp loop
+   182
+   183 				hpos_l .ds 6
+   183 00,52CD			org *+ 6
+   184 				hpos_r .ds 6
+   184 00,52D3			org *+ 6
+   185 00,52D9-571B> 00 00 00 +	thit_l :6 brk
+   186 00,52DF 00 00 00 00 00 +	thit_r :6 brk
+   187 00,52E5 00 00 00 00 00 +	stop_l :6 brk
+   188 00,52EB 00 00 00 00 00 +	stop_r :6 brk
+   189
+   190
+   191 				;-- DLI PROGRAM
+   192
+   193 = 00,52F1		 ?old_dli equ *
+   194
+   195
+   196 00,52F1			dli0
+   197 00,52F1 8D 0A D4		 sta $d40a
+   198
+   199 				 @p2 0
+Macro: @P2 [Source: D:\!Atari\getris2\intro\intro.asm]
+     1 00,52F4 AD CD 52		 lda hpos_l+0
+     5 00,52F7 38		 sec
+     6 00,52F8 E9 0C		 sbc #12
+Source: D:\!Atari\getris2\intro\intro.asm
+     3 00,52FA 8D 02 D0		 sta hposp2
+     5 00,52FD 18		 clc
+     6 00,52FE 69 1C		 adc #28
+Source: D:\!Atari\getris2\intro\intro.asm
+     5 00,5300 8D 06 D0		 sta hposm2
+Source: D:\!Atari\getris2\intro\intro.asm
+   200 				 @p3 0
+Macro: @P3 [Source: D:\!Atari\getris2\intro\intro.asm]
+     1 00,5303 A9 E7		 lda #231
+     5 00,5305 38		 sec
+     6 00,5306 ED D3 52		 sbc HPOS_R+0
+Source: D:\!Atari\getris2\intro\intro.asm
+     3 00,5309 8D 03 D0		 sta hposp3
+     5 00,530C 18		 clc
+     6 00,530D 69 1C		 adc #28
+Source: D:\!Atari\getris2\intro\intro.asm
+     5 00,530F 8D 07 D0		 sta hposm3
+Source: D:\!Atari\getris2\intro\intro.asm
+   201 				 DLINEW dli1
+Macro: DLINEW [Source: D:\!Atari\getris2\intro\intro.mac]
+    36 00,5312 A9 1F		      ldA <DLI1
+    37 00,5314 8D 9C 54		      stA DLIV+1
+    38 00,5317 A9 53		      ldA >DLI1
+    39 00,5319 8D 9D 54		      stA DLIV+1+1
+     7 00,531C 4C 0E 55		 jmp NmiQuit
+     9 = 00,531F		 ?old_dli = *
+Source: D:\!Atari\getris2\intro\intro.asm
+   202
+   203 00,531F			dli1
+   204 00,531F 8D 0A D4		 sta $d40a
+   205
+   206 				 @p2 1
+Macro: @P2 [Source: D:\!Atari\getris2\intro\intro.asm]
+     1 00,5322 AD CE 52		 lda hpos_l+1
+     5 00,5325 38		 sec
+     6 00,5326 E9 0C		 sbc #12
+Source: D:\!Atari\getris2\intro\intro.asm
+     3 00,5328 8D 02 D0		 sta hposp2
+     5 00,532B 18		 clc
+     6 00,532C 69 1C		 adc #28
+Source: D:\!Atari\getris2\intro\intro.asm
+     5 00,532E 8D 06 D0		 sta hposm2
+Source: D:\!Atari\getris2\intro\intro.asm
+   207 				 @p3 1
+Macro: @P3 [Source: D:\!Atari\getris2\intro\intro.asm]
+     1 00,5331 A9 E7		 lda #231
+     5 00,5333 38		 sec
+     6 00,5334 ED D4 52		 sbc HPOS_R+1
+Source: D:\!Atari\getris2\intro\intro.asm
+     3 00,5337 8D 03 D0		 sta hposp3
+     5 00,533A 18		 clc
+     6 00,533B 69 1C		 adc #28
+Source: D:\!Atari\getris2\intro\intro.asm
+     5 00,533D 8D 07 D0		 sta hposm3
+Source: D:\!Atari\getris2\intro\intro.asm
+   208 				 DLINEW dli2
+Macro: DLINEW [Source: D:\!Atari\getris2\intro\intro.mac]
+     5 00,5340 A9 48		 ldA <DLI2
+     6 00,5342 8D 9C 54		 stA DLIV+1
+Source: D:\!Atari\getris2\intro\intro.asm
+Source: D:\!Atari\getris2\intro\intro.asm
+     7 00,5345 4C 0E 55		 jmp NmiQuit
+     9 = 00,5348		 ?old_dli = *
+Source: D:\!Atari\getris2\intro\intro.asm
+   209
+   210 00,5348			dli2
+   211 00,5348 A9 24		 lda >fnt+$400*$01
+   212 00,534A 8D 0A D4		 sta $d40a                   ;line=40
+   213 00,534D 8D 09 D4		 sta chbase
+   214 				 DLINEW dli3
+Macro: DLINEW [Source: D:\!Atari\getris2\intro\intro.mac]
+     5 00,5350 A9 58		 ldA <DLI3
+     6 00,5352 8D 9C 54		 stA DLIV+1
+Source: D:\!Atari\getris2\intro\intro.asm
+Source: D:\!Atari\getris2\intro\intro.asm
+     7 00,5355 4C 0E 55		 jmp NmiQuit
+     9 = 00,5358		 ?old_dli = *
+Source: D:\!Atari\getris2\intro\intro.asm
+   215
+   216 00,5358			dli3
+   217 00,5358 A9 20		 lda >fnt+$400*$00
+   218 00,535A 8D 0A D4		 sta $d40a                   ;line=56
+   219 00,535D 8D 09 D4		 sta chbase
+   220
+   221 				 @p2 2
+Macro: @P2 [Source: D:\!Atari\getris2\intro\intro.asm]
+     1 00,5360 AD CF 52		 lda hpos_l+2
+     5 00,5363 38		 sec
+     6 00,5364 E9 0C		 sbc #12
+Source: D:\!Atari\getris2\intro\intro.asm
+     3 00,5366 8D 02 D0		 sta hposp2
+     5 00,5369 18		 clc
+     6 00,536A 69 1C		 adc #28
+Source: D:\!Atari\getris2\intro\intro.asm
+     5 00,536C 8D 06 D0		 sta hposm2
+Source: D:\!Atari\getris2\intro\intro.asm
+   222 				 @p3 2
+Macro: @P3 [Source: D:\!Atari\getris2\intro\intro.asm]
+     1 00,536F A9 E7		 lda #231
+     5 00,5371 38		 sec
+     6 00,5372 ED D5 52		 sbc HPOS_R+2
+Source: D:\!Atari\getris2\intro\intro.asm
+     3 00,5375 8D 03 D0		 sta hposp3
+     5 00,5378 18		 clc
+     6 00,5379 69 1C		 adc #28
+Source: D:\!Atari\getris2\intro\intro.asm
+     5 00,537B 8D 07 D0		 sta hposm3
+Source: D:\!Atari\getris2\intro\intro.asm
+   223 				 DLINEW dli4
+Macro: DLINEW [Source: D:\!Atari\getris2\intro\intro.mac]
+     5 00,537E A9 86		 ldA <DLI4
+     6 00,5380 8D 9C 54		 stA DLIV+1
+Source: D:\!Atari\getris2\intro\intro.asm
+Source: D:\!Atari\getris2\intro\intro.asm
+     7 00,5383 4C 0E 55		 jmp NmiQuit
+     9 = 00,5386		 ?old_dli = *
+Source: D:\!Atari\getris2\intro\intro.asm
+   224
+   225 00,5386			dli4
+   226 00,5386 A9 24		 lda >fnt+$400*$01
+   227 00,5388 8D 0A D4		 sta $d40a                   ;line=64
+   228 00,538B 8D 09 D4		 sta chbase
+   229 				 DLINEW dli5
+Macro: DLINEW [Source: D:\!Atari\getris2\intro\intro.mac]
+     5 00,538E A9 96		 ldA <DLI5
+     6 00,5390 8D 9C 54		 stA DLIV+1
+Source: D:\!Atari\getris2\intro\intro.asm
+Source: D:\!Atari\getris2\intro\intro.asm
+     7 00,5393 4C 0E 55		 jmp NmiQuit
+     9 = 00,5396		 ?old_dli = *
+Source: D:\!Atari\getris2\intro\intro.asm
+   230
+   231 00,5396			dli5
+   232 00,5396 A9 28		 lda >fnt+$400*$02
+   233 00,5398 8D 0A D4		 sta $d40a                   ;line=80
+   234 00,539B 8D 09 D4		 sta chbase
+   235 				 DLINEW dli6
+Macro: DLINEW [Source: D:\!Atari\getris2\intro\intro.mac]
+     5 00,539E A9 A6		 ldA <DLI6
+     6 00,53A0 8D 9C 54		 stA DLIV+1
+Source: D:\!Atari\getris2\intro\intro.asm
+Source: D:\!Atari\getris2\intro\intro.asm
+     7 00,53A3 4C 0E 55		 jmp NmiQuit
+     9 = 00,53A6		 ?old_dli = *
+Source: D:\!Atari\getris2\intro\intro.asm
+   236
+   237 00,53A6			dli6
+   238 00,53A6 A9 20		 lda >fnt+$400*$00
+   239 00,53A8 8D 0A D4		 sta $d40a                   ;line=88
+   240 00,53AB 8D 09 D4		 sta chbase
+   241
+   242 				 @p2 3
+Macro: @P2 [Source: D:\!Atari\getris2\intro\intro.asm]
+     1 00,53AE AD D0 52		 lda hpos_l+3
+     5 00,53B1 38		 sec
+     6 00,53B2 E9 0C		 sbc #12
+Source: D:\!Atari\getris2\intro\intro.asm
+     3 00,53B4 8D 02 D0		 sta hposp2
+     5 00,53B7 18		 clc
+     6 00,53B8 69 1C		 adc #28
+Source: D:\!Atari\getris2\intro\intro.asm
+     5 00,53BA 8D 06 D0		 sta hposm2
+Source: D:\!Atari\getris2\intro\intro.asm
+   243 				 @p3 3
+Macro: @P3 [Source: D:\!Atari\getris2\intro\intro.asm]
+     1 00,53BD A9 E7		 lda #231
+     5 00,53BF 38		 sec
+     6 00,53C0 ED D6 52		 sbc HPOS_R+3
+Source: D:\!Atari\getris2\intro\intro.asm
+     3 00,53C3 8D 03 D0		 sta hposp3
+     5 00,53C6 18		 clc
+     6 00,53C7 69 1C		 adc #28
+Source: D:\!Atari\getris2\intro\intro.asm
+     5 00,53C9 8D 07 D0		 sta hposm3
+Source: D:\!Atari\getris2\intro\intro.asm
+   244 				 DLINEW dli7
+Macro: DLINEW [Source: D:\!Atari\getris2\intro\intro.mac]
+     5 00,53CC A9 D4		 ldA <DLI7
+     6 00,53CE 8D 9C 54		 stA DLIV+1
+Source: D:\!Atari\getris2\intro\intro.asm
+Source: D:\!Atari\getris2\intro\intro.asm
+     7 00,53D1 4C 0E 55		 jmp NmiQuit
+     9 = 00,53D4		 ?old_dli = *
+Source: D:\!Atari\getris2\intro\intro.asm
+   245
+   246 00,53D4			dli7
+   247 00,53D4 A9 28		 lda >fnt+$400*$02
+   248 00,53D6 8D 0A D4		 sta $d40a                   ;line=96
+   249 00,53D9 8D 09 D4		 sta chbase
+   250 				 DLINEW dli8
+Macro: DLINEW [Source: D:\!Atari\getris2\intro\intro.mac]
+     5 00,53DC A9 E4		 ldA <DLI8
+     6 00,53DE 8D 9C 54		 stA DLIV+1
+Source: D:\!Atari\getris2\intro\intro.asm
+Source: D:\!Atari\getris2\intro\intro.asm
+     7 00,53E1 4C 0E 55		 jmp NmiQuit
+     9 = 00,53E4		 ?old_dli = *
+Source: D:\!Atari\getris2\intro\intro.asm
+   251
+   252 00,53E4			dli8
+   253 00,53E4 A9 20		 lda >fnt+$400*$00
+   254 00,53E6 8D 0A D4		 sta $d40a                   ;line=120
+   255 00,53E9 8D 09 D4		 sta chbase
+   256
+   257 				 @p2 4
+Macro: @P2 [Source: D:\!Atari\getris2\intro\intro.asm]
+     1 00,53EC AD D1 52		 lda hpos_l+4
+     5 00,53EF 38		 sec
+     6 00,53F0 E9 0C		 sbc #12
+Source: D:\!Atari\getris2\intro\intro.asm
+     3 00,53F2 8D 02 D0		 sta hposp2
+     5 00,53F5 18		 clc
+     6 00,53F6 69 1C		 adc #28
+Source: D:\!Atari\getris2\intro\intro.asm
+     5 00,53F8 8D 06 D0		 sta hposm2
+Source: D:\!Atari\getris2\intro\intro.asm
+   258 				 @p3 4
+Macro: @P3 [Source: D:\!Atari\getris2\intro\intro.asm]
+     1 00,53FB A9 E7		 lda #231
+     5 00,53FD 38		 sec
+     6 00,53FE ED D7 52		 sbc HPOS_R+4
+Source: D:\!Atari\getris2\intro\intro.asm
+     3 00,5401 8D 03 D0		 sta hposp3
+     5 00,5404 18		 clc
+     6 00,5405 69 1C		 adc #28
+Source: D:\!Atari\getris2\intro\intro.asm
+     5 00,5407 8D 07 D0		 sta hposm3
+Source: D:\!Atari\getris2\intro\intro.asm
+   259 				 DLINEW dli9
+Macro: DLINEW [Source: D:\!Atari\getris2\intro\intro.mac]
+    36 00,540A A9 17		      ldA <DLI9
+    37 00,540C 8D 9C 54		      stA DLIV+1
+    38 00,540F A9 54		      ldA >DLI9
+    39 00,5411 8D 9D 54		      stA DLIV+1+1
+     7 00,5414 4C 0E 55		 jmp NmiQuit
+     9 = 00,5417		 ?old_dli = *
+Source: D:\!Atari\getris2\intro\intro.asm
+   260
+   261 00,5417			dli9
+   262 00,5417 A9 28		 lda >fnt+$400*$02
+   263 00,5419 8D 0A D4		 sta $d40a                   ;line=128
+   264 00,541C 8D 09 D4		 sta chbase
+   265 				 DLINEW dli10
+Macro: DLINEW [Source: D:\!Atari\getris2\intro\intro.mac]
+     5 00,541F A9 27		 ldA <DLI10
+     6 00,5421 8D 9C 54		 stA DLIV+1
+Source: D:\!Atari\getris2\intro\intro.asm
+Source: D:\!Atari\getris2\intro\intro.asm
+     7 00,5424 4C 0E 55		 jmp NmiQuit
+     9 = 00,5427		 ?old_dli = *
+Source: D:\!Atari\getris2\intro\intro.asm
+   266
+   267 00,5427			dli10
+   268 00,5427 A9 24		 lda >fnt+$400*$01
+   269 00,5429 8D 0A D4		 sta $d40a                   ;line=136
+   270 00,542C 8D 09 D4		 sta chbase
+   271 				 DLINEW dli11
+Macro: DLINEW [Source: D:\!Atari\getris2\intro\intro.mac]
+     5 00,542F A9 37		 ldA <DLI11
+     6 00,5431 8D 9C 54		 stA DLIV+1
+Source: D:\!Atari\getris2\intro\intro.asm
+Source: D:\!Atari\getris2\intro\intro.asm
+     7 00,5434 4C 0E 55		 jmp NmiQuit
+     9 = 00,5437		 ?old_dli = *
+Source: D:\!Atari\getris2\intro\intro.asm
+   272
+   273 00,5437			dli11
+   274 00,5437 A9 28		 lda >fnt+$400*$02
+   275 00,5439 8D 0A D4		 sta $d40a                   ;line=144
+   276 00,543C 8D 09 D4		 sta chbase
+   277 				 DLINEW dli12
+Macro: DLINEW [Source: D:\!Atari\getris2\intro\intro.mac]
+     5 00,543F A9 47		 ldA <DLI12
+     6 00,5441 8D 9C 54		 stA DLIV+1
+Source: D:\!Atari\getris2\intro\intro.asm
+Source: D:\!Atari\getris2\intro\intro.asm
+     7 00,5444 4C 0E 55		 jmp NmiQuit
+     9 = 00,5447		 ?old_dli = *
+Source: D:\!Atari\getris2\intro\intro.asm
+   278
+   279 00,5447			dli12
+   280 00,5447 A9 20		 lda >fnt+$400*$00
+   281 00,5449 8D 0A D4		 sta $d40a                   ;line=152
+   282 00,544C 8D 09 D4		 sta chbase
+   283
+   284 				 @p2 5
+Macro: @P2 [Source: D:\!Atari\getris2\intro\intro.asm]
+     1 00,544F AD D2 52		 lda hpos_l+5
+     5 00,5452 38		 sec
+     6 00,5453 E9 0C		 sbc #12
+Source: D:\!Atari\getris2\intro\intro.asm
+     3 00,5455 8D 02 D0		 sta hposp2
+     5 00,5458 18		 clc
+     6 00,5459 69 1C		 adc #28
+Source: D:\!Atari\getris2\intro\intro.asm
+     5 00,545B 8D 06 D0		 sta hposm2
+Source: D:\!Atari\getris2\intro\intro.asm
+   285 				 @p3 5
+Macro: @P3 [Source: D:\!Atari\getris2\intro\intro.asm]
+     1 00,545E A9 E7		 lda #231
+     5 00,5460 38		 sec
+     6 00,5461 ED D8 52		 sbc HPOS_R+5
+Source: D:\!Atari\getris2\intro\intro.asm
+     3 00,5464 8D 03 D0		 sta hposp3
+     5 00,5467 18		 clc
+     6 00,5468 69 1C		 adc #28
+Source: D:\!Atari\getris2\intro\intro.asm
+     5 00,546A 8D 07 D0		 sta hposm3
+Source: D:\!Atari\getris2\intro\intro.asm
+   286 				 DLINEW dli13
+Macro: DLINEW [Source: D:\!Atari\getris2\intro\intro.mac]
+     5 00,546D A9 75		 ldA <DLI13
+     6 00,546F 8D 9C 54		 stA DLIV+1
+Source: D:\!Atari\getris2\intro\intro.asm
+Source: D:\!Atari\getris2\intro\intro.asm
+     7 00,5472 4C 0E 55		 jmp NmiQuit
+     9 = 00,5475		 ?old_dli = *
+Source: D:\!Atari\getris2\intro\intro.asm
+   287
+   288 00,5475			dli13
+   289 00,5475 A9 28		 lda >fnt+$400*$02
+   290 00,5477 8D 0A D4		 sta $d40a                   ;line=160
+   291 00,547A 8D 09 D4		 sta chbase
+   292 				 DLINEW dli14
+Macro: DLINEW [Source: D:\!Atari\getris2\intro\intro.mac]
+     5 00,547D A9 85		 ldA <DLI14
+     6 00,547F 8D 9C 54		 stA DLIV+1
+Source: D:\!Atari\getris2\intro\intro.asm
+Source: D:\!Atari\getris2\intro\intro.asm
+     7 00,5482 4C 0E 55		 jmp NmiQuit
+     9 = 00,5485		 ?old_dli = *
+Source: D:\!Atari\getris2\intro\intro.asm
+   293
+   294 00,5485			dli14
+   295 00,5485 A9 2C		 lda >fnt+$400*$03
+   296 00,5487 8D 0A D4		 sta $d40a                   ;line=168
+   297 00,548A 8D 09 D4		 sta chbase
+   298 00,548D 4C 0E 55		 jmp NmiQuit
+   299
+   300 				;--
+   301
+   302 00,5490			nmi
+   303 00,5490 85 82		 sta regA
+   304 00,5492 86 83		 stx regX
+   305 00,5494 84 84		 sty regY
+   306
+   307 00,5496 2C 0F D4		 bit $d40f
+   308 00,5499 10 03		 bpl vbl
+   309
+   310 00,549B 4C F1 52		dliv jmp dli0
+   311
+   312 00,549E			vbl			;VBL routine
+   313 00,549E 8D 0F D4		 sta $d40f		;reset NMI flag
+   314
+   315 00,54A1 E6 14		 inc cloc		;little timer
+   316
+   317 				 mwa #ant $d402		;ANTIC address program
+Macro: MWA [Source: d:\!atari\macro\xasm.mac]
+    36 00,54A3 A9 00		      ldA <ANT
+    37 00,54A5 8D 02 D4		      stA $D402
+    38 00,54A8 A9 30		      ldA >ANT
+    39 00,54AA 8D 03 D4		      stA $D402+1
+Source: D:\!Atari\getris2\intro\intro.asm
+   318 				 mva #scr48 $d400	;set new screen's width
+Macro: MVA [Source: d:\!atari\macro\xasm.mac]
+     5 00,54AD A9 3F		 ldA #SCR48
+     6 00,54AF 8D 00 D4		 stA $D400
+Source: D:\!Atari\getris2\intro\intro.asm
+Source: D:\!Atari\getris2\intro\intro.asm
+   319
+   320 				;-- first line of screen initialization
+   321
+   322 00,54B2 A9 20		 lda >fnt
+   323 00,54B4 8D 09 D4		 sta chbase
+   324 00,54B7 A9 00		c0 lda #$00
+   325 00,54B9 8D 1A D0		 sta colbak
+   326 00,54BC A9 54		c1 lda #$54
+   327 00,54BE 8D 16 D0		 sta color0
+   328 00,54C1 A9 8A		c2 lda #$8A
+   329 00,54C3 8D 17 D0		 sta color1
+   330 00,54C6 A9 68		c3 lda #$68
+   331 00,54C8 8D 18 D0		 sta color2
+   332 00,54CB A9 14		c4 lda #$14
+   333 00,54CD 8D 19 D0		 sta color3
+   334 00,54D0 A9 04		 lda #$04
+   335 00,54D2 8D 1B D0		 sta gtictl
+   336
+   337 00,54D5 A9 03		 lda #$03
+   338 00,54D7 8D 0A D0		 sta sizep2
+   339 00,54DA 8D 0B D0		 sta sizep3
+   340 00,54DD A9 00		 lda #$00
+   341 00,54DF 8D 0C D0		 sta sizem
+   342
+   343 00,54E2 A9 0C		c5 lda #$0C
+   344 00,54E4 8D 14 D0		 sta colpm2
+   345 00,54E7 8D 15 D0		 sta colpm3
+   346
+   347 00,54EA A9 00		 lda #0
+   348 00,54EC 8D 08 D0		 sta sizep0
+   349 00,54EF 8D 09 D0		 sta sizep1
+   350
+   351 00,54F2 8D 00 D0		 sta hposp0
+   352 00,54F5 8D 01 D0		 sta hposp1
+   353 00,54F8 8D 04 D0		 sta hposm0
+   354 00,54FB 8D 05 D0		 sta hposm1
+   355
+   356 00,54FE 8D 12 D0		 sta colpm0
+   357 00,5501 8D 13 D0		 sta colpm1
+   358
+   359 				 mwa #dli0 dliv+1	;set the first address of DLI interrupt
+Macro: MWA [Source: d:\!atari\macro\xasm.mac]
+    36 00,5504 A9 F1		      ldA <DLI0
+    37 00,5506 8D 9C 54		      stA DLIV+1
+    38 00,5509 A9 52		      ldA >DLI0
+    39 00,550B 8D 9D 54		      stA DLIV+1+1
+Source: D:\!Atari\getris2\intro\intro.asm
+   360
+   361 				;this area is for yours routines
+   362
+   363 00,550E			NmiQuit
+   364 00,550E A5 82		 lda regA
+   365 00,5510 A6 83		 ldx regX
+   366 00,5512 A4 84		 ldy regY
+   367 00,5514 40		 rti
+   368
+   369 00,5515			wait
+   370 				 lda:cmp:req cloc
+   370 00,5515 A5 14		 lda cloc
+   370 00,5517 C5 14		 cmp cloc
+   370 00,5519 F0 FC		 req$5517 cloc
+   371 00,551B 60		 rts
+   372
+   373
+   374 00,551C			_m23
+   375 00,551C 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   376 00,552C 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   377 00,553C 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   378 00,554C 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   379 00,555C 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   380 00,556C 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   381 00,557C 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   382 00,558C 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   383 00,559C 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$A0,$50,$00,$00
+   384 00,55AC 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   385 00,55BC 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   386 00,55CC 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   387 00,55DC 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   388 00,55EC 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   389 00,55FC 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   390 00,560C 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   391
+   392 00,561C			_p23
+   393 00,561C 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   394 00,562C 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   395 00,563C 7F 7F 43 C3 C3 +	 dta $7F,$7F,$43,$C3,$C3,$C3,$C3,$C0,$C0,$C0,$C0,$CF,$CF,$C3,$C3,$C3
+   396 00,564C C3 C3 C3 C3 C3 +	 dta $C3,$C3,$C3,$C3,$C3,$63,$7F,$7F,$00,$00,$00,$00,$00,$00,$00,$00
+   397 00,565C 7F 7F 43 C3 C3 +	 dta $7F,$7F,$43,$C3,$C3,$C3,$C3,$C0,$C0,$C0,$C0,$FC,$FC,$C0,$C0,$C0
+   398 00,566C C3 C3 C3 C3 C3 +	 dta $C3,$C3,$C3,$C3,$C3,$63,$7F,$7F,$00,$00,$00,$00,$00,$00,$00,$00
+   399 00,567C 7F 7F 43 C3 C3 +	 dta $7F,$7F,$43,$C3,$C3,$C3,$C3,$E3,$03,$03,$03,$03,$03,$03,$03,$03
+   400 00,568C 03 03 03 03 03 +	 dta $03,$03,$03,$03,$03,$03,$03,$03,$00,$00,$00,$00,$00,$00,$00,$00
+   401 00,569C FF FE C2 C3 C3 +	 dta $FF,$FE,$C2,$C3,$C3,$C3,$C3,$C3,$C3,$C3,$C2,$FE,$FE,$C2,$C3,$C3
+   402 00,56AC C3 C3 C3 C3 C3 +	 dta $C3,$C3,$C3,$C3,$C3,$C3,$C3,$E3,$00,$00,$00,$00,$00,$00,$00,$00
+   403 00,56BC 1C 18 18 18 18 +	 dta $1C,$18,$18,$18,$18,$18,$18,$18,$18,$18,$18,$18,$18,$18,$18,$18
+   404 00,56CC 18 18 18 18 18 +	 dta $18,$18,$18,$18,$18,$18,$18,$1C,$00,$00,$00,$00,$00,$00,$00,$00
+   405 00,56DC 7F 7E 42 C3 C3 +	 dta $7F,$7E,$42,$C3,$C3,$C3,$C3,$C3,$C0,$C0,$60,$7F,$7E,$02,$03,$03
+   406 00,56EC E3 C3 C3 C3 C3 +	 dta $E3,$C3,$C3,$C3,$C3,$62,$7E,$7F,$00,$00,$00,$00,$00,$00,$00,$00
+   407 00,56FC 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   408 00,570C 00 00 00 00 00 +	 dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+   409
+   410 				;--
+   411 00,02E2-02E3> 20 4F	 ini main
+   412
+   413 				;--
+   414
+Source: d:\!atari\macro\xasm.mac

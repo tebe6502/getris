@@ -1,0 +1,11 @@
+Mad-Assembler v1.6.9beta by TeBe/Madteam
+Source: F:\!Atari\getris2\intro3\test.asm
+     1
+     2 				 org $2000
+     3
+     4 FFFF> 00,2000-2008> AD +	 lda $d20a
+     5 00,2003 8D 1A D0		 sta $d01a
+     6
+     7 00,2006 4C 00 20		 jmp $2000
+     8
+     9 00,02E2-02E3> 00 20	 ini $2000

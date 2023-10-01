@@ -1,0 +1,21 @@
+/**********************************
+ DLINEW - new DLI address
+***********************************/
+.macro dlinew
+ ift .hi(?old_dli)==.hi(:1)
+  mva <:1 dliv+1
+ els
+  mwa #:1 dliv+1
+ eif
+
+ jmp NmiQuit
+
+ ?old_dli = *
+.endm
+
+/**********************************
+ ALIGN
+***********************************/
+.macro align
+ org (*/:1)*:1+:1
+.endm
